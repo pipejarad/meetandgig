@@ -1,11 +1,13 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-class Usuario(AbstractUser):
-    tipo_usuario = models.CharField(max_length=10, choices=[("musico", "Músico"), ("empleador", "Empleador")])
-    foto_perfil = models.ImageField(upload_to="fotos_perfil/", null=True, blank=True)
 
-    
+class Usuario(AbstractUser):
+    tipo_usuario = models.CharField(max_length=10, choices=[(
+        "musico", "Músico"), ("empleador", "Empleador")])
+    foto_perfil = models.ImageField(
+        upload_to="fotos_perfil/", null=True, blank=True)
+
 
 class PerfilMusico(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
@@ -27,3 +29,6 @@ class PerfilEmpleador(models.Model):
     tipo_entidad = models.CharField(max_length=100)
     ubicacion = models.CharField(max_length=100)
     contacto_alternativo = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.usuario.username
