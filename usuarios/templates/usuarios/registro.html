@@ -1,15 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Registro de usuario</title>
-</head>
-<body>
-    <h2>Registro</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Registrarse</button>
-    </form>
-    <p>¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Registro - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title text-center">Registro de usuario</h4>
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %} {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %} {% for field in form %}
+          <div class="mb-3">
+            {{ field.label_tag }} {{ field }} {% if field.errors %}
+            <div class="text-danger small">{{ field.errors }}</div>
+            {% endif %} {% if field.help_text %}
+            <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Registrarse</button>
+          </div>
+        </form>
+        <div class="text-center mt-3">
+          <p>
+            ¿Ya tienes cuenta?
+            <a href="{% url 'login' %}" class="text-decoration-none">Inicia sesión</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}

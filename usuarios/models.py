@@ -3,6 +3,7 @@ from django.db import models
 
 
 class Usuario(AbstractUser):
+    email = models.EmailField(unique=True)
     tipo_usuario = models.CharField(max_length=10, choices=[(
         "musico", "Músico"), ("empleador", "Empleador")])
     foto_perfil = models.ImageField(

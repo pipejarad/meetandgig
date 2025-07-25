@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- Meta -->
+    <meta name="description" content="{% block meta_description %}Meet & Gig - Plataforma para músicos y eventos{% endblock %}" />
+    <meta name="author" content="Meet & Gig" />
+    <link rel="shortcut icon" href="{% static 'img/fav.png' %}" />
+
+    <!-- Title -->
+    <title>{% block title %}Meet & Gig{% endblock %}</title>
+
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <!-- Animate css -->
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}" />
+    <!-- Flag Icon css -->
+    <link rel="stylesheet" href="{% static 'css/flag-icon.min.css' %}" />
+    <!-- Icomoon Font Icons css -->
+    <link rel="stylesheet" href="{% static 'fonts/style.css' %}" />
+    <!-- Main css -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+    <!-- Custom Meet & Gig css -->
+    <link rel="stylesheet" href="{% static 'css/meetandgig-custom.css' %}" />
+
+    <!-- DateRange css -->
+    <link rel="stylesheet" href="{% static 'vendor/daterange/daterange.css' %}" />
+
+    {% block extra_css %}
+    <!-- Espacio para CSS adicional en templates que extiendan este -->
+    {% endblock %}
+</head>
+
+<body>
+    <!-- Page wrapper start -->
+    <div class="page-wrapper">
+        <!-- Navbar integrada -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'inicio' %}">
+                    <img src="{% static 'img/logo.png' %}" alt="Meet & Gig" height="40" class="me-2">
+                    Meet & Gig
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'inicio' %}">Inicio</a>
+                        </li>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Eventos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Músicos</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
+                                <li><a class="dropdown-item" href="#">Configuración</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'registro' %}">Registrarse</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main container start -->
+        <div class="main-container">
+            {% block sidebar %}
+            <!-- Sidebar aquí si necesitas un menú lateral global -->
+            {% endblock %}
+
+            <!-- Content wrapper start -->
+            <div class="content-wrapper">
+                {% block messages %}
+                <!-- Mensajes de Django -->
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% endblock %}
+                
+                {% block content %}
+                <!-- Contenido principal aquí -->
+                {% endblock %}
+            </div>
+            <!-- Content wrapper end -->
+        </div>
+        <!-- Main container end -->
+    </div>
+    <!-- Page wrapper end -->
+
+    <!-- Required jQuery first, then Bootstrap Bundle JS -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Optional JavaScript -->
+    <script src="{% static 'js/jquery.easing.1.3.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'js/moment.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+
+    {% block extra_js %}
+    <!-- Espacio para JavaScript adicional en templates que extiendan este -->
+    {% endblock %}
+</body>
+</html>

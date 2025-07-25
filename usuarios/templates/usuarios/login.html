@@ -1,15 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Iniciar sesión</title>
-</head>
-<body>
-    <h2>Iniciar sesión</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Entrar</button>
-    </form>
-    <p>¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a></p>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Iniciar sesión - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title text-center">Iniciar sesión</h4>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {% if form.username.errors %}
+            <div class="text-danger small">{{ form.username.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {% if form.password.errors %}
+            <div class="text-danger small">{{ form.password.errors }}</div>
+            {% endif %}
+          </div>
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %}
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Entrar</button>
+          </div>
+        </form>
+        <div class="text-center mt-3">
+          <p>
+            ¿No tienes cuenta?
+            <a href="{% url 'registro' %}" class="text-decoration-none">Regístrate aquí</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}
