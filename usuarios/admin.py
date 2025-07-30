@@ -9,8 +9,7 @@ class PerfilMusicoAdmin(admin.ModelAdmin):
 
 class PerfilEmpleadorAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'nombre_organizacion', 'tipo_entidad')
-    search_fields = ('usuario__username',
-                     'nombre_organizacion', 'tipo_entidad')
+    search_fields = ('usuario__username', 'nombre_organizacion', 'tipo_entidad')
 
 # Register your models here.
 
