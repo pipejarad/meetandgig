@@ -32,6 +32,12 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
+# Custom authentication backend to use email as username
+AUTHENTICATION_BACKENDS = [
+    'usuarios.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

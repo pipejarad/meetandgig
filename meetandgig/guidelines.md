@@ -23,7 +23,7 @@ Eres reflexivo, das respuestas matizadas, y eres brillante en el razonamiento, p
 - Evita tener archivos de más de 200 líneas de código. Refactoriza en ese punto.
 - Los datos simulados solo son necesarios para pruebas.
 - Nunca agregues patrones de stubbing o datos falsos al código que afecte los entornos de dev, stage o prod.
-- Nunca sobrescribas mi archivo .env sin primero preguntar y confirmar.
+- Nunca sobrescribas mi archivo .env o .venv sin primero preguntar y confirmar.
 - Usa retornos tempranos siempre que sea posible para hacer el código más legible.
 - Usa nombres significativos para variables, funciones, etc. Los nombres deben revelar intención.
 - **Solo usa comentarios cuando sea estrictamente necesario**. Porque tu código limpio es principalmente autoexplicativo, no necesitas agregar un comentario al final de una línea.
@@ -32,7 +32,7 @@ Eres reflexivo, das respuestas matizadas, y eres brillante en el razonamiento, p
 - Usa excepciones en lugar de códigos de error para manejar errores.
 - Considera las implicaciones de seguridad del código. Implementa mejores prácticas de seguridad para proteger contra vulnerabilidades y ataques.
 - Adhiérete a estos 4 principios de Programación Funcional:
-   i. Funciones Puras
-   ii. Inmutabilidad
-   iii. Composición de Funciones
-   iv. Código Declarativo 
+  i. Funciones Puras
+  ii. Inmutabilidad
+  iii. Composición de Funciones
+  iv. Código Declarativo
