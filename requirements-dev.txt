@@ -1,0 +1,18 @@
+# Incluir requirements principales
+-r requirements.txt
+
+# Dependencias adicionales para desarrollo
+
+# Testing y debugging
+coverage==7.3.2
+django-debug-toolbar==4.2.0
+
+# Formateo de código
+black==23.7.0
+flake8==6.0.0
+
+# Documentación
+sphinx==7.1.2
+
+# Variables de entorno
+python-decouple==3.8
