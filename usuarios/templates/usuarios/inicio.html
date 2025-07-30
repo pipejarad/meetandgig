@@ -1,27 +1,55 @@
-{% extends 'usuarios/base.html' %}
+{% extends 'base.html' %}
+
+{% block title %}Inicio - Meet & Gig{% endblock %}
 
 {% block content %}
-
-<h1>INICIO</h1>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Tipo Usuario</th>
-            <th>Ubicación</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for usuario in usuarios%}
-        <tr>
-            <td>{{ usuario.username }}</td>
-            <td>{{ usuario.tipo_usuario }}</td>
-            <td>{{ usuario.ubicacion }}</td>
-            <td></td>
-        </tr>
-    {% endfor %}    
-    </tbody>
-</table>
-
+<div class="container-fluid py-4">
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Usuarios Registrados</h4>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Tipo Usuario</th>
+                <th>Ubicación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for usuario in usuarios %}
+              <tr>
+                <td>{{ usuario.username }}</td>
+                <td>
+                  <span class="badge bg-secondary"
+                    >{{ usuario.get_tipo_usuario_display }}</span
+                  >
+                </td>
+                <td>{{ usuario.ubicacion|default:"No especificada" }}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary">
+                    Ver perfil
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted">
+                  No hay usuarios registrados
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 {% endblock %}

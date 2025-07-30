@@ -1,15 +1,138 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Registro de usuario</title>
-</head>
-<body>
-    <h2>Registro</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Registrarse</button>
-    </form>
-    <p>¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Registro - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="card-title text-center mb-0">Registro de usuario</h4>
+        </div>
+        <div class="card-body">
+          
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                <ul class="mb-0">
+                  {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.username.id_for_label }}" class="form-label fw-bold">
+                  {{ form.username.label }}
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                  <div class="text-danger small mt-1">
+                    {% for error in form.username.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
+                  {{ form.email.label }}
+                </label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                  <div class="text-danger small mt-1">
+                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.tipo_usuario.id_for_label }}" class="form-label fw-bold">
+                {{ form.tipo_usuario.label }}
+              </label>
+              {{ form.tipo_usuario }}
+              {% if form.tipo_usuario.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in form.tipo_usuario.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.password1.id_for_label }}" class="form-label fw-bold">
+                  {{ form.password1.label }}
+                </label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                  <div class="text-danger small mt-1">
+                    {% for error in form.password1.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                {% if form.password1.help_text %}
+                  <div class="form-text">{{ form.password1.help_text }}</div>
+                {% endif %}
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.password2.id_for_label }}" class="form-label fw-bold">
+                  {{ form.password2.label }}
+                </label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                  <div class="text-danger small mt-1">
+                    {% for error in form.password2.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="{{ form.foto_perfil.id_for_label }}" class="form-label fw-bold">
+                {{ form.foto_perfil.label }} <small class="text-muted">(Opcional)</small>
+              </label>
+              {{ form.foto_perfil }}
+              {% if form.foto_perfil.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in form.foto_perfil.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Registrarse
+              </button>
+            </div>
+          </form>
+          
+          <hr class="my-4">
+          
+          <div class="text-center">
+            <p class="mb-0">
+              ¿Ya tienes cuenta?
+              <a href="{% url 'login' %}" class="text-decoration-none fw-bold">
+                Inicia sesión aquí
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+indent_style = space
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# Python files
+[*.py]
+indent_size = 4
+max_line_length = 88
+
+# HTML/Django templates (NO AUTO FORMATTING)
+[*.html]
+indent_size = 2
+max_line_length = off
+trim_trailing_whitespace = false
+
+# CSS files
+[*.css]
+indent_size = 2
+
+# JavaScript files
+[*.js]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
