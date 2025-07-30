@@ -30,7 +30,6 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 ### Instalación
 
 1. **Clonar el repositorio**
-
 ```bash
 git clone https://github.com/pipejarad/meetandgig.git
 cd meetandgig
@@ -152,7 +151,9 @@ meetandgig/
 ### 📋 Planificado
 
 - [ ] Sistema de búsqueda y filtrado
+- [ ] Mensajería interna
 - [ ] Sistema de calificaciones
+- [ ] Integración de pagos
 
 ## 🧑‍💻 Desarrollo
 
