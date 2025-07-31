@@ -1,9 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.urls import reverse
-from .forms import RegistroForm, LoginForm
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.template.loader import render_to_string
+from .forms import RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm
 from .models import Usuario
 
 
@@ -76,3 +82,96 @@ def _redirect_by_user_type(user):
     else:
         # TODO: Implementar estas vistas en próximos tickets
         return redirect('inicio')  # Temporal hasta crear perfil_empleador_crear
+
+
+def recuperar_password_view(request):
+    if request.user.is_authenticated:
+        return redirect('inicio')
+        
+    if request.method == 'POST':
+        form = RecuperarPasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            try:
+                user = Usuario.objects.get(email__iexact=email)
+                _send_password_reset_email(request, user)
+                messages.success(
+                    request, 
+                    'Se ha enviado un enlace de recuperación a tu email. Revisa tu bandeja de entrada.'
+                )
+                return redirect('login')
+            except Usuario.DoesNotExist:
+                messages.error(request, 'No existe un usuario con este email.')
+        else:
+            messages.error(request, 'Por favor corrige los errores en el formulario.')
+    else:
+        form = RecuperarPasswordForm()
+    
+    return render(request, 'usuarios/recuperar_password.html', {'form': form})
+
+
+def cambiar_password_view(request, uidb64, token):
+    if request.user.is_authenticated:
+        return redirect('inicio')
+    
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = Usuario.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, Usuario.DoesNotExist):
+        user = None
+
+    if user is None or not default_token_generator.check_token(user, token):
+        messages.error(request, 'El enlace de recuperación es inválido o ha expirado.')
+        return redirect('recuperar_password')
+
+    if request.method == 'POST':
+        form = CambiarPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request, 
+                'Tu contraseña ha sido cambiada exitosamente. Ya puedes iniciar sesión.'
+            )
+            return redirect('login')
+        else:
+            messages.error(request, 'Por favor corrige los errores en el formulario.')
+    else:
+        form = CambiarPasswordForm(user)
+
+    return render(request, 'usuarios/cambiar_password.html', {'form': form})
+
+
+def _send_password_reset_email(request, user):
+    """
+    Función helper para enviar email de recuperación de contraseña.
+    Mantiene la lógica de envío centralizada siguiendo DRY.
+    """
+    token = default_token_generator.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    
+    reset_url = request.build_absolute_uri(
+        reverse('cambiar_password', kwargs={'uidb64': uid, 'token': token})
+    )
+    
+    subject = 'Recuperación de contraseña - Meet & Gig'
+    message = f"""
+Hola {user.username},
+
+Has solicitado recuperar tu contraseña en Meet & Gig.
+
+Haz clic en el siguiente enlace para cambiar tu contraseña:
+{reset_url}
+
+Si no solicitaste este cambio, puedes ignorar este email.
+
+Saludos,
+El equipo de Meet & Gig
+"""
+    
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=False,
+    )

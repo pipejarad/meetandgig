@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm
 from django.core.exceptions import ValidationError
 from .models import Usuario
 
@@ -103,5 +103,47 @@ class LoginForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': 'Tu contraseña'
+        })
+    )
+
+
+class RecuperarPasswordForm(forms.Form):
+    email = forms.EmailField(
+        label='Email',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'correo@ejemplo.com'
+        }),
+        error_messages={
+            'required': 'El email es obligatorio.',
+            'invalid': 'Ingresa un email válido.',
+        }
+    )
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email:
+            return email
+            
+        if not Usuario.objects.filter(email__iexact=email).exists():
+            raise ValidationError("No existe un usuario registrado con este email.")
+        return email.lower()
+
+
+class CambiarPasswordForm(SetPasswordForm):
+    new_password1 = forms.CharField(
+        label='Nueva contraseña',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ingresa tu nueva contraseña'
+        }),
+        help_text='Tu contraseña debe tener al menos 8 caracteres.'
+    )
+    
+    new_password2 = forms.CharField(
+        label='Confirmar nueva contraseña',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirma tu nueva contraseña'
         })
     )
