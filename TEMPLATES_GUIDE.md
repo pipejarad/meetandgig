@@ -230,8 +230,8 @@ La navegación está **integrada y fixed** en `templates/base.html` e incluye:
 - **Header**: Logo Meet & Gig con enlace al inicio
 - **Navegación principal**: Enlaces a las secciones principales
 - **Menús dinámicos**: Enlaces que cambian según el estado de autenticación:
-  - **Usuario no logueado**: Login y Registro
-  - **Usuario logueado**: Dropdown con perfil y logout
+- **Usuario no logueado**: Login y Registro
+- **Usuario logueado**: Dropdown con perfil y logout
 - **Mensajes**: Sistema automático de notificaciones Django
 
 ⚠️ **Importante**: El navbar **NO es un bloque personalizable**. Está hardcodeado con la lógica de autenticación integrada.
