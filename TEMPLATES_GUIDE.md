@@ -7,42 +7,42 @@ La estructura de templates ha sido organizada de manera jerárquica para facilit
 ```
 meetandgig/
 ├── templates/
-│   ├── index.html          # Template base principal
-│   └── base.html           # Template base con navegación
+│   └── base.html           # Template base principal con navegación completa
 └── usuarios/
     └── templates/
         └── usuarios/
-            ├── base.html   # Template base para usuarios
-            ├── login.html  # Página de login
-            ├── registro.html # Página de registro
-            └── inicio.html # Página de inicio
+            ├── login.html           # Página de login
+            ├── registro.html        # Página de registro
+            ├── inicio.html          # Página de inicio
+            ├── recuperar_password.html   # Recuperación de contraseña
+            └── cambiar_password.html     # Cambio de contraseña
 ```
 
 ## Jerarquía de Templates
 
-1. **index.html** - Template raíz con toda la estructura HTML, CSS y JS
-2. **base.html** - Extiende index.html y añade navegación global
-3. **usuarios/base.html** - Extiende base.html para la app de usuarios
-4. **Páginas específicas** - Extienden usuarios/base.html
+1. **base.html** - Template raíz con toda la estructura HTML, CSS, JS y navegación
+2. **Páginas específicas** - Extienden directamente base.html
 
 ## Cómo usar los Templates
 
 ### Para crear una nueva página en usuarios:
 
 ```django
-{% extends 'usuarios/base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Mi Nueva Página - Meet & Gig{% endblock %}
 
-{% block usuarios_content %}
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">Mi Nueva Página</h4>
-            </div>
-            <div class="card-body">
-                <!-- Tu contenido aquí -->
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Mi Nueva Página</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Tu contenido aquí -->
+                </div>
             </div>
         </div>
     </div>
@@ -58,41 +58,78 @@ meetandgig/
    mi_app/
    └── templates/
        └── mi_app/
-           ├── base.html
-           └── pagina.html
+           └── mi_pagina.html
    ```
-3. En `mi_app/templates/mi_app/base.html`:
+3. En `mi_app/templates/mi_app/mi_pagina.html`:
 
    ```django
    {% extends "base.html" %}
 
-   {% block main_content %}
-       {% block mi_app_content %}
+   {% block title %}Mi App - Meet & Gig{% endblock %}
+
+   {% block content %}
+   <div class="container-fluid py-4">
        <!-- Contenido específico de mi_app -->
-       {% endblock %}
+   </div>
    {% endblock %}
    ```
 
 ## Bloques Disponibles
 
-### En index.html (template raíz):
+### En base.html (template principal):
 
 - `{% block title %}` - Título de la página
-- `{% block meta_description %}` - Meta descripción
-- `{% block extra_css %}` - CSS adicional
-- `{% block navbar %}` - Barra de navegación
-- `{% block sidebar %}` - Menú lateral
-- `{% block messages %}` - Mensajes de Django
-- `{% block content %}` - Contenido principal
-- `{% block extra_js %}` - JavaScript adicional
+- `{% block meta_description %}` - Meta descripción para SEO
+- `{% block extra_css %}` - CSS adicional específico de la página
+- `{% block sidebar %}` - Contenido del sidebar/menú lateral
+- `{% block messages %}` - Área para mensajes de Django (ya implementada automáticamente)
+- `{% block content %}` - Contenido principal de la página
+- `{% block extra_js %}` - JavaScript adicional específico de la página
 
-### En base.html (con navegación):
+### Estructura del navbar:
 
-- `{% block main_content %}` - Contenido principal dentro del contenedor
+El navbar está **integrado** en base.html y **no es un bloque**, sino que está hardcodeado con la lógica de autenticación. Incluye:
 
-### En usuarios/base.html:
+- Logo y navegación principal
+- Enlaces dinámicos según el estado de autenticación
+- Dropdown de usuario para usuarios logueados
 
-- `{% block usuarios_content %}` - Contenido específico de usuarios
+### Ejemplo de uso de todos los bloques:
+
+```django
+{% extends 'base.html' %}
+
+{% block title %}Login - Meet & Gig{% endblock %}
+
+{% block meta_description %}Inicia sesión en Meet & Gig para conectar músicos con eventos{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-form {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-custom">
+    <!-- Contenido personalizado del sidebar -->
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Tu contenido principal aquí -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // JavaScript específico para esta página
+</script>
+{% endblock %}
+```
 
 ## Archivos Estáticos
 
@@ -186,35 +223,169 @@ Usa `meetandgig-custom.css` para personalizar estilos:
 
 ## Navegación
 
-La navegación se configura en `templates/base.html`. Para agregar elementos:
+### Navbar Integrado
+
+La navegación está **integrada y fixed** en `templates/base.html` e incluye:
+
+- **Header**: Logo Meet & Gig con enlace al inicio
+- **Navegación principal**: Enlaces a las secciones principales
+- **Menús dinámicos**: Enlaces que cambian según el estado de autenticación:
+  - **Usuario no logueado**: Login y Registro
+  - **Usuario logueado**: Dropdown con perfil y logout
+- **Mensajes**: Sistema automático de notificaciones Django
+
+⚠️ **Importante**: El navbar **NO es un bloque personalizable**. Está hardcodeado con la lógica de autenticación integrada.
+
+### Para personalizar la navegación:
+
+Si necesitas modificar la navegación, edita directamente el archivo `templates/base.html` en la sección del navbar (líneas ~42-85).
+
+### Ejemplo de estructura actual del navbar:
 
 ```django
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'mi_vista' %}">Mi Página</a>
-</li>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'inicio' %}">Meet & Gig</a>
+
+        <!-- Navegación principal -->
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'inicio' %}">Inicio</a>
+            </li>
+        </ul>
+
+        <!-- Navegación de usuario -->
+        <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+                <!-- Dropdown para usuario logueado -->
+            {% else %}
+                <!-- Enlaces de login/registro -->
+            {% endif %}
+        </ul>
+    </div>
+</nav>
 ```
 
 ## Mensajes de Django
 
-Los mensajes se muestran automáticamente en todas las páginas:
+### Sistema Automático Integrado
+
+Los mensajes se muestran **automáticamente** en todas las páginas a través del bloque `{% block messages %}` en `base.html`. **No necesitas hacer nada adicional** en tus templates.
+
+### Tipos de mensajes disponibles:
 
 ```python
 # En tus views
 from django.contrib import messages
 
-messages.success(request, 'Operación exitosa')
-messages.error(request, 'Error en la operación')
-messages.warning(request, 'Advertencia')
-messages.info(request, 'Información')
+# Mensaje de éxito (verde)
+messages.success(request, 'Operación completada exitosamente')
+
+# Mensaje de error (rojo)
+messages.error(request, 'Ocurrió un error en la operación')
+
+# Mensaje de advertencia (amarillo)
+messages.warning(request, 'Advertencia: Revisa los datos')
+
+# Mensaje informativo (azul)
+messages.info(request, 'Información importante para el usuario')
 ```
+
+### Personalización de mensajes:
+
+Si necesitas personalizar el **estilo** o **comportamiento** de los mensajes, puedes:
+
+1. **Sobrescribir el bloque messages** en tu template:
+
+```django
+{% block messages %}
+<div class="custom-messages">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} custom-alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
+```
+
+2. **Usar JavaScript personalizado** en `{% block extra_js %}` para efectos especiales.
+
+## Sistema de Sidebar
+
+### Bloque Sidebar Disponible
+
+El template base incluye un bloque `{% block sidebar %}` que puedes usar para añadir contenido lateral específico a ciertas páginas.
+
+### Ejemplo de uso del sidebar:
+
+```django
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Meet & Gig{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-nav">
+    <h5>Navegación</h5>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="#perfil">Mi Perfil</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#configuracion">Configuración</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#historial">Historial</a>
+        </li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Contenido principal -->
+</div>
+{% endblock %}
+```
+
+**Nota**: La mayoría de páginas actuales **no usan sidebar**, pero está disponible para implementaciones futuras como dashboards de usuario o paneles administrativos.
 
 ## Consejos de Desarrollo
 
-1. **Siempre usa `{% load static %}`** al inicio de tus templates
+1. **Siempre usa `{% load static %}`** al inicio de tus templates si necesitas archivos estáticos
 2. **Usa URLs con nombres** en lugar de rutas hardcodeadas: `{% url 'nombre_url' %}`
-3. **Mantén la consistencia** usando los bloques apropiados
-4. **Aprovecha los componentes Bootstrap** incluidos
-5. **Personaliza con CSS** en lugar de modificar los archivos base
+3. **Extiende directamente base.html** para todas las páginas
+4. **Usa el contenedor apropiado**: `<div class="container-fluid py-4">` para páginas completas
+5. **Aprovecha los componentes Bootstrap** incluidos
+6. **Personaliza con CSS** en el bloque `{% block extra_css %}`
+7. **Mantén la consistencia** en el uso de cards y componentes
+
+## Estructura de Página Recomendada
+
+```django
+{% extends 'base.html' %}
+
+{% block title %}Título - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Título de la Sección</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Contenido principal -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```
 
 ## Próximos Pasos
 

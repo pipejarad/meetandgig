@@ -11,8 +11,12 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 ### 🎯 Sprint 1: Autenticación y Acceso Básico
 
 - ✅ **Ticket 1.1**: Sistema de registro completo con validación de email único
-- 🔄 **Ticket 1.2**: Sistema de login con autenticación por email/username
-- 📋 **Próximos tickets**: Gestión de perfiles por tipo de usuario
+- ✅ **Ticket 1.2**: Sistema de login con autenticación por email/username
+- ✅ **Ticket 1.3**: Sistema de logout con botón en header
+- ✅ **Ticket 1.4**: Sistema de recuperación de contraseña con tokens seguros
+- 📋 **Ticket 1.5**: Acceso a panel de administración
+- 📋 **Ticket 1.6**: Diseño mejorado de login/registro
+- 📋 **Ticket 1.7**: Upgrade Bootstrap 4 → Bootstrap 5
 
 ### 👥 Tipos de Usuario
 
@@ -30,6 +34,7 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 ### Instalación
 
 1. **Clonar el repositorio**
+
 ```bash
 git clone https://github.com/pipejarad/meetandgig.git
 cd meetandgig
@@ -126,7 +131,7 @@ meetandgig/
 
 - **Backend**: Django 4.2.20
 - **Base de datos**: SQLite (desarrollo) / PostgreSQL (producción)
-- **Frontend**: Bootstrap 5, HTML5, CSS3, JavaScript
+- **Frontend**: Bootstrap 4.3.1, HTML5, CSS3, JavaScript
 - **Autenticación**: Sistema personalizado con email como username
 - **Testing**: Django TestCase
 - **Control de versiones**: Git
@@ -135,20 +140,32 @@ meetandgig/
 
 ### ✅ Completado
 
+- [x] **Ticket 1.1**: Sistema de registro completo con validación de email único
+- [x] **Ticket 1.2**: Sistema de login con autenticación por email/username
+- [x] **Ticket 1.3**: Sistema de logout con botón en header
+- [x] **Ticket 1.4**: Sistema de recuperación de contraseña con tokens seguros
 - [x] Configuración inicial del proyecto
 - [x] Modelo de usuario personalizado con tipos (músico/empleador)
-- [x] Sistema de registro con validaciones robustas
 - [x] Backend de autenticación personalizado
-- [x] Templates responsivos con Bootstrap
+- [x] Templates responsivos con Bootstrap 4.3.1
 - [x] Suite completa de tests (11/11 pasando)
 
 ### 🔄 En Desarrollo
 
-- [ ] Sistema de login mejorado
-- [ ] Gestión de perfiles de usuario
-- [ ] Dashboard personalizado por tipo de usuario
+- [ ] **Ticket 1.5**: Acceso a panel de administración
+- [ ] **Ticket 1.6**: Diseño mejorado de login/registro
+- [ ] **Ticket 1.7**: Upgrade Bootstrap 4 → Bootstrap 5
 
 ### 📋 Planificado
+
+#### 🎯 Sprint 2: Gestión de Perfiles
+
+- [ ] Gestión de perfiles de usuario
+- [ ] Dashboard personalizado por tipo de usuario
+- [ ] Perfiles de músicos con portafolio
+- [ ] Perfiles de empleadores con historial
+
+#### 🎯 Sprint 3: Funcionalidades Avanzadas
 
 - [ ] Sistema de búsqueda y filtrado
 - [ ] Mensajería interna

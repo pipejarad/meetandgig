@@ -81,6 +81,29 @@ body {
     font-weight: 500;
 }
 
+/* Badge secondary personalizado - Color celeste */
+.badge.badge-secondary,
+.bg-secondary.badge {
+    background-color: #87CEEB !important; /* Sky Blue / Celeste */
+    color: #333 !important; /* Texto oscuro para mejor contraste */
+}
+
+.badge.badge-secondary:hover,
+.bg-secondary.badge:hover {
+    background-color: #6BB6E8 !important; /* Celeste más oscuro en hover */
+    color: #333 !important;
+}
+
+/* Sobrescribir bg-secondary general si se usa con badge */
+.bg-secondary {
+    background-color: #87CEEB !important;
+}
+
+.bg-secondary:hover,
+.bg-secondary:focus {
+    background-color: #6BB6E8 !important;
+}
+
 /* Alertas */
 .alert {
     border-radius: 0.375rem;
