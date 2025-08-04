@@ -15,18 +15,19 @@
 
 ## 🟩 Sprint 2: Perfiles de Usuario
 
-| Ticket | Título                                | Descripción breve                                                                                                                                                                                                                                            |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2.1    | Crear y editar perfil de músico       | Formulario con campos personalizados: instrumentos, géneros, experiencia musical, enlaces externos, formación, y secciones multimedia para construir un portafolio profesional.                                                                              |
-| 2.2    | Crear y editar perfil de empleador    | Formulario para datos de empleador (organización, contacto, etc.).                                                                                                                                                                                           |
-| 2.3    | Subida de foto de perfil              | Carga y visualización de imagen.                                                                                                                                                                                                                             |
-| 2.4    | Integrar URL de portafolio            | Campo validado de portafolio para músicos.                                                                                                                                                                                                                   |
-| 2.5    | Vista pública de perfiles             | Visualización completa del perfil, accesible públicamente.                                                                                                                                                                                                   |
-| 2.6    | Diseño de pantallas de perfil         | Diseño responsivo para perfiles según tipo de usuario.                                                                                                                                                                                                       |
-| 2.7    | Validación de unicidad de perfil      | Lógica para que un usuario tenga un solo perfil.                                                                                                                                                                                                             |
-| 🔥 2.8 | Búsqueda de perfiles de usuario       | Permite filtrar músicos/empleadores públicamente.                                                                                                                                                                                                            |
-| 🔥 2.9 | Normalización de categorías en perfil | Define categorías preestablecidas en campos clave.                                                                                                                                                                                                           |
-| 2.10   | Vista del portafolio del músico       | Página pública que muestra la biografía, material multimedia y referencias del músico. Esta vista se separa del perfil editable y actúa como su presentación profesional ante empleadores. Incluye diseño responsivo e integración con los datos del perfil. |
+| Ticket | Título                             | Estado                 | Descripción                                                                                                                                                                                                                                                          |
+| ------ | ---------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2.1    | Crear y editar perfil de músico    | ✅ HECHO → 🔄 REFACTOR | **REFACTORIZAR:** Separar campos profesionales del perfil actual hacia el nuevo modelo de portafolio. Mantener solo datos personales/administrativos.                                                                                                                |
+| 2.2    | Crear y editar perfil de empleador | ✅ HECHO               | Formulario para datos de empleador (organización, contacto, etc.).                                                                                                                                                                                                   |
+| 2.3    | Subida de foto de perfil           | ✅ HECHO               | Carga y visualización de imagen para perfiles.                                                                                                                                                                                                                       |
+| 2.4    | Vista del portafolio del músico    | 🆕 NUEVO               | Página pública que muestra la biografía, instrumentos, géneros, experiencia musical, material multimedia y referencias del músico. Esta vista actúa como su presentación profesional ante empleadores. Incluye diseño responsivo e integración con datos del perfil. |
+
+| 2.5 | Crear y editar contenido del portafolio | 🆕 NUEVO | Formulario para que músicos gestionen su información profesional: instrumentos, géneros, experiencia musical, enlaces externos, formación, y secciones multimedia para construir su portafolio profesional.  
+ |
+| 2.6 | Diseño de pantallas de perfil | 🔄 PENDIENTE | Diseño responsivo para perfiles según tipo de usuario (privados/administrativos). |
+| 2.7 | Validación de unicidad de perfil | ✅ HECHO | Lógica para que un usuario tenga un solo perfil y un solo portafolio. |
+| 🔥 2.8 | Búsqueda y listado de portafolios | 🆕 NUEVO | Permite buscar y filtrar músicos públicamente a través de sus portafolios. |
+| 🔥 2.9 | Normalización de categorías en portafolio | 🆕 NUEVO | Define categorías preestablecidas en campos clave del portafolio (instrumentos, géneros musicales, etc.). |
 
 ---
 
@@ -46,17 +47,17 @@
 
 ## 🟩 Sprint 4: Visualización, Referencias y Moderación
 
-| Ticket | Título                                       | Descripción breve                                    |
-| ------ | -------------------------------------------- | ---------------------------------------------------- |
-| 4.1    | Agregar referencia laboral                   | Permitir agregar referencias al perfil de un músico. |
-| 4.2    | Visualizar referencias laborales             | Las referencias son visibles en el perfil.           |
-| 4.3    | Mostrar información de contacto              | Email u otros datos visibles según configuración.    |
-| 4.4    | Notificar postulación a empleador            | Email o alerta al recibir nueva postulación.         |
-| 4.5    | Notificar resultado de postulación al músico | Notificación si es aceptado o rechazado.             |
-| 4.6    | Revisar y aceptar/rechazar postulaciones     | Gestión de candidaturas por parte del empleador.     |
-| 4.7    | Vista de estado de postulación               | Músico puede ver estado de sus postulaciones.        |
-| 4.8    | Funcionalidad de moderación básica           | Admin puede editar/eliminar usuarios, ofertas, etc.  |
-| 4.9    | Diseño responsive general                    | Garantizar experiencia óptima en móvil/escritorio.   |
+| Ticket | Título                                       | Descripción breve                                        |
+| ------ | -------------------------------------------- | -------------------------------------------------------- |
+| 4.1    | Agregar referencia laboral                   | Permitir agregar referencias al portafolio de un músico. |
+| 4.2    | Visualizar referencias laborales             | Las referencias son visibles en el portafolio.           |
+| 4.3    | Mostrar información de contacto              | Email u otros datos visibles según configuración.        |
+| 4.4    | Notificar postulación a empleador            | Email o alerta al recibir nueva postulación.             |
+| 4.5    | Notificar resultado de postulación al músico | Notificación si es aceptado o rechazado.                 |
+| 4.6    | Revisar y aceptar/rechazar postulaciones     | Gestión de candidaturas por parte del empleador.         |
+| 4.7    | Vista de estado de postulación               | Músico puede ver estado de sus postulaciones.            |
+| 4.8    | Funcionalidad de moderación básica           | Admin puede editar/eliminar usuarios, ofertas, etc.      |
+| 4.9    | Diseño responsive general                    | Garantizar experiencia óptima en móvil/escritorio.       |
 
 ---
 

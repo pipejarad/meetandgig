@@ -2,7 +2,36 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from PIL import Image
 from .models import Usuario, PerfilMusico, PerfilEmpleador
+
+
+def validate_image_file(image):
+    """Valida que el archivo de imagen sea válido y tenga un tamaño apropiado"""
+    if image:
+        # Validar tamaño de archivo (máximo 5MB)
+        if image.size > 5 * 1024 * 1024:
+            raise ValidationError("La imagen no puede ser mayor a 5MB.")
+        
+        # Validar que sea una imagen válida
+        try:
+            img = Image.open(image)
+            img.verify()
+        except Exception:
+            raise ValidationError("El archivo debe ser una imagen válida (JPG, PNG, GIF).")
+        
+        # Validar dimensiones mínimas
+        image.seek(0)  # Reset el puntero del archivo
+        img = Image.open(image)
+        width, height = img.size
+        if width < 100 or height < 100:
+            raise ValidationError("La imagen debe tener al menos 100x100 píxeles.")
+        
+        # Validar formato
+        if img.format.lower() not in ['jpeg', 'jpg', 'png', 'gif']:
+            raise ValidationError("Solo se permiten archivos JPG, PNG o GIF.")
+    
+    return image
 
 
 class RegistroForm(UserCreationForm):
@@ -33,7 +62,9 @@ class RegistroForm(UserCreationForm):
         widget=forms.FileInput(attrs={
             'class': 'form-control',
             'accept': 'image/*'
-        })
+        }),
+        validators=[validate_image_file],
+        help_text='Imagen de perfil (máx. 5MB, mín. 100x100px, formatos: JPG, PNG, GIF)'
     )
     
     password1 = forms.CharField(
@@ -154,7 +185,8 @@ class PerfilMusicoForm(forms.ModelForm):
     foto_perfil = forms.ImageField(
         required=False,
         label="Foto de perfil",
-        help_text="Foto de perfil profesional (recomendado: 400x400px)"
+        help_text="Imagen de perfil profesional (máx. 5MB, mín. 100x100px, formatos: JPG, PNG, GIF)",
+        validators=[validate_image_file]
     )
     
     generos_musicales = forms.CharField(
@@ -333,7 +365,9 @@ class PerfilEmpleadorForm(forms.ModelForm):
     foto_perfil = forms.ImageField(
         required=False,
         label='Foto de perfil',
-        widget=forms.FileInput(attrs={'class': 'form-control'})
+        widget=forms.FileInput(attrs={'class': 'form-control'}),
+        validators=[validate_image_file],
+        help_text='Imagen de perfil (máx. 5MB, mín. 100x100px, formatos: JPG, PNG, GIF)'
     )
 
     class Meta:
