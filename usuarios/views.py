@@ -9,8 +9,9 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
-from .forms import RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm
-from .models import Usuario
+from django.contrib.auth.decorators import login_required
+from .forms import RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, PerfilMusicoForm
+from .models import Usuario, PerfilMusico
 
 
 def inicio(request):
@@ -175,3 +176,69 @@ El equipo de Meet & Gig
         [user.email],
         fail_silently=False,
     )
+
+
+@login_required
+def editar_perfil_musico(request):
+    if request.user.tipo_usuario != 'musico':
+        messages.error(request, 'Solo los músicos pueden acceder a esta sección.')
+        return redirect('inicio')
+    
+    try:
+        perfil = request.user.perfil_musico
+    except PerfilMusico.DoesNotExist:
+        perfil = None
+    
+    if request.method == 'POST':
+        form = PerfilMusicoForm(request.POST, request.FILES, instance=perfil, usuario=request.user)
+        if form.is_valid():
+            perfil = form.save(commit=False)
+            if not perfil.usuario_id:
+                perfil.usuario = request.user
+            perfil.save()
+            
+            request.user.refresh_from_db()
+            
+            if form.cleaned_data.get('foto_perfil'):
+                messages.success(request, '✅ Perfil e imagen actualizados exitosamente.')
+            else:
+                messages.success(request, '✅ Perfil actualizado exitosamente.')
+            
+            return redirect('editar_perfil_musico')
+        else:
+            messages.error(request, 'Por favor corrige los errores en el formulario.')
+    else:
+        form = PerfilMusicoForm(instance=perfil, usuario=request.user)
+    
+    context = {
+        'form': form,
+        'perfil': perfil,
+        'usuario': request.user,
+        'es_nuevo_perfil': perfil is None
+    }
+    
+    return render(request, 'usuarios/editar_perfil_musico.html', context)
+
+
+@login_required 
+def ver_mi_perfil(request):
+    if request.user.tipo_usuario != 'musico':
+        messages.error(request, 'Solo los músicos tienen perfil público.')
+        return redirect('inicio')
+    
+    try:
+        perfil = request.user.perfil_musico
+    except PerfilMusico.DoesNotExist:
+        messages.info(
+            request, 
+            'Aún no has creado tu perfil de músico. ¡Complétalo para que otros puedan encontrarte!'
+        )
+        return redirect('editar_perfil_musico')
+    
+    context = {
+        'perfil': perfil,
+        'usuario': request.user,
+        'es_mi_perfil': True
+    }
+    
+    return render(request, 'usuarios/ver_perfil_musico.html', context)
