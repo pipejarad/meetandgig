@@ -116,6 +116,9 @@ static_root/
 # Media files (user uploads)
 media/
 
+# Portafolios duplicados (deben estar en media/)
+portafolios/
+
 # IDE files
 .vscode/
 .idea/
