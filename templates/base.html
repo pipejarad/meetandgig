@@ -89,6 +89,9 @@
                                 {% if user.tipo_usuario == 'musico' %}
                                     <a class="dropdown-item" href="{% url 'ver_mi_perfil' %}">Mi Perfil</a>
                                     <a class="dropdown-item" href="{% url 'editar_perfil_musico' %}">Editar Perfil</a>
+                                {% elif user.tipo_usuario == 'empleador' %}
+                                    <a class="dropdown-item" href="{% url 'perfil_empleador' %}">Mi Perfil</a>
+                                    <a class="dropdown-item" href="{% url 'editar_perfil_empleador' %}">Editar Perfil</a>
                                 {% else %}
                                     <a class="dropdown-item" href="#">Mi Perfil</a>
                                 {% endif %}

@@ -192,11 +192,126 @@ class PerfilMusico(models.Model):
 
 
 class PerfilEmpleador(models.Model):
-    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
-    nombre_organizacion = models.CharField(max_length=100)
-    tipo_entidad = models.CharField(max_length=100)
-    ubicacion = models.CharField(max_length=100)
-    contacto_alternativo = models.CharField(max_length=100, blank=True)
+    TIPO_ENTIDAD_CHOICES = [
+        ('empresa', 'Empresa'),
+        ('fundacion', 'Fundación'),
+        ('organizacion_sin_fines_lucro', 'Organización sin fines de lucro'),
+        ('institucion_educativa', 'Institución educativa'),
+        ('gobierno', 'Gobierno/Institución pública'),
+        ('iglesia', 'Iglesia/Organización religiosa'),
+        ('club_social', 'Club social'),
+        ('restaurante_bar', 'Restaurante/Bar'),
+        ('hotel', 'Hotel/Centro de eventos'),
+        ('particular', 'Particular'),
+        ('otro', 'Otro')
+    ]
+
+    TAMAÑO_ORGANIZACION_CHOICES = [
+        ('1-10', '1-10 empleados'),
+        ('11-50', '11-50 empleados'),
+        ('51-200', '51-200 empleados'),
+        ('201-500', '201-500 empleados'),
+        ('501-1000', '501-1000 empleados'),
+        ('1000+', 'Más de 1000 empleados'),
+        ('no_aplica', 'No aplica')
+    ]
+
+    usuario = models.OneToOneField(
+        Usuario, 
+        on_delete=models.CASCADE, 
+        related_name='perfil_empleador'
+    )
+    
+    nombre_organizacion = models.CharField(
+        max_length=200,
+        verbose_name='Nombre de la organización'
+    )
+    tipo_entidad = models.CharField(
+        max_length=50,
+        choices=TIPO_ENTIDAD_CHOICES,
+        verbose_name='Tipo de entidad',
+        default='empresa'
+    )
+    descripcion = models.TextField(
+        max_length=1000,
+        blank=True,
+        help_text='Describe tu organización (máx. 1000 caracteres)',
+        verbose_name='Descripción de la organización'
+    )
+    
+    email_corporativo = models.EmailField(
+        blank=True,
+        verbose_name='Email corporativo',
+        help_text='Email oficial de la organización (opcional)'
+    )
+    telefono = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name='Teléfono'
+    )
+    contacto_alternativo = models.CharField(
+        max_length=100, 
+        blank=True,
+        verbose_name='Contacto alternativo',
+        help_text='Nombre de persona de contacto'
+    )
+    
+    ubicacion = models.CharField(
+        max_length=200,
+        verbose_name='Ubicación',
+        help_text='Ciudad, región o dirección'
+    )
+    direccion_completa = models.TextField(
+        max_length=300,
+        blank=True,
+        verbose_name='Dirección completa'
+    )
+    
+    sitio_web = models.URLField(
+        blank=True,
+        verbose_name='Sitio web'
+    )
+    linkedin_url = models.URLField(
+        blank=True,
+        verbose_name='LinkedIn'
+    )
+    facebook_url = models.URLField(
+        blank=True,
+        verbose_name='Facebook'
+    )
+    instagram_url = models.URLField(
+        blank=True,
+        verbose_name='Instagram'
+    )
+    
+    año_fundacion = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Año de fundación'
+    )
+    tamaño_organizacion = models.CharField(
+        max_length=50,
+        choices=TAMAÑO_ORGANIZACION_CHOICES,
+        blank=True,
+        verbose_name='Tamaño de la organización'
+    )
+    
+    fecha_creacion = models.DateTimeField(default=timezone.now)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    perfil_verificado = models.BooleanField(
+        default=False,
+        verbose_name='Perfil verificado'
+    )
+
+    class Meta:
+        verbose_name = 'Perfil de Empleador'
+        verbose_name_plural = 'Perfiles de Empleadores'
 
     def __str__(self):
-        return self.usuario.username
+        return f"{self.nombre_organizacion} - {self.usuario.get_full_name() or self.usuario.username}"
+    
+    def get_nombre_completo_contacto(self):
+        return self.usuario.get_full_name() or self.usuario.username
+    
+    def get_email_principal(self):
+        return self.email_corporativo or self.usuario.email

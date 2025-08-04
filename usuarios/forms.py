@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm
 from django.core.exceptions import ValidationError
-from .models import Usuario, PerfilMusico
+from django.utils import timezone
+from .models import Usuario, PerfilMusico, PerfilEmpleador
 
 
 class RegistroForm(UserCreationForm):
@@ -314,3 +315,80 @@ class PerfilMusicoForm(forms.ModelForm):
         if commit:
             perfil.save()
         return perfil
+
+
+class PerfilEmpleadorForm(forms.ModelForm):
+    first_name = forms.CharField(
+        max_length=30,
+        required=True,
+        label='Nombre',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        required=True,
+        label='Apellido',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    foto_perfil = forms.ImageField(
+        required=False,
+        label='Foto de perfil',
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = PerfilEmpleador
+        fields = [
+            'nombre_organizacion', 'tipo_entidad', 'descripcion',
+            'email_corporativo', 'telefono', 'contacto_alternativo',
+            'ubicacion', 'direccion_completa', 'sitio_web',
+            'linkedin_url', 'facebook_url', 'instagram_url',
+            'año_fundacion', 'tamaño_organizacion'
+        ]
+        widgets = {
+            'nombre_organizacion': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipo_entidad': forms.Select(attrs={'class': 'form-control'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'email_corporativo': forms.EmailInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+            'contacto_alternativo': forms.TextInput(attrs={'class': 'form-control'}),
+            'ubicacion': forms.TextInput(attrs={'class': 'form-control'}),
+            'direccion_completa': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'sitio_web': forms.URLInput(attrs={'class': 'form-control'}),
+            'linkedin_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'facebook_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'instagram_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'año_fundacion': forms.NumberInput(attrs={'class': 'form-control'}),
+            'tamaño_organizacion': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        if user:
+            self.fields['first_name'].initial = user.first_name
+            self.fields['last_name'].initial = user.last_name
+            self.fields['foto_perfil'].initial = user.foto_perfil
+
+    def save(self, commit=True):
+        perfil = super().save(commit=False)
+        
+        if commit:
+            user = perfil.usuario
+            user.first_name = self.cleaned_data['first_name']
+            user.last_name = self.cleaned_data['last_name']
+            
+            if self.cleaned_data['foto_perfil']:
+                user.foto_perfil = self.cleaned_data['foto_perfil']
+            
+            user.save()
+            perfil.save()
+        
+        return perfil
+
+    def clean_año_fundacion(self):
+        año = self.cleaned_data.get('año_fundacion')
+        if año and (año < 1800 or año > timezone.now().year):
+            raise forms.ValidationError('El año de fundación debe estar entre 1800 y el año actual.')
+        return año

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
@@ -10,8 +10,11 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
-from .forms import RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, PerfilMusicoForm
-from .models import Usuario, PerfilMusico
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import CreateView, UpdateView
+from django.core.exceptions import PermissionDenied
+from .forms import RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, PerfilMusicoForm, PerfilEmpleadorForm
+from .models import Usuario, PerfilMusico, PerfilEmpleador
 
 
 def inicio(request):
@@ -242,3 +245,84 @@ def ver_mi_perfil(request):
     }
     
     return render(request, 'usuarios/ver_perfil_musico.html', context)
+
+
+class EmpleadorRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        
+        if request.user.tipo_usuario != 'empleador':
+            raise PermissionDenied("Solo los empleadores pueden acceder a esta página.")
+        
+        return super().dispatch(request, *args, **kwargs)
+
+
+class CrearPerfilEmpleadorView(LoginRequiredMixin, EmpleadorRequiredMixin, CreateView):
+    model = PerfilEmpleador
+    form_class = PerfilEmpleadorForm
+    template_name = 'usuarios/crear_perfil_empleador.html'
+    success_url = reverse_lazy('perfil_empleador')
+
+    def dispatch(self, request, *args, **kwargs):
+        if hasattr(request.user, 'perfil_empleador'):
+            return redirect('editar_perfil_empleador')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.usuario = self.request.user
+        messages.success(self.request, 'Perfil de empleador creado exitosamente.')
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Crear Perfil de Empleador'
+        context['boton_texto'] = 'Crear Perfil'
+        return context
+
+
+class EditarPerfilEmpleadorView(LoginRequiredMixin, EmpleadorRequiredMixin, UpdateView):
+    model = PerfilEmpleador
+    form_class = PerfilEmpleadorForm
+    template_name = 'usuarios/editar_perfil_empleador.html'
+    success_url = reverse_lazy('perfil_empleador')
+
+    def get_object(self):
+        return get_object_or_404(PerfilEmpleador, usuario=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Perfil actualizado exitosamente.')
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Editar Perfil de Empleador'
+        context['boton_texto'] = 'Actualizar Perfil'
+        return context
+
+
+@login_required
+def perfil_empleador_view(request):
+    if request.user.tipo_usuario != 'empleador':
+        raise PermissionDenied("Solo los empleadores pueden ver esta página.")
+    
+    try:
+        perfil = request.user.perfil_empleador
+    except PerfilEmpleador.DoesNotExist:
+        return redirect('crear_perfil_empleador')
+    
+    context = {
+        'perfil': perfil,
+        'usuario': request.user
+    }
+    return render(request, 'usuarios/perfil_empleador.html', context)

@@ -18,6 +18,11 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 - 📋 **Ticket 1.6**: Diseño mejorado de login/registro
 - 📋 **Ticket 1.7**: Upgrade Bootstrap 4 → Bootstrap 5
 
+### 🎼 Sprint 2: Gestión de Perfiles de Músico
+
+- ✅ **Ticket 2.1**: Sistema completo de perfiles de músico con portafolio profesional
+- 📋 **Ticket 2.10**: Vista pública del portafolio del músico
+
 ### 👥 Tipos de Usuario
 
 - **Músicos**: Artistas que buscan oportunidades de presentación
@@ -112,19 +117,31 @@ meetandgig/
 ├── meetandgig/           # Configuración principal
 │   ├── settings.py       # Configuraciones de Django
 │   ├── urls.py          # URLs principales
-│   ├── static/          # Archivos estáticos
+│   ├── static/          # Archivos estáticos (CSS, JS, imágenes)
 │   └── guidelines.md    # Guías de desarrollo
 ├── usuarios/            # App de gestión de usuarios
-│   ├── models.py        # Modelos de Usuario, PerfilMusico, PerfilEmpleador
-│   ├── forms.py         # Formularios de registro y login
-│   ├── views.py         # Vistas de autenticación
+│   ├── models.py        # Usuario, PerfilMusico con 20+ campos
+│   ├── forms.py         # Formularios de registro, login y perfiles
+│   ├── views.py         # Vistas de autenticación y perfiles
+│   ├── urls.py          # URLs específicas de usuarios
+│   ├── admin.py         # Configuración del admin de Django
 │   ├── backends.py      # Backend de autenticación personalizado
 │   ├── tests.py         # Suite de tests (11 tests)
-│   └── templates/       # Templates HTML
-├── templates/           # Templates base
-├── requirements.txt     # Dependencias de producción
+│   ├── migrations/      # Migraciones de base de datos
+│   └── templates/       # Templates HTML específicos
+│       └── usuarios/
+│           ├── editar_perfil_musico.html
+│           └── ver_perfil_musico.html
+├── templates/           # Templates base del proyecto
+│   └── base.html        # Template base con Bootstrap 4
+├── media/              # Archivos subidos por usuarios
+│   ├── fotos_perfil/   # Fotos de perfil de usuarios
+│   └── portafolios/    # Multimedia de portafolios
+├── TICKETS.md          # Documentación de todos los tickets
+├── TEMPLATES_GUIDE.md  # Guía de templates
+├── requirements.txt    # Dependencias de producción
 ├── requirements-dev.txt # Dependencias de desarrollo
-└── manage.py           # Comando de Django
+└── manage.py          # Comando de Django
 ```
 
 ## 🛠️ Tecnologías Utilizadas
@@ -133,6 +150,9 @@ meetandgig/
 - **Base de datos**: SQLite (desarrollo) / PostgreSQL (producción)
 - **Frontend**: Bootstrap 4.3.1, HTML5, CSS3, JavaScript
 - **Autenticación**: Sistema personalizado con email como username
+- **Multimedia**: Sistema de subida de archivos con ImageField
+- **Validación**: Formularios Django con validación personalizada
+- **Localización**: Configuración para Chile (es-cl, CLP)
 - **Testing**: Django TestCase
 - **Control de versiones**: Git
 
@@ -140,37 +160,70 @@ meetandgig/
 
 ### ✅ Completado
 
+#### 🎯 Sprint 1: Autenticación Completa
+
 - [x] **Ticket 1.1**: Sistema de registro completo con validación de email único
 - [x] **Ticket 1.2**: Sistema de login con autenticación por email/username
 - [x] **Ticket 1.3**: Sistema de logout con botón en header
 - [x] **Ticket 1.4**: Sistema de recuperación de contraseña con tokens seguros
-- [x] Configuración inicial del proyecto
+
+#### 🎼 Sprint 2: Perfiles de Músico
+
+- [x] **Ticket 2.1**: Sistema completo de perfiles de músico
+  - ✅ Modelo PerfilMusico con 20+ campos profesionales
+  - ✅ Formularios de creación y edición con validación
+  - ✅ Sistema de subida de fotos de perfil
+  - ✅ Campos para instrumentos, géneros y experiencia
+  - ✅ Enlaces a redes sociales y multimedia
+  - ✅ Tarifas en pesos chilenos (CLP)
+  - ✅ Configuración de privacidad y disponibilidad
+  - ✅ Templates responsive con Bootstrap 4
+  - ✅ Validación de formularios y contadores de caracteres
+
+#### 🏗️ Infraestructura
+
+- [x] Configuración inicial del proyecto Django 4.2.20
 - [x] Modelo de usuario personalizado con tipos (músico/empleador)
-- [x] Backend de autenticación personalizado
-- [x] Templates responsivos con Bootstrap 4.3.1
+- [x] Backend de autenticación personalizado con email
+- [x] Sistema de manejo de archivos multimedia
+- [x] Configuración de URLs y settings optimizada
+- [x] Templates base responsivos con Bootstrap 4.3.1
 - [x] Suite completa de tests (11/11 pasando)
+- [x] Migraciones de base de datos optimizadas
 
 ### 🔄 En Desarrollo
+
+#### 🎯 Sprint 1: Finalización
 
 - [ ] **Ticket 1.5**: Acceso a panel de administración
 - [ ] **Ticket 1.6**: Diseño mejorado de login/registro
 - [ ] **Ticket 1.7**: Upgrade Bootstrap 4 → Bootstrap 5
 
+#### 🎼 Sprint 2: Portafolios Públicos
+
+- [ ] **Ticket 2.10**: Vista pública del portafolio del músico
+
 ### 📋 Planificado
 
-#### 🎯 Sprint 2: Gestión de Perfiles
+#### 🎯 Sprint 2: Gestión Completa de Perfiles
 
-- [ ] Gestión de perfiles de usuario
-- [ ] Dashboard personalizado por tipo de usuario
-- [ ] Perfiles de músicos con portafolio
-- [ ] Perfiles de empleadores con historial
+- [ ] **Ticket 2.2**: Dashboard personalizado para músicos
+- [ ] **Ticket 2.3**: Sistema de búsqueda de músicos
+- [ ] **Ticket 2.4**: Filtros avanzados por instrumento/género/ubicación
+- [ ] **Ticket 2.5**: Perfiles de empleadores
+- [ ] **Ticket 2.6**: Normalización de categorías
+- [ ] **Ticket 2.7**: Sistema de favoritos
+- [ ] **Ticket 2.8**: Estadísticas de perfil
+- [ ] **Ticket 2.9**: Configuración de notificaciones
 
 #### 🎯 Sprint 3: Funcionalidades Avanzadas
 
-- [ ] Sistema de búsqueda y filtrado
-- [ ] Mensajería interna
-- [ ] Sistema de calificaciones
+- [ ] Sistema de mensajería interna
+- [ ] Sistema de calificaciones y reseñas
+- [ ] Gestión de eventos y contrataciones
 - [ ] Integración de pagos
+- [ ] Calendario de disponibilidad
+- [ ] Sistema de notificaciones push
 
 ## 🧑‍💻 Desarrollo
 
