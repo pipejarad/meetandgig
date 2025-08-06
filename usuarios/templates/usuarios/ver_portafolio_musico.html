@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Portafolio Profesional - Meet & Gig{% endblock %}
+
+{% block extra_css %}
+<style>
+    .portfolio-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .portfolio-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="80" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="30" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .portfolio-header h1 {
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .portfolio-header p {
+        margin-bottom: 0;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #28a745;
+    }
+    
+    .info-card h5 {
+        color: #28a745;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .badge-custom {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        margin: 0.25rem;
+        display: inline-block;
+    }
+    
+    .social-links a {
+        display: inline-block;
+        padding: 0.75rem;
+        margin: 0.25rem;
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        color: #495057;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 1px solid #dee2e6;
+    }
+    
+    .social-links a:hover {
+        background: #28a745;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: block;
+        margin-top: 0.5rem;
+    }
+    
+    .status-available {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .status-unavailable {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .btn-edit {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        border: 2px dashed #dee2e6;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="portfolio-header">
+                <h1>
+                    <i class="fas fa-music me-2"></i>
+                    Mi Portafolio Profesional
+                </h1>
+                <p>Tu showcase musical para empleadores y colaboradores</p>
+            </div>
+        </div>
+    </div>
+
+    {% if portafolio %}
+        <div class="row">
+            <!-- Información Musical -->
+            <div class="col-md-6">
+                <div class="info-card">
+                    <h5><i class="fas fa-guitar me-2"></i>Información Musical</h5>
+                    
+                    <div class="mb-3">
+                        <strong>Instrumento Principal:</strong>
+                        <span class="badge-custom ms-2">{{ portafolio.get_instrumento_principal_display }}</span>
+                    </div>
+                    
+                    {% if portafolio.generos_musicales %}
+                        <div class="mb-3">
+                            <strong>Géneros Musicales:</strong><br>
+                            {% for genero in portafolio.get_generos_list %}
+                                <span class="badge-custom">{{ genero }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    {% if portafolio.instrumentos_secundarios %}
+                        <div class="mb-3">
+                            <strong>Instrumentos Secundarios:</strong><br>
+                            {% for instrumento in portafolio.get_instrumentos_list %}
+                                <span class="badge-custom">{{ instrumento }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        {% if portafolio.nivel_experiencia %}
+                            <div class="col-sm-6 mb-2">
+                                <strong>Nivel:</strong><br>
+                                {{ portafolio.get_nivel_experiencia_display }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if portafolio.años_experiencia %}
+                            <div class="col-sm-6 mb-2">
+                                <strong>Experiencia:</strong><br>
+                                {{ portafolio.años_experiencia }} años
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información Comercial -->
+            <div class="col-md-6">
+                <div class="info-card">
+                    <h5><i class="fas fa-briefcase me-2"></i>Información Comercial</h5>
+                    
+                    {% if portafolio.ubicacion %}
+                        <div class="mb-3">
+                            <strong><i class="fas fa-map-marker-alt me-1"></i>Ubicación:</strong><br>
+                            {{ portafolio.ubicacion }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if portafolio.tarifa_base %}
+                        <div class="mb-3">
+                            <strong><i class="fas fa-dollar-sign me-1"></i>Tarifa Base:</strong><br>
+                            ${{ portafolio.tarifa_base|floatformat:0 }} CLP
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <strong><i class="fas fa-calendar-check me-1"></i>Estado:</strong><br>
+                        {% if portafolio.disponible_para_gigs %}
+                            <span class="status-badge status-available">
+                                <i class="fas fa-check-circle me-1"></i>Disponible para contrataciones
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-unavailable">
+                                <i class="fas fa-times-circle me-1"></i>No disponible
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong><i class="fas fa-eye me-1"></i>Visibilidad:</strong><br>
+                        {% if portafolio.portafolio_publico %}
+                            <span class="status-badge status-available">
+                                <i class="fas fa-globe me-1"></i>Portafolio público
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-unavailable">
+                                <i class="fas fa-lock me-1"></i>Portafolio privado
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biografía y Formación -->
+        <div class="row">
+            {% if portafolio.biografia %}
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h5><i class="fas fa-user-circle me-2"></i>Biografía</h5>
+                        <p style="white-space: pre-line;">{{ portafolio.biografia }}</p>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if portafolio.formacion_musical %}
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h5><i class="fas fa-graduation-cap me-2"></i>Formación Musical</h5>
+                        <p style="white-space: pre-line;">{{ portafolio.formacion_musical }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Enlaces y Redes Sociales -->
+        {% if portafolio.get_enlaces_sociales %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="info-card">
+                        <h5><i class="fas fa-link me-2"></i>Enlaces y Redes Sociales</h5>
+                        <div class="social-links">
+                            {% for enlace in portafolio.get_enlaces_sociales %}
+                                <a href="{{ enlace.url }}" target="_blank" rel="noopener noreferrer">
+                                    <i class="{{ enlace.icon }} me-2"></i>{{ enlace.nombre }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Acciones -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <a href="{% url 'editar_portafolio_musico' %}" class="btn btn-edit btn-lg">
+                    <i class="fas fa-edit me-2"></i>Editar Portafolio
+                </a>
+                
+                <a href="{% url 'ver_mi_perfil' %}" class="btn btn-outline-secondary btn-lg ms-3">
+                    <i class="fas fa-user me-2"></i>Ver Perfil Personal
+                </a>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Estado vacío -->
+        <div class="row">
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="fas fa-music"></i>
+                    <h3>Aún no has creado tu portafolio</h3>
+                    <p>Crea tu portafolio profesional para mostrar tu talento musical y ser encontrado por empleadores.</p>
+                    <a href="{% url 'crear_portafolio_musico' %}" class="btn btn-success btn-lg mt-3">
+                        <i class="fas fa-plus me-2"></i>Crear Mi Portafolio
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

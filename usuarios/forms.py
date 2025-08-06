@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetP
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from PIL import Image
-from .models import Usuario, PerfilMusico, PerfilEmpleador
+from .models import Usuario, PerfilMusico, PerfilEmpleador, PortafolioMusico
 
 
 def validate_image_file(image):
@@ -182,19 +182,121 @@ class CambiarPasswordForm(SetPasswordForm):
 
 
 class PerfilMusicoForm(forms.ModelForm):
+    first_name = forms.CharField(
+        max_length=30,
+        required=True,
+        label='Nombre',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        required=True,
+        label='Apellido',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
     foto_perfil = forms.ImageField(
         required=False,
         label="Foto de perfil",
-        help_text="Imagen de perfil profesional (máx. 5MB, mín. 100x100px, formatos: JPG, PNG, GIF)",
+        help_text="Imagen de perfil (máx. 5MB, mín. 100x100px, formatos: JPG, PNG, GIF)",
         validators=[validate_image_file]
     )
     
+    telefono = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '+56 9 1234 5678'
+        }),
+        help_text='Número de teléfono personal'
+    )
+    
+    direccion = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Calle, número, comuna, ciudad',
+            'maxlength': 200
+        }),
+        help_text='Dirección personal (opcional)'
+    )
+    
+    contacto_emergencia = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nombre: Teléfono',
+            'maxlength': 100
+        }),
+        help_text='Contacto de emergencia (opcional)'
+    )
+
+    class Meta:
+        model = PerfilMusico
+        fields = [
+            'telefono', 'fecha_nacimiento', 'direccion', 'contacto_emergencia',
+            'recibir_notificaciones_email', 'mostrar_telefono_publico'
+        ]
+        
+        widgets = {
+            'fecha_nacimiento': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'recibir_notificaciones_email': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'mostrar_telefono_publico': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            })
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.usuario = kwargs.pop('usuario', None)
+        super().__init__(*args, **kwargs)
+        
+        if self.usuario:
+            self.fields['first_name'].initial = self.usuario.first_name
+            self.fields['last_name'].initial = self.usuario.last_name
+            if hasattr(self.usuario, 'foto_perfil'):
+                self.fields['foto_perfil'].initial = self.usuario.foto_perfil
+        
+        self.fields['foto_perfil'].widget.attrs.update({
+            'class': 'form-control',
+            'accept': 'image/*'
+        })
+    
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono', '')
+        if telefono and len(telefono.replace(' ', '').replace('+', '').replace('-', '')) < 8:
+            raise forms.ValidationError('El teléfono debe tener al menos 8 dígitos.')
+        return telefono
+    
+    def save(self, commit=True):
+        perfil = super().save(commit=False)
+        
+        if not perfil.usuario_id:
+            perfil.usuario = self.usuario
+        
+        if commit:
+            perfil.save()
+            
+            if self.usuario:
+                self.usuario.first_name = self.cleaned_data.get('first_name', '')
+                self.usuario.last_name = self.cleaned_data.get('last_name', '')
+                
+                if self.cleaned_data.get('foto_perfil'):
+                    self.usuario.foto_perfil = self.cleaned_data['foto_perfil']
+                
+                self.usuario.save()
+        
+        return perfil
+
+
+class PortafolioMusicoForm(forms.ModelForm):
     generos_musicales = forms.CharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Ej: Rock, Blues, Jazz',
-            'data-toggle': 'tooltip',
-            'title': 'Separa los géneros con comas'
+            'placeholder': 'Ej: Rock, Blues, Jazz'
         }),
         help_text='Separa los géneros musicales con comas'
     )
@@ -203,9 +305,7 @@ class PerfilMusicoForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Ej: Piano, Bajo, Armónica',
-            'data-toggle': 'tooltip',
-            'title': 'Separa los instrumentos con comas'
+            'placeholder': 'Ej: Piano, Bajo, Armónica'
         }),
         help_text='Otros instrumentos que tocas (separados por comas)'
     )
@@ -242,14 +342,14 @@ class PerfilMusicoForm(forms.ModelForm):
     )
 
     class Meta:
-        model = PerfilMusico
+        model = PortafolioMusico
         fields = [
             'biografia', 'instrumento_principal', 'instrumentos_secundarios',
             'generos_musicales', 'nivel_experiencia', 'años_experiencia',
             'formacion_musical', 'website_personal', 'soundcloud_url',
             'youtube_url', 'spotify_url', 'instagram_url', 'facebook_url',
             'ubicacion', 'disponible_para_gigs', 'tarifa_base',
-            'video_demo', 'perfil_publico'
+            'video_demo', 'portafolio_publico'
         ]
         
         widgets = {
@@ -295,22 +395,10 @@ class PerfilMusicoForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'https://youtube.com/watch?v=...'
             }),
-            'perfil_publico': forms.CheckboxInput(attrs={
+            'portafolio_publico': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             })
         }
-    
-    def __init__(self, *args, **kwargs):
-        self.usuario = kwargs.pop('usuario', None)
-        super().__init__(*args, **kwargs)
-        
-        # No inicializar con la imagen actual - solo mostrar en template
-        # para evitar problemas con el widget de archivos
-        
-        self.fields['foto_perfil'].widget.attrs.update({
-            'class': 'form-control',
-            'accept': 'image/*'
-        })
     
     def clean_generos_musicales(self):
         generos = self.cleaned_data.get('generos_musicales', '')
@@ -335,18 +423,6 @@ class PerfilMusicoForm(forms.ModelForm):
         if años is not None and años > 80:
             raise ValidationError("Los años de experiencia no pueden exceder 80.")
         return años
-    
-    def save(self, commit=True):
-        foto_perfil = self.cleaned_data.get('foto_perfil')
-        
-        if foto_perfil and self.usuario:
-            self.usuario.foto_perfil = foto_perfil
-            self.usuario.save()
-        
-        perfil = super().save(commit=False)
-        if commit:
-            perfil.save()
-        return perfil
 
 
 class PerfilEmpleadorForm(forms.ModelForm):
