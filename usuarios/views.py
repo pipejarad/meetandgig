@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
@@ -13,8 +13,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, UpdateView
 from django.core.exceptions import PermissionDenied
-from .forms import RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, PerfilMusicoForm, PerfilEmpleadorForm
-from .models import Usuario, PerfilMusico, PerfilEmpleador
+from .forms import (
+    RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, 
+    PerfilMusicoForm, PerfilEmpleadorForm, PortafolioMusicoForm
+)
+from .models import Usuario, PerfilMusico, PerfilEmpleador, PortafolioMusico
 
 
 def inicio(request):
@@ -195,12 +198,7 @@ def editar_perfil_musico(request):
     if request.method == 'POST':
         form = PerfilMusicoForm(request.POST, request.FILES, instance=perfil, usuario=request.user)
         if form.is_valid():
-            perfil = form.save(commit=False)
-            if not perfil.usuario_id:
-                perfil.usuario = request.user
-            perfil.save()
-            
-            request.user.refresh_from_db()
+            perfil = form.save()
             
             if form.cleaned_data.get('foto_perfil'):
                 messages.success(request, '✅ Perfil e imagen actualizados exitosamente.')
@@ -326,3 +324,115 @@ def perfil_empleador_view(request):
         'usuario': request.user
     }
     return render(request, 'usuarios/perfil_empleador.html', context)
+
+
+# ================================================
+# VISTAS DEL PORTAFOLIO MÚSICO
+# ================================================
+
+@login_required
+def ver_mi_portafolio(request):
+    """Vista para que el músico vea su propio portafolio"""
+    if request.user.tipo_usuario != 'musico':
+        raise PermissionDenied("Solo los músicos pueden ver esta página.")
+    
+    portafolio, created = PortafolioMusico.objects.get_or_create(
+        usuario=request.user,
+        defaults={
+            'biografia': '',
+            'instrumento_principal': 'guitarra',
+            'generos_musicales': 'rock',
+            'nivel_experiencia': 'principiante',
+            'años_experiencia': 1,
+            'ubicacion': 'No especificada',
+            'disponible_para_gigs': True,
+            'portafolio_publico': True,
+        }
+    )
+    
+    context = {
+        'portafolio': portafolio,
+        'usuario': request.user,
+        'es_mi_portafolio': True,
+        'titulo': 'Mi Portafolio Musical'
+    }
+    return render(request, 'usuarios/ver_portafolio_musico.html', context)
+
+
+def ver_portafolio_musico(request, username):
+    """Vista pública del portafolio de un músico"""
+    usuario = get_object_or_404(Usuario, username=username, tipo_usuario='musico')
+    
+    try:
+        portafolio = usuario.portafolio_musico
+        if not portafolio.portafolio_publico:
+            if not request.user.is_authenticated or request.user != usuario:
+                raise Http404("Este portafolio no está disponible públicamente.")
+    except PortafolioMusico.DoesNotExist:
+        raise Http404("Este músico no tiene un portafolio disponible.")
+    
+    context = {
+        'portafolio': portafolio,
+        'usuario': usuario,
+        'es_mi_portafolio': request.user.is_authenticated and request.user == usuario,
+        'titulo': f'Portafolio de {usuario.get_full_name() or usuario.username}'
+    }
+    return render(request, 'usuarios/ver_portafolio_musico.html', context)
+
+
+@login_required
+def editar_portafolio_musico(request):
+    """Vista para editar el portafolio del músico"""
+    if request.user.tipo_usuario != 'musico':
+        raise PermissionDenied("Solo los músicos pueden editar portafolios.")
+    
+    portafolio, created = PortafolioMusico.objects.get_or_create(
+        usuario=request.user,
+        defaults={
+            'biografia': '',
+            'instrumento_principal': 'guitarra',
+            'generos_musicales': 'rock',
+            'nivel_experiencia': 'principiante',
+            'años_experiencia': 1,
+            'ubicacion': 'No especificada',
+            'disponible_para_gigs': True,
+            'portafolio_publico': True,
+        }
+    )
+    
+    if request.method == 'POST':
+        form = PortafolioMusicoForm(request.POST, instance=portafolio)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Portafolio actualizado exitosamente.')
+            return redirect('ver_mi_portafolio')
+    else:
+        form = PortafolioMusicoForm(instance=portafolio)
+    
+    context = {
+        'form': form,
+        'portafolio': portafolio,
+        'titulo': 'Editar Mi Portafolio Musical'
+    }
+    return render(request, 'usuarios/editar_portafolio_musico.html', context)
+
+
+def ver_perfil_musico(request, username):
+    """Vista pública del perfil de un músico"""
+    usuario = get_object_or_404(Usuario, username=username, tipo_usuario='musico')
+    
+    try:
+        perfil = usuario.perfil_musico
+        if not perfil.perfil_publico:
+            if not request.user.is_authenticated or request.user != usuario:
+                raise Http404("Este perfil no está disponible públicamente.")
+    except PerfilMusico.DoesNotExist:
+        raise Http404("Este músico no tiene un perfil disponible.")
+    
+    context = {
+        'perfil': perfil,
+        'usuario': usuario,
+        'es_mi_perfil': request.user.is_authenticated and request.user == usuario,
+        'titulo': f'Perfil de {usuario.get_full_name() or usuario.username}'
+    }
+    return render(request, 'usuarios/ver_perfil_musico.html', context)

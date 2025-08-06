@@ -75,9 +75,64 @@
                     <form method="post" enctype="multipart/form-data" id="perfil-form">
                         {% csrf_token %}
                         
+                        <!-- Mostrar errores del formulario -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-warning">
+                                <h6><i class="icon-warning"></i> Por favor corrige los siguientes errores:</h6>
+                                <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li><strong>{% if field == 'first_name' %}Nombre{% elif field == 'last_name' %}Apellido{% elif field == 'instrumento_principal' %}Instrumento principal{% elif field == 'generos_musicales' %}Géneros musicales{% elif field == 'nivel_experiencia' %}Nivel de experiencia{% elif field == 'años_experiencia' %}Años de experiencia{% elif field == 'ubicacion' %}Ubicación{% elif field == 'biografia' %}Biografía{% elif field == 'formacion_musical' %}Formación musical{% elif field == 'instrumentos_secundarios' %}Instrumentos secundarios{% else %}{{ field|title }}{% endif %}:</strong> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        
                         <!-- Información Básica -->
                         <div class="form-section">
                             <h5><i class="icon-user"></i> Información Básica</h5>
+                            
+                            <!-- Nombre y Apellido -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                            {{ form.first_name.label }} *
+                                        </label>
+                                        {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.first_name.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                            {{ form.last_name.label }} *
+                                        </label>
+                                        {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.last_name.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="mb-3">
@@ -112,7 +167,7 @@
                                         {{ form.foto_perfil }}
                                         {% if usuario.foto_perfil %}
                                             <div class="mt-2">
-                                                <img src="{{ usuario.foto_perfil.url }}?v={{ usuario.foto_perfil.name|slice:'-10:' }}" alt="Foto actual" class="preview-image">
+                                                <img src="{{ usuario.foto_perfil.url }}?v={{ usuario.date_joined|date:'U' }}" alt="Foto actual" class="preview-image">
                                                 <small class="form-text text-success d-block">
                                                     <i class="icon-check"></i> Imagen actual: {{ usuario.foto_perfil.name }}
                                                 </small>
@@ -339,6 +394,9 @@
                                 {% if not es_nuevo_perfil %}
                                     <a href="{% url 'ver_mi_perfil' %}" class="btn btn-outline-primary me-2">
                                         <i class="icon-eye"></i> Ver Perfil
+                                    </a>
+                                    <a href="{% url 'ver_mi_portafolio' %}" class="btn btn-outline-success me-2">
+                                        <i class="icon-briefcase"></i> Mi Portafolio
                                     </a>
                                 {% endif %}
                                 <button type="submit" class="btn btn-success">

@@ -315,3 +315,168 @@ class PerfilEmpleador(models.Model):
     
     def get_email_principal(self):
         return self.email_corporativo or self.usuario.email
+
+
+class PortafolioMusico(models.Model):
+    """
+    Modelo para el portafolio público de músicos
+    (separado del perfil personal)
+    """
+    INSTRUMENTO_CHOICES = [
+        ('guitarra', 'Guitarra'),
+        ('bajo', 'Bajo'),
+        ('bateria', 'Batería'),
+        ('piano', 'Piano'),
+        ('teclados', 'Teclados'),
+        ('violin', 'Violín'),
+        ('saxofon', 'Saxofón'),
+        ('trompeta', 'Trompeta'),
+        ('flauta', 'Flauta'),
+        ('voz', 'Voz/Canto'),
+        ('armonica', 'Armónica'),
+        ('ukulele', 'Ukulele'),
+        ('mandolina', 'Mandolina'),
+        ('acordeon', 'Acordeón'),
+        ('otro', 'Otro'),
+    ]
+    
+    NIVEL_CHOICES = [
+        ('principiante', 'Principiante (0-2 años)'),
+        ('intermedio', 'Intermedio (3-5 años)'),
+        ('avanzado', 'Avanzado (6-10 años)'),
+        ('profesional', 'Profesional (10+ años)'),
+    ]
+
+    # Relación con usuario
+    usuario = models.OneToOneField(
+        Usuario, 
+        on_delete=models.CASCADE,
+        related_name='portafolio_musico'
+    )
+    
+    # Información musical
+    biografia = models.TextField(
+        max_length=1000,
+        blank=True,
+        help_text='Cuéntanos sobre tu trayectoria musical (máx. 1000 caracteres)'
+    )
+    
+    instrumento_principal = models.CharField(
+        max_length=50,
+        choices=INSTRUMENTO_CHOICES,
+        default='guitarra',
+        verbose_name='Instrumento principal'
+    )
+    
+    instrumentos_secundarios = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='Instrumentos secundarios',
+        help_text='Otros instrumentos que tocas (separados por comas)'
+    )
+    
+    generos_musicales = models.CharField(
+        max_length=200,
+        verbose_name='Géneros musicales',
+        help_text='Géneros musicales que interpretas (separados por comas)',
+        default='rock'
+    )
+    
+    nivel_experiencia = models.CharField(
+        max_length=20,
+        choices=NIVEL_CHOICES,
+        default='principiante',
+        verbose_name='Nivel de experiencia'
+    )
+    
+    años_experiencia = models.PositiveIntegerField(
+        default=1,
+        verbose_name='Años de experiencia',
+        help_text='Número de años tocando música'
+    )
+    
+    formacion_musical = models.TextField(
+        max_length=500,
+        blank=True,
+        verbose_name='Formación musical',
+        help_text='Estudios musicales, cursos, talleres, etc.'
+    )
+    
+    # Enlaces profesionales
+    website_personal = models.URLField(blank=True, verbose_name='Sitio web personal')
+    soundcloud_url = models.URLField(blank=True, verbose_name='SoundCloud')
+    youtube_url = models.URLField(blank=True, verbose_name='YouTube')
+    spotify_url = models.URLField(blank=True, verbose_name='Spotify')
+    instagram_url = models.URLField(blank=True, verbose_name='Instagram')
+    facebook_url = models.URLField(blank=True, verbose_name='Facebook')
+    video_demo = models.URLField(
+        blank=True,
+        verbose_name='Video demostración',
+        help_text='Enlace a video demo (YouTube, Vimeo, etc.)'
+    )
+    
+    # Información de contacto profesional
+    ubicacion = models.CharField(
+        max_length=100,
+        verbose_name='Ubicación',
+        default='No especificada'
+    )
+    
+    disponible_para_gigs = models.BooleanField(
+        default=True,
+        verbose_name='Disponible para presentaciones'
+    )
+    
+    tarifa_base = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Tarifa base (CLP)',
+        help_text='Tarifa base por presentación en pesos chilenos (CLP)'
+    )
+    
+    # Metadatos
+    fecha_creacion = models.DateTimeField(default=timezone.now)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    portafolio_publico = models.BooleanField(
+        default=True,
+        verbose_name='Portafolio público',
+        help_text='¿Deseas que tu portafolio sea visible públicamente?'
+    )
+
+    class Meta:
+        verbose_name = 'Portafolio de Músico'
+        verbose_name_plural = 'Portafolios de Músicos'
+
+    def __str__(self):
+        return f"Portafolio - {self.usuario.get_full_name() or self.usuario.username}"
+
+    def get_instrumentos_list(self):
+        """Retorna lista de instrumentos como array"""
+        instrumentos = [self.get_instrumento_principal_display()]
+        if self.instrumentos_secundarios:
+            instrumentos.extend([i.strip() for i in self.instrumentos_secundarios.split(',')])
+        return instrumentos
+    
+    def get_generos_list(self):
+        """Retorna lista de géneros como array"""
+        if self.generos_musicales:
+            return [g.strip() for g in self.generos_musicales.split(',')]
+        return []
+
+    def get_enlaces_sociales(self):
+        """Retorna diccionario con enlaces sociales no vacíos"""
+        enlaces = {}
+        if self.website_personal:
+            enlaces['website'] = self.website_personal
+        if self.soundcloud_url:
+            enlaces['soundcloud'] = self.soundcloud_url
+        if self.youtube_url:
+            enlaces['youtube'] = self.youtube_url
+        if self.spotify_url:
+            enlaces['spotify'] = self.spotify_url
+        if self.instagram_url:
+            enlaces['instagram'] = self.instagram_url
+        if self.facebook_url:
+            enlaces['facebook'] = self.facebook_url
+        return enlaces

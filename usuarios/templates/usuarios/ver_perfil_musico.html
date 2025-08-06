@@ -190,7 +190,7 @@
             <div class="row align-items-center">
                 <div class="col-auto">
                     {% if usuario.foto_perfil %}
-                        <img src="{{ usuario.foto_perfil.url }}?v={{ usuario.foto_perfil.name|slice:'-10:' }}" alt="{{ usuario.username }}" class="profile-avatar">
+                        <img src="{{ usuario.foto_perfil.url }}?v={{ usuario.date_joined|date:'U' }}" alt="{{ usuario.username }}" class="profile-avatar">
                     {% else %}
                         <img src="{% static 'img/user.png' %}" alt="{{ usuario.username }}" class="profile-avatar">
                     {% endif %}
@@ -222,6 +222,9 @@
                         </div>
                         {% if es_mi_perfil %}
                             <div class="mt-2">
+                                <a href="{% url 'ver_mi_portafolio' %}" class="btn btn-success btn-sm me-2">
+                                    <i class="icon-briefcase"></i> Ver Mi Portafolio
+                                </a>
                                 <a href="{% url 'editar_perfil_musico' %}" class="btn btn-light btn-sm">
                                     <i class="icon-edit"></i> Editar Perfil
                                 </a>

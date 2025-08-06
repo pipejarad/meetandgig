@@ -200,52 +200,89 @@ class PerfilMusicoForm(forms.ModelForm):
         help_text="Imagen de perfil (máx. 5MB, mín. 100x100px, formatos: JPG, PNG, GIF)",
         validators=[validate_image_file]
     )
-    
-    telefono = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': '+56 9 1234 5678'
-        }),
-        help_text='Número de teléfono personal'
-    )
-    
-    direccion = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Calle, número, comuna, ciudad',
-            'maxlength': 200
-        }),
-        help_text='Dirección personal (opcional)'
-    )
-    
-    contacto_emergencia = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Nombre: Teléfono',
-            'maxlength': 100
-        }),
-        help_text='Contacto de emergencia (opcional)'
-    )
 
     class Meta:
         model = PerfilMusico
         fields = [
-            'telefono', 'fecha_nacimiento', 'direccion', 'contacto_emergencia',
-            'recibir_notificaciones_email', 'mostrar_telefono_publico'
+            'biografia', 'instrumento_principal', 'instrumentos_secundarios',
+            'generos_musicales', 'nivel_experiencia', 'años_experiencia',
+            'formacion_musical', 'website_personal', 'soundcloud_url',
+            'youtube_url', 'spotify_url', 'instagram_url', 'facebook_url',
+            'ubicacion', 'disponible_para_gigs', 'tarifa_base', 'video_demo',
+            'perfil_publico'
         ]
         
         widgets = {
-            'fecha_nacimiento': forms.DateInput(attrs={
+            'biografia': forms.Textarea(attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'rows': 4,
+                'maxlength': 1000
             }),
-            'recibir_notificaciones_email': forms.CheckboxInput(attrs={
+            'instrumento_principal': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'instrumentos_secundarios': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Bajo, Teclados, Voz'
+            }),
+            'generos_musicales': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Rock, Blues, Jazz'
+            }),
+            'nivel_experiencia': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'años_experiencia': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'max': 50
+            }),
+            'formacion_musical': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3
+            }),
+            'website_personal': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://mipagina.com'
+            }),
+            'soundcloud_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://soundcloud.com/usuario'
+            }),
+            'youtube_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://youtube.com/usuario'
+            }),
+            'spotify_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://open.spotify.com/artist/...'
+            }),
+            'instagram_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://instagram.com/usuario'
+            }),
+            'facebook_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://facebook.com/usuario'
+            }),
+            'ubicacion': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Santiago, Chile'
+            }),
+            'disponible_para_gigs': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
-            'mostrar_telefono_publico': forms.CheckboxInput(attrs={
+            'tarifa_base': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'step': 1000,
+                'placeholder': '50000'
+            }),
+            'video_demo': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://youtube.com/watch?v=...'
+            }),
+            'perfil_publico': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             })
         }
@@ -279,6 +316,7 @@ class PerfilMusicoForm(forms.ModelForm):
         
         if commit:
             perfil.save()
+            self.save_m2m()
             
             if self.usuario:
                 self.usuario.first_name = self.cleaned_data.get('first_name', '')

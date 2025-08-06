@@ -13,4 +13,12 @@ urlpatterns = [
     path('perfil-empleador/', views.perfil_empleador_view, name='perfil_empleador'),
     path('perfil-empleador/crear/', views.CrearPerfilEmpleadorView.as_view(), name='crear_perfil_empleador'),
     path('perfil-empleador/editar/', views.EditarPerfilEmpleadorView.as_view(), name='editar_perfil_empleador'),
+    
+    # URLs del portafolio
+    path('portafolio/musico/', views.ver_mi_portafolio, name='ver_mi_portafolio'),
+    path('portafolio/musico/editar/', views.editar_portafolio_musico, name='editar_portafolio_musico'),
+    path('portafolio/<str:username>/', views.ver_portafolio_musico, name='ver_portafolio_musico'),
+    
+    # URLs del perfil público
+    path('perfil/<str:username>/', views.ver_perfil_musico, name='ver_perfil_musico'),
 ]
