@@ -78,6 +78,13 @@
                         <li class="nav-item">
                             <a class="nav-link" href="#">Músicos</a>
                         </li>
+                        {% if user.tipo_usuario == 'musico' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'ver_mi_portafolio' %}">
+                                <i class="fas fa-music me-2"></i>Mi Portafolio
+                            </a>
+                        </li>
+                        {% endif %}
                         {% endif %}
                     </ul>
 
@@ -89,8 +96,19 @@
                             </a>
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                 {% if user.tipo_usuario == 'musico' %}
-                                    <a class="dropdown-item" href="{% url 'ver_mi_perfil' %}">Mi Perfil</a>
-                                    <a class="dropdown-item" href="{% url 'editar_perfil_musico' %}">Editar Perfil</a>
+                                    <a class="dropdown-item" href="{% url 'ver_mi_perfil' %}">
+                                        <i class="fas fa-user me-2"></i>Mi Perfil Personal
+                                    </a>
+                                    <a class="dropdown-item" href="{% url 'ver_mi_portafolio' %}">
+                                        <i class="fas fa-music me-2"></i>Mi Portafolio Profesional
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="{% url 'editar_perfil_musico' %}">
+                                        <i class="fas fa-edit me-2"></i>Editar Perfil
+                                    </a>
+                                    <a class="dropdown-item" href="{% url 'editar_portafolio_musico' %}">
+                                        <i class="fas fa-cog me-2"></i>Editar Portafolio
+                                    </a>
                                 {% elif user.tipo_usuario == 'empleador' %}
                                     <a class="dropdown-item" href="{% url 'perfil_empleador' %}">Mi Perfil</a>
                                     <a class="dropdown-item" href="{% url 'editar_perfil_empleador' %}">Editar Perfil</a>

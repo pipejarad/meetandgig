@@ -400,19 +400,30 @@ def editar_portafolio_musico(request):
         }
     )
     
+    es_creacion = created or not any([
+        portafolio.biografia, 
+        portafolio.instrumentos_secundarios,
+        portafolio.formacion_musical,
+        portafolio.website_personal
+    ])
+    
     if request.method == 'POST':
         form = PortafolioMusicoForm(request.POST, instance=portafolio)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Portafolio actualizado exitosamente.')
+            mensaje = 'Portafolio creado exitosamente.' if es_creacion else 'Portafolio actualizado exitosamente.'
+            messages.success(request, mensaje)
             return redirect('ver_mi_portafolio')
     else:
         form = PortafolioMusicoForm(instance=portafolio)
     
+    titulo = 'Crear Mi Portafolio Musical' if es_creacion else 'Editar Mi Portafolio Musical'
+    
     context = {
         'form': form,
         'portafolio': portafolio,
-        'titulo': 'Editar Mi Portafolio Musical'
+        'titulo': titulo,
+        'es_creacion': es_creacion
     }
     return render(request, 'usuarios/editar_portafolio_musico.html', context)
 

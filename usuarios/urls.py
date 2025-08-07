@@ -16,6 +16,7 @@ urlpatterns = [
     
     # URLs del portafolio
     path('portafolio/musico/', views.ver_mi_portafolio, name='ver_mi_portafolio'),
+    path('portafolio/musico/crear/', views.editar_portafolio_musico, name='crear_portafolio_musico'),
     path('portafolio/musico/editar/', views.editar_portafolio_musico, name='editar_portafolio_musico'),
     path('portafolio/<str:username>/', views.ver_portafolio_musico, name='ver_portafolio_musico'),
     

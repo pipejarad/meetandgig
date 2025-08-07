@@ -465,18 +465,56 @@ class PortafolioMusico(models.Model):
         return []
 
     def get_enlaces_sociales(self):
-        """Retorna diccionario con enlaces sociales no vacíos"""
-        enlaces = {}
+        """Retorna lista de objetos con enlaces sociales no vacíos con iconos"""
+        enlaces = []
+        
         if self.website_personal:
-            enlaces['website'] = self.website_personal
-        if self.soundcloud_url:
-            enlaces['soundcloud'] = self.soundcloud_url
+            enlaces.append({
+                'nombre': 'Sitio Web Personal',
+                'url': self.website_personal,
+                'icon': 'fas fa-globe'
+            })
+            
         if self.youtube_url:
-            enlaces['youtube'] = self.youtube_url
+            enlaces.append({
+                'nombre': 'YouTube',
+                'url': self.youtube_url,
+                'icon': 'fab fa-youtube'
+            })
+            
+        if self.soundcloud_url:
+            enlaces.append({
+                'nombre': 'SoundCloud',
+                'url': self.soundcloud_url,
+                'icon': 'fab fa-soundcloud'
+            })
+            
         if self.spotify_url:
-            enlaces['spotify'] = self.spotify_url
+            enlaces.append({
+                'nombre': 'Spotify',
+                'url': self.spotify_url,
+                'icon': 'fab fa-spotify'
+            })
+            
         if self.instagram_url:
-            enlaces['instagram'] = self.instagram_url
+            enlaces.append({
+                'nombre': 'Instagram',
+                'url': self.instagram_url,
+                'icon': 'fab fa-instagram'
+            })
+            
         if self.facebook_url:
-            enlaces['facebook'] = self.facebook_url
+            enlaces.append({
+                'nombre': 'Facebook',
+                'url': self.facebook_url,
+                'icon': 'fab fa-facebook'
+            })
+            
+        if self.video_demo:
+            enlaces.append({
+                'nombre': 'Video Demo',
+                'url': self.video_demo,
+                'icon': 'fas fa-play-circle'
+            })
+            
         return enlaces
