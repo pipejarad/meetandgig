@@ -53,6 +53,34 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# ARCHIVOS TEMPORALES DE DESARROLLO - IGNORAR SIEMPRE
+*_temp.py
+*_temp.html
+*_nuevo.html
+*_migration.py
+test_*.py
+check_*.py
+migrate_*.py
+populate_*.py
+cleanup_*.py
+validate_*.py
+*_IMPLEMENTADOS.md
+*_COMPLETADO.md
+*_REFACTOR.md
+PROBLEMA_*.md
+FORMULARIO_*.md
+DEPLOYMENT_*.md
+LIMPIEZA_*.md
+MEJORA_*.md
+SINCRONIZACION_*.md
+
+# Archivos de migración temporales
+usuarios/migrations/*_custom_refactor.py
+usuarios/admin_temp.py
+usuarios/urls_temp.py
+usuarios/views_temp.py
+usuarios/views_migration.py
+
 # Flask stuff:
 instance/
 .webassets-cache
