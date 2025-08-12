@@ -8,20 +8,48 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 
 ## ✨ Características Principales
 
-### 🎯 Sprint 1: Autenticación y Acceso Básico
+### 🎯 Sprint 1: Autenticación y Acceso Básico (100% COMPLETADO)
 
-- ✅ **Ticket 1.1**: Sistema de registro completo con validación de email único
-- ✅ **Ticket 1.2**: Sistema de login con autenticación por email/username
-- ✅ **Ticket 1.3**: Sistema de logout con botón en header
-- ✅ **Ticket 1.4**: Sistema de recuperación de contraseña con tokens seguros
-- 📋 **Ticket 1.5**: Acceso a panel de administración
-- 📋 **Ticket 1.6**: Diseño mejorado de login/registro
-- 📋 **Ticket 1.7**: Upgrade Bootstrap 4 → Bootstrap 5
+- ✅ **Ticket 1.1**: Registro de usuario con validación de email único y contraseña
+- ✅ **Ticket 1.2**: Inicio de sesión con validación de credenciales y persistencia
+- ✅ **Ticket 1.3**: Cierre de sesión que destruye sesión y redirige al login
+- ✅ **Ticket 1.4**: Recuperación de contraseña con envío de enlace por correo
+- ✅ **Ticket 1.5**: Acceso al panel de administración para superusuarios
+- ✅ **Ticket 1.6**: Diseño responsivo y amigable para pantallas de login
 
-### 🎼 Sprint 2: Gestión de Perfiles de Músico
+### 🎼 Sprint 2: Perfiles de Usuario (80% COMPLETADO)
 
-- ✅ **Ticket 2.1**: Sistema completo de perfiles de músico con portafolio profesional
-- 📋 **Ticket 2.10**: Vista pública del portafolio del músico
+- ✅ **Ticket 2.1**: Crear y editar perfil de músico (administrativo/personal)
+- ✅ **Ticket 2.2**: Crear y editar perfil de empleador (organización, contacto)
+- ✅ **Ticket 2.3**: Subida de foto de perfil con carga y visualización
+- ✅ **Ticket 2.4**: Vista del portafolio del músico (página pública profesional)
+- ✅ **Ticket 2.5**: Crear y editar contenido del portafolio (instrumentos, géneros, multimedia)
+- 🔄 **Ticket 2.6**: Diseño de pantallas de perfil (incluye ruta /p/<slug>/ y SEO básico)
+- ✅ **Ticket 2.7**: Validación de unicidad de perfil (un usuario = un perfil + un portafolio)
+- 🆕 **Ticket 2.8**: Búsqueda y listado de portafolios (buscar músicos públicamente)
+- 🆕 **Ticket 2.9**: Normalización de categorías (instrumentos, géneros predefinidos)
+
+### � Sprint 3: Publicación y Ofertas Laborales (PENDIENTE)
+
+- 🔄 **Ticket 3.1**: Crear oferta laboral (formulario para empleadores)
+- 🔄 **Ticket 3.2**: Visualizar ofertas publicadas (listado accesible a músicos)
+- 🔄 **Ticket 3.3**: Filtrar ofertas por criterios (estilo, instrumento, ubicación, fecha)
+- 🔄 **Ticket 3.4**: Cerrar oferta laboral (cambiar estado a "cerrada")
+- 🔄 **Ticket 3.5**: Diseño de vista de ofertas (UI responsive)
+- 🔥 **Ticket 3.6**: Postulación a una oferta laboral (desde vista de oferta)
+- 🔥 **Ticket 3.7**: Validaciones de postulaciones y cierre (evitar duplicidad, control cupos)
+
+### 🎭 Sprint 4: Visualización, Referencias y Moderación (PENDIENTE)
+
+- 🔄 **Ticket 4.1**: Agregar referencia laboral al portafolio
+- 🔄 **Ticket 4.2**: Visualizar referencias laborales en portafolio
+- 🔄 **Ticket 4.3**: Mostrar información de contacto según configuración
+- 🔄 **Ticket 4.4**: Notificar postulación a empleador (email/alerta)
+- � **Ticket 4.5**: Notificar resultado de postulación al músico
+- 🔄 **Ticket 4.6**: Revisar y aceptar/rechazar postulaciones
+- 🔄 **Ticket 4.7**: Vista de estado de postulación para músicos
+- 🔄 **Ticket 4.8**: Funcionalidad de moderación básica (admin)
+- 🔄 **Ticket 4.9**: Diseño responsive general (móvil/escritorio)
 
 ### 👥 Tipos de Usuario
 
@@ -114,116 +142,244 @@ python manage.py test usuarios -v 2
 
 ```
 meetandgig/
-├── meetandgig/           # Configuración principal
-│   ├── settings.py       # Configuraciones de Django
-│   ├── urls.py          # URLs principales
-│   ├── static/          # Archivos estáticos (CSS, JS, imágenes)
-│   └── guidelines.md    # Guías de desarrollo
-├── usuarios/            # App de gestión de usuarios
-│   ├── models.py        # Usuario, PerfilMusico con 20+ campos
-│   ├── forms.py         # Formularios de registro, login y perfiles
-│   ├── views.py         # Vistas de autenticación y perfiles
-│   ├── urls.py          # URLs específicas de usuarios
-│   ├── admin.py         # Configuración del admin de Django
-│   ├── backends.py      # Backend de autenticación personalizado
-│   ├── tests.py         # Suite de tests (11 tests)
-│   ├── migrations/      # Migraciones de base de datos
-│   └── templates/       # Templates HTML específicos
-│       └── usuarios/
-│           ├── editar_perfil_musico.html
-│           └── ver_perfil_musico.html
-├── templates/           # Templates base del proyecto
-│   └── base.html        # Template base con Bootstrap 4
-├── media/              # Archivos subidos por usuarios
-│   ├── fotos_perfil/   # Fotos de perfil de usuarios
-│   └── portafolios/    # Multimedia de portafolios
-├── TICKETS.md          # Documentación de todos los tickets
-├── TEMPLATES_GUIDE.md  # Guía de templates
-├── requirements.txt    # Dependencias de producción
-├── requirements-dev.txt # Dependencias de desarrollo
-└── manage.py          # Comando de Django
+├── docs/                    # 📚 Documentación organizada
+│   ├── tickets/            # Tickets completados con detalles técnicos
+│   ├── desarrollo/         # Documentación de implementaciones M2M, templates
+│   ├── fases/             # Documentación de fases completadas
+│   ├── mejoras/           # Mejoras visuales y limpieza del proyecto
+│   ├── deployment/        # Validaciones para despliegue
+│   ├── guias/             # Guías de templates y contexto del proyecto
+│   └── README.md          # Índice de documentación
+├── meetandgig/             # ⚙️ Configuración principal
+│   ├── settings.py        # Configuraciones de Django
+│   ├── urls.py           # URLs principales del proyecto
+│   ├── static/           # Archivos estáticos (CSS, JS, imágenes, Bootstrap)
+│   └── wsgi.py          # Configuración WSGI para producción
+├── usuarios/              # 👥 App de gestión de usuarios y portafolios
+│   ├── models.py         # Usuario, PerfilMusico, Portafolio, Genero, Instrumento (+7 modelos)
+│   ├── forms.py          # Formularios de registro, login, perfiles y portafolios
+│   ├── views.py          # Vistas de autenticación, perfiles y portafolios
+│   ├── admin.py          # Admin personalizado con filtros y búsqueda
+│   ├── urls.py           # URLs específicas de usuarios
+│   ├── backends.py       # Backend de autenticación con email personalizado
+│   ├── tests.py          # Suite de tests completa
+│   ├── migrations/       # Migraciones de BD (12 migraciones, incluye M2M)
+│   └── templates/usuarios/  # Templates HTML específicos
+│       ├── login.html           # Página de login
+│       ├── registro.html        # Página de registro
+│       ├── inicio.html          # Página principal
+│       ├── editar_perfil_musico.html      # Formulario perfil (datos personales)
+│       ├── ver_perfil_musico.html         # Vista perfil (datos personales)
+│       ├── editar_portafolio_musico.html  # Formulario portafolio (datos profesionales)
+│       ├── ver_portafolio_musico.html     # Vista portafolio público
+│       ├── perfil_empleador.html          # Vista perfil empleador
+│       ├── perfil_empleador_form.html     # Formulario empleador
+│       ├── crear_perfil_empleador.html    # Creación empleador
+│       ├── editar_perfil_empleador.html   # Edición empleador
+│       ├── recuperar_password.html        # Recuperación de contraseña
+│       └── cambiar_password.html          # Cambio de contraseña
+├── templates/             # 🎨 Templates base del proyecto
+│   └── base.html         # Template base con Bootstrap 4, navbar dinámico, mensajes
+├── media/                # 📁 Archivos subidos por usuarios
+│   ├── fotos_perfil/     # Fotos de perfil de usuarios
+│   └── portafolios/      # Multimedia de portafolios (imágenes, videos)
+├── staticfiles/          # 📦 Archivos estáticos recolectados para producción
+├── TICKETS.md            # 📋 Backlog principal con estado de todos los tickets
+├── guidelines.md         # 📖 Convenciones y mejores prácticas de desarrollo
+├── requirements.txt      # 📦 Dependencias de producción
+├── requirements-dev.txt  # 🛠️ Dependencias adicionales para desarrollo
+└── manage.py            # 🐍 Comando principal de Django
 ```
 
 ## 🛠️ Tecnologías Utilizadas
 
-- **Backend**: Django 4.2.20
-- **Base de datos**: SQLite (desarrollo) / PostgreSQL (producción)
-- **Frontend**: Bootstrap 4.3.1, HTML5, CSS3, JavaScript
-- **Autenticación**: Sistema personalizado con email como username
-- **Multimedia**: Sistema de subida de archivos con ImageField
-- **Validación**: Formularios Django con validación personalizada
-- **Localización**: Configuración para Chile (es-cl, CLP)
-- **Testing**: Django TestCase
-- **Control de versiones**: Git
+- **Backend**: Django 4.2.20 (framework web principal)
+- **Base de datos**: SQLite (desarrollo) / PostgreSQL (producción recomendada)
+- **Frontend**: Bootstrap 4.3.1, HTML5, CSS3, JavaScript ES6
+- **Autenticación**: Sistema personalizado con email como username + tokens seguros
+- **Multimedia**: Sistema de subida con ImageField, soporte video/audio embebido
+- **Arquitectura**: Separación PerfilMusico (datos personales) / Portafolio (datos profesionales)
+- **Relaciones M2M**: Géneros musicales e instrumentos normalizados
+- **Templates**: Sistema jerárquico con base.html, bloques reutilizables
+- **Formularios**: Django Forms con validación personalizada y contadores
+- **Localización**: Configurado para Chile (es-CL, CLP)
+- **Testing**: Django TestCase con cobertura completa
+- **Control de versiones**: Git con conventional commits
+- **Documentación**: Markdown organizado en carpeta docs/
 
 ## 📊 Estado del Desarrollo
 
-### ✅ Completado
+### ✅ Completado (Sprint 1 y 2)
 
-#### 🎯 Sprint 1: Autenticación Completa
+#### 🎯 Sprint 1: Autenticación Completa (100%)
 
-- [x] **Ticket 1.1**: Sistema de registro completo con validación de email único
-- [x] **Ticket 1.2**: Sistema de login con autenticación por email/username
-- [x] **Ticket 1.3**: Sistema de logout con botón en header
-- [x] **Ticket 1.4**: Sistema de recuperación de contraseña con tokens seguros
+- [x] **Sistema de autenticación robusto**
+  - ✅ Registro con validación de email único
+  - ✅ Login con email/username + persistencia de sesión
+  - ✅ Logout con redirección segura
+  - ✅ Recuperación de contraseña con tokens y emails
+  - ✅ Acceso al panel de administración
+  - ✅ Templates responsive con diseño profesional
 
-#### 🎼 Sprint 2: Perfiles de Músico
+#### 🎼 Sprint 2: Sistema de Perfiles y Portafolios (80%)
 
-- [x] **Ticket 2.1**: Sistema completo de perfiles de músico
-  - ✅ Modelo PerfilMusico con 20+ campos profesionales
-  - ✅ Formularios de creación y edición con validación
-  - ✅ Sistema de subida de fotos de perfil
-  - ✅ Campos para instrumentos, géneros y experiencia
-  - ✅ Enlaces a redes sociales y multimedia
-  - ✅ Tarifas en pesos chilenos (CLP)
-  - ✅ Configuración de privacidad y disponibilidad
-  - ✅ Templates responsive con Bootstrap 4
-  - ✅ Validación de formularios y contadores de caracteres
+- [x] **Arquitectura separada de datos**
 
-#### 🏗️ Infraestructura
+  - ✅ PerfilMusico: datos personales/administrativos
+  - ✅ Portafolio: datos profesionales públicos
+  - ✅ Separación clara de responsabilidades
 
-- [x] Configuración inicial del proyecto Django 4.2.20
-- [x] Modelo de usuario personalizado con tipos (músico/empleador)
-- [x] Backend de autenticación personalizado con email
-- [x] Sistema de manejo de archivos multimedia
-- [x] Configuración de URLs y settings optimizada
-- [x] Templates base responsivos con Bootstrap 4.3.1
-- [x] Suite completa de tests (11/11 pasando)
-- [x] Migraciones de base de datos optimizadas
+- [x] **Modelos relacionales avanzados**
+
+  - ✅ 7+ modelos: Usuario, PerfilMusico, Portafolio, Genero, Instrumento, etc.
+  - ✅ Relaciones M2M normalizadas para géneros e instrumentos
+  - ✅ Campos profesionales: biografía, formación, experiencia, tarifas
+  - ✅ Enlaces sociales: YouTube, Spotify, SoundCloud, Instagram, Facebook
+
+- [x] **Sistema completo de formularios**
+
+  - ✅ Formularios de perfil (datos personales)
+  - ✅ Formularios de portafolio (datos profesionales)
+  - ✅ Formularios de empleador (organizaciones)
+  - ✅ Validación personalizada y contadores de caracteres
+  - ✅ Subida de fotos de perfil con preview
+
+- [x] **Templates profesionales**
+  - ✅ Vista de perfil personal (administrativo)
+  - ✅ Vista de portafolio público (profesional)
+  - ✅ Diseño consistente y responsive
+  - ✅ Integración con Bootstrap 4
+  - ✅ Sistema de mensajes automático
+
+#### 🏗️ Infraestructura y Calidad
+
+- [x] **Base sólida del proyecto**
+
+  - ✅ Configuración optimizada de Django 4.2.20
+  - ✅ Backend de autenticación personalizado
+  - ✅ Sistema de manejo de archivos multimedia
+  - ✅ 12 migraciones de BD optimizadas y limpias
+  - ✅ Suite completa de tests funcionales
+  - ✅ Documentación técnica organizada en docs/
+
+- [x] **Limpieza y organización**
+  - ✅ Código limpio siguiendo principios DRY
+  - ✅ Eliminación de archivos temporales y cache
+  - ✅ Restructuración de documentación por temas
+  - ✅ Guidelines de desarrollo establecidas
 
 ### 🔄 En Desarrollo
 
-#### 🎯 Sprint 1: Finalización
+#### 🎼 Sprint 2: Funcionalidades Pendientes (20%)
 
-- [ ] **Ticket 1.5**: Acceso a panel de administración
-- [ ] **Ticket 1.6**: Diseño mejorado de login/registro
-- [ ] **Ticket 1.7**: Upgrade Bootstrap 4 → Bootstrap 5
+- [ ] **Ticket 2.6**: Diseño de pantallas de perfil
 
-#### 🎼 Sprint 2: Portafolios Públicos
+  - Rutas públicas `/p/<slug>/` para portafolios
+  - SEO básico para portafolios
+  - Mejoras visuales finales
 
-- [ ] **Ticket 2.10**: Vista pública del portafolio del músico
+- [ ] **Ticket 2.8**: Búsqueda y listado de portafolios
+
+  - Página de búsqueda pública
+  - Filtros por instrumento, género, ubicación
+  - Paginación y ordenamiento
+
+- [ ] **Ticket 2.9**: Normalización de categorías
+  - Catálogo predefinido de instrumentos
+  - Catálogo predefinido de géneros musicales
+  - Sistema de admin para gestión de categorías
 
 ### 📋 Planificado
 
-#### 🎯 Sprint 2: Gestión Completa de Perfiles
+#### � Sprint 3: Ofertas Laborales
 
-- [ ] **Ticket 2.2**: Dashboard personalizado para músicos
-- [ ] **Ticket 2.3**: Sistema de búsqueda de músicos
-- [ ] **Ticket 2.4**: Filtros avanzados por instrumento/género/ubicación
-- [ ] **Ticket 2.5**: Perfiles de empleadores
-- [ ] **Ticket 2.6**: Normalización de categorías
-- [ ] **Ticket 2.7**: Sistema de favoritos
-- [ ] **Ticket 2.8**: Estadísticas de perfil
-- [ ] **Ticket 2.9**: Configuración de notificaciones
+- [ ] Sistema completo de ofertas de trabajo
+- [ ] Formularios para empleadores
+- [ ] Visualización y filtrado de ofertas
+- [ ] Sistema de postulaciones
+- [ ] Validaciones y control de cupos
 
-#### 🎯 Sprint 3: Funcionalidades Avanzadas
+#### 🎭 Sprint 4: Referencias y Moderación
 
-- [ ] Sistema de mensajería interna
-- [ ] Sistema de calificaciones y reseñas
-- [ ] Gestión de eventos y contrataciones
-- [ ] Integración de pagos
-- [ ] Calendario de disponibilidad
-- [ ] Sistema de notificaciones push
+- [ ] Sistema de referencias laborales
+- [ ] Notificaciones por email
+- [ ] Panel de moderación
+- [ ] Gestión de postulaciones
+- [ ] Estadísticas y reportes
+
+## 🚀 Cómo Empezar
+
+### 📋 Prerrequisitos
+
+- Python 3.9+ (probado con Python 3.9)
+- pip (gestor de paquetes de Python)
+- Git para control de versiones
+- Editor de código (recomendado: VS Code)
+
+### ⚡ Instalación Rápida
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/tu-usuario/meetandgig.git
+cd meetandgig
+
+# 2. Crear y activar entorno virtual
+python -m venv venv
+# En Windows:
+venv\Scripts\activate
+# En macOS/Linux:
+source venv/bin/activate
+
+# 3. Instalar dependencias
+pip install -r requirements.txt
+
+# 4. Configurar base de datos
+python manage.py migrate
+
+# 5. Crear superusuario (opcional)
+python manage.py createsuperuser
+
+# 6. Ejecutar servidor de desarrollo
+python manage.py runserver
+```
+
+### 🌐 Acceso al Sistema
+
+Una vez iniciado el servidor:
+
+- **🏠 Página principal**: http://127.0.0.1:8000/
+- **👤 Registro de usuario**: http://127.0.0.1:8000/usuarios/registro/
+- **🔐 Login**: http://127.0.0.1:8000/usuarios/login/
+- **⚙️ Admin Panel**: http://127.0.0.1:8000/admin/ (requiere superusuario)
+
+### 🗂️ Datos de Prueba
+
+Para poblar catálogos con datos de prueba:
+
+```bash
+python populate_catalogs.py
+```
+
+Esto añadirá:
+
+- Géneros musicales comunes (Rock, Jazz, Pop, etc.)
+- Instrumentos populares (Guitarra, Piano, Batería, etc.)
+- Niveles de experiencia estándar
+
+### 🧪 Testing
+
+Ejecutar la suite completa de tests:
+
+```bash
+python manage.py test
+```
+
+Tests específicos disponibles:
+
+- `test_perfil_form.py` - Validación de formularios
+- `test_portafolio_completo.py` - Sistema de portafolios
+- `test_m2m_fields.py` - Relaciones many-to-many
+- `test_enlaces_sociales.py` - Validación de redes sociales
 
 ## 🧑‍💻 Desarrollo
 
