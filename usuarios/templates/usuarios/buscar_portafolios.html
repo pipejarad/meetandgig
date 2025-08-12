@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Sidebar de Filtros -->
+    <div class="col-lg-3 col-md-4 mb-4">
+      <div class="card sticky-top" style="top: 20px;">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-filter mr-2"></i>Filtros de Búsqueda
+          </h5>
+        </div>
+        <div class="card-body">
+          <form method="GET" id="filtros-form">
+            <!-- Búsqueda por Texto -->
+            <div class="mb-3">
+              <label for="q" class="form-label">Buscar músico</label>
+              <input type="text" 
+                     class="form-control" 
+                     id="q" 
+                     name="q" 
+                     placeholder="Nombre, biografía..." 
+                     value="{{ filtros_aplicados.query }}">
+            </div>
+
+            <!-- Filtro por Instrumento -->
+            <div class="mb-3">
+              <label for="instrumento" class="form-label">Instrumento</label>
+              <select class="form-control" id="instrumento" name="instrumento">
+                <option value="">Todos los instrumentos</option>
+                {% for instrumento in instrumentos %}
+                <option value="{{ instrumento.id }}" 
+                        {% if filtros_aplicados.instrumento_id == instrumento.id|stringformat:"s" %}selected{% endif %}>
+                  {{ instrumento.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Filtro por Género -->
+            <div class="mb-3">
+              <label for="genero" class="form-label">Género Musical</label>
+              <select class="form-control" id="genero" name="genero">
+                <option value="">Todos los géneros</option>
+                {% for genero in generos %}
+                <option value="{{ genero.id }}" 
+                        {% if filtros_aplicados.genero_id == genero.id|stringformat:"s" %}selected{% endif %}>
+                  {{ genero.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Filtro por Ubicación -->
+            <div class="mb-3">
+              <label for="ubicacion" class="form-label">Ubicación</label>
+              <select class="form-control" id="ubicacion" name="ubicacion">
+                <option value="">Todas las ubicaciones</option>
+                {% for ubicacion in ubicaciones %}
+                <option value="{{ ubicacion.id }}" 
+                        {% if filtros_aplicados.ubicacion_id == ubicacion.id|stringformat:"s" %}selected{% endif %}>
+                  {{ ubicacion.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Filtro por Nivel de Experiencia -->
+            <div class="mb-3">
+              <label for="nivel_experiencia" class="form-label">Experiencia</label>
+              <select class="form-control" id="nivel_experiencia" name="nivel_experiencia">
+                <option value="">Cualquier nivel</option>
+                {% for nivel in niveles_experiencia %}
+                <option value="{{ nivel.id }}" 
+                        {% if filtros_aplicados.nivel_id == nivel.id|stringformat:"s" %}selected{% endif %}>
+                  {{ nivel.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Filtro por Disponibilidad -->
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" 
+                       type="checkbox" 
+                       id="disponible" 
+                       name="disponible" 
+                       value="true"
+                       {% if filtros_aplicados.disponible == 'true' %}checked{% endif %}>
+                <label class="form-check-label" for="disponible">
+                  Solo disponibles para gigs
+                </label>
+              </div>
+            </div>
+
+            <!-- Filtros por Tarifa -->
+            <div class="mb-3">
+              <label class="form-label">Rango de Tarifa (CLP)</label>
+              <div class="row">
+                <div class="col-6">
+                  <input type="number" 
+                         class="form-control form-control-sm" 
+                         name="tarifa_min" 
+                         placeholder="Mín."
+                         value="{{ filtros_aplicados.tarifa_min }}">
+                </div>
+                <div class="col-6">
+                  <input type="number" 
+                         class="form-control form-control-sm" 
+                         name="tarifa_max" 
+                         placeholder="Máx."
+                         value="{{ filtros_aplicados.tarifa_max }}">
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-group-vertical">
+              <button type="submit" class="btn btn-primary mb-2">
+                <i class="fas fa-search mr-1"></i>Buscar
+              </button>
+              <a href="{% url 'buscar_portafolios' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-eraser mr-1"></i>Limpiar Filtros
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados de Búsqueda -->
+    <div class="col-lg-9 col-md-8">
+      <!-- Header de Resultados -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2>Músicos Disponibles</h2>
+          <p class="text-muted mb-0">
+            {% if total_resultados %}
+              {{ total_resultados }} músico{{ total_resultados|pluralize }} encontrado{{ total_resultados|pluralize }}
+              {% if filtros_aplicados.query %}para "{{ filtros_aplicados.query }}"{% endif %}
+            {% else %}
+              No se encontraron músicos
+            {% endif %}
+          </p>
+        </div>
+        
+        <!-- Ordenamiento -->
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" 
+                  type="button" 
+                  data-toggle="dropdown">
+            <i class="fas fa-sort mr-1"></i>Ordenar
+          </button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="?{{ request.GET.urlencode }}&orden=recientes">Más recientes</a>
+            <a class="dropdown-item" href="?{{ request.GET.urlencode }}&orden=nombre">Por nombre</a>
+            <a class="dropdown-item" href="?{{ request.GET.urlencode }}&orden=experiencia">Por experiencia</a>
+            <a class="dropdown-item" href="?{{ request.GET.urlencode }}&orden=tarifa_asc">Tarifa: menor a mayor</a>
+            <a class="dropdown-item" href="?{{ request.GET.urlencode }}&orden=tarifa_desc">Tarifa: mayor a menor</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Resultados -->
+      {% if portafolios %}
+      <div class="row">
+        {% for portafolio in portafolios %}
+        <div class="col-lg-6 col-xl-4 mb-4">
+          <div class="card h-100 shadow-sm hover-card">
+            <div class="card-body">
+              <!-- Header del Card -->
+              <div class="d-flex align-items-center mb-3">
+                {% if portafolio.usuario.foto_perfil %}
+                  <img src="{{ portafolio.usuario.foto_perfil.url }}" 
+                       class="rounded-circle mr-3" 
+                       width="50" 
+                       height="50" 
+                       alt="Foto de {{ portafolio.usuario.get_full_name }}"
+                       style="object-fit: cover;">
+                {% else %}
+                  <div class="bg-primary rounded-circle mr-3 d-flex align-items-center justify-content-center" 
+                       style="width: 50px; height: 50px;">
+                    <i class="fas fa-user text-white"></i>
+                  </div>
+                {% endif %}
+                <div class="flex-grow-1">
+                  <h5 class="card-title mb-1">
+                    {{ portafolio.usuario.get_full_name|default:portafolio.usuario.username }}
+                  </h5>
+                  <small class="text-muted">
+                    <i class="fas fa-map-marker-alt mr-1"></i>{{ portafolio.ubicacion.nombre }}
+                  </small>
+                </div>
+                {% if portafolio.disponible_para_gigs %}
+                <span class="badge badge-success">
+                  <i class="fas fa-check-circle mr-1"></i>Disponible
+                </span>
+                {% endif %}
+              </div>
+
+              <!-- Biografía -->
+              {% if portafolio.biografia %}
+              <p class="card-text text-muted small mb-3">
+                {{ portafolio.biografia|truncatewords:20 }}
+              </p>
+              {% endif %}
+
+              <!-- Instrumentos -->
+              <div class="mb-2">
+                <small class="text-muted d-block mb-1">Instrumentos:</small>
+                {% for pi in portafolio.get_instrumentos_principales|slice:":3" %}
+                  <span class="badge badge-primary mr-1 mb-1">{{ pi.instrumento.nombre }}</span>
+                {% empty %}
+                  <span class="text-muted small">No especificados</span>
+                {% endfor %}
+                {% if portafolio.get_instrumentos_principales.count > 3 %}
+                  <span class="text-muted small">+{{ portafolio.get_instrumentos_principales.count|add:"-3" }} más</span>
+                {% endif %}
+              </div>
+
+              <!-- Géneros -->
+              <div class="mb-3">
+                <small class="text-muted d-block mb-1">Géneros:</small>
+                {% for pg in portafolio.get_generos|slice:":2" %}
+                  <span class="badge badge-secondary mr-1 mb-1">{{ pg.genero.nombre }}</span>
+                {% empty %}
+                  <span class="text-muted small">No especificados</span>
+                {% endfor %}
+                {% if portafolio.get_generos.count > 2 %}
+                  <span class="text-muted small">+{{ portafolio.get_generos.count|add:"-2" }} más</span>
+                {% endif %}
+              </div>
+
+              <!-- Footer del Card -->
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <div>
+                  <small class="text-muted">
+                    <i class="fas fa-clock mr-1"></i>{{ portafolio.años_experiencia }} año{{ portafolio.años_experiencia|pluralize }} exp.
+                  </small>
+                  {% if portafolio.tarifa_base and portafolio.show_tarifa %}
+                  <br>
+                  <small class="text-success fw-bold">
+                    <i class="fas fa-dollar-sign mr-1"></i>${{ portafolio.tarifa_base|floatformat:0 }} CLP
+                  </small>
+                  {% endif %}
+                </div>
+                <a href="{% url 'ver_portafolio_musico' portafolio.usuario.username %}" 
+                   class="btn btn-primary btn-sm">
+                  <i class="fas fa-eye mr-1"></i>Ver Perfil
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Paginación -->
+      {% if portafolios.has_other_pages %}
+      <nav aria-label="Paginación" class="mt-5">
+        <ul class="pagination justify-content-center">
+          {% if portafolios.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?{% for key, value in filtros_aplicados.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ portafolios.previous_page_number }}">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+          {% endif %}
+          
+          {% for num in portafolios.paginator.page_range %}
+            {% if portafolios.number == num %}
+              <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+              </li>
+            {% elif num > portafolios.number|add:'-3' and num < portafolios.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link" href="?{% for key, value in filtros_aplicados.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+          
+          {% if portafolios.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?{% for key, value in filtros_aplicados.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ portafolios.next_page_number }}">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <!-- Estado Vacío -->
+      <div class="text-center py-5">
+        <i class="fas fa-search fa-4x text-muted mb-4"></i>
+        <h3 class="text-muted">No se encontraron músicos</h3>
+        <p class="text-muted mb-4">
+          {% if filtros_aplicados.query or filtros_aplicados.instrumento_id or filtros_aplicados.genero_id %}
+            Intenta modificar los filtros de búsqueda para encontrar más resultados.
+          {% else %}
+            Actualmente no hay músicos registrados con portafolios activos.
+          {% endif %}
+        </p>
+        <div class="d-flex justify-content-center">
+          <a href="{% url 'buscar_portafolios' %}" class="btn btn-outline-primary mr-2">
+            <i class="fas fa-eraser mr-1"></i>Limpiar Filtros
+          </a>
+          <a href="{% url 'registro' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus mr-1"></i>Registrarse como Músico
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.hover-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.hover-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+}
+
+.sticky-top {
+  z-index: 1020;
+}
+
+@media (max-width: 768px) {
+  .sticky-top {
+    position: relative !important;
+    top: auto !important;
+  }
+}
+</style>
+{% endblock %}

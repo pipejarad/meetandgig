@@ -22,4 +22,8 @@ urlpatterns = [
     
     # URLs del perfil público
     path('perfil/<str:username>/', views.ver_perfil_musico, name='ver_perfil_musico'),
+    
+    # URLs de búsqueda (Ticket 2.8)
+    path('buscar/', views.buscar_portafolios, name='buscar_portafolios'),
+    path('musicos/', views.buscar_portafolios, name='listar_portafolios'),
 ]

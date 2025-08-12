@@ -485,3 +485,121 @@ def ver_perfil_musico(request, username):
         'titulo': f'Perfil de {usuario.get_full_name() or usuario.username}'
     }
     return render(request, 'usuarios/ver_perfil_musico.html', context)
+
+
+def buscar_portafolios(request):
+    """Vista de búsqueda y listado de portafolios musicales"""
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+    from .models import Instrumento, Genero, NivelExperiencia, Ubicacion
+    
+    portafolios = Portafolio.objects.filter(activo=True).select_related(
+        'usuario', 'ubicacion', 'nivel_experiencia'
+    ).prefetch_related(
+        'portafolio_instrumentos__instrumento',
+        'portafolio_generos__genero'
+    )
+    
+    # Obtener parámetros de búsqueda
+    query = request.GET.get('q', '')
+    instrumento_id = request.GET.get('instrumento', '')
+    genero_id = request.GET.get('genero', '')
+    ubicacion_id = request.GET.get('ubicacion', '')
+    nivel_id = request.GET.get('nivel_experiencia', '')
+    disponible = request.GET.get('disponible', '')
+    tarifa_min = request.GET.get('tarifa_min', '')
+    tarifa_max = request.GET.get('tarifa_max', '')
+    ordenar = request.GET.get('orden', 'recientes')
+    
+    # Filtros de búsqueda por texto
+    if query:
+        portafolios = portafolios.filter(
+            Q(usuario__first_name__icontains=query) |
+            Q(usuario__last_name__icontains=query) |
+            Q(usuario__username__icontains=query) |
+            Q(biografia__icontains=query) |
+            Q(formacion_musical__icontains=query)
+        )
+    
+    # Filtros por instrumento (M2M)
+    if instrumento_id:
+        portafolios = portafolios.filter(
+            portafolio_instrumentos__instrumento_id=instrumento_id
+        ).distinct()
+    
+    # Filtros por género (M2M)
+    if genero_id:
+        portafolios = portafolios.filter(
+            portafolio_generos__genero_id=genero_id
+        ).distinct()
+    
+    # Filtros por ubicación (FK)
+    if ubicacion_id:
+        portafolios = portafolios.filter(ubicacion_id=ubicacion_id)
+    
+    # Filtros por nivel de experiencia (FK)
+    if nivel_id:
+        portafolios = portafolios.filter(nivel_experiencia_id=nivel_id)
+    
+    # Filtro por disponibilidad
+    if disponible == 'true':
+        portafolios = portafolios.filter(disponible_para_gigs=True)
+    
+    # Filtros por rango de tarifas
+    if tarifa_min:
+        try:
+            portafolios = portafolios.filter(tarifa_base__gte=int(tarifa_min))
+        except ValueError:
+            pass
+    
+    if tarifa_max:
+        try:
+            portafolios = portafolios.filter(tarifa_base__lte=int(tarifa_max))
+        except ValueError:
+            pass
+    
+    # Ordenamiento
+    if ordenar == 'nombre':
+        portafolios = portafolios.order_by('usuario__first_name', 'usuario__last_name')
+    elif ordenar == 'experiencia':
+        portafolios = portafolios.order_by('-años_experiencia')
+    elif ordenar == 'tarifa_asc':
+        portafolios = portafolios.filter(tarifa_base__isnull=False).order_by('tarifa_base')
+    elif ordenar == 'tarifa_desc':
+        portafolios = portafolios.filter(tarifa_base__isnull=False).order_by('-tarifa_base')
+    else:  # 'recientes' por defecto
+        portafolios = portafolios.order_by('-fecha_actualizacion')
+    
+    # Paginación
+    paginator = Paginator(portafolios, 12)
+    page_number = request.GET.get('page')
+    portafolios_page = paginator.get_page(page_number)
+    
+    # Obtener opciones para filtros
+    instrumentos = Instrumento.objects.all().order_by('nombre')
+    generos = Genero.objects.all().order_by('nombre')
+    ubicaciones = Ubicacion.objects.filter(activo=True).order_by('nombre')
+    niveles_experiencia = NivelExperiencia.objects.all().order_by('orden')
+    
+    context = {
+        'portafolios': portafolios_page,
+        'instrumentos': instrumentos,
+        'generos': generos,
+        'ubicaciones': ubicaciones,
+        'niveles_experiencia': niveles_experiencia,
+        'filtros_aplicados': {
+            'query': query,
+            'instrumento_id': instrumento_id,
+            'genero_id': genero_id,
+            'ubicacion_id': ubicacion_id,
+            'nivel_id': nivel_id,
+            'disponible': disponible,
+            'tarifa_min': tarifa_min,
+            'tarifa_max': tarifa_max,
+            'ordenar': ordenar,
+        },
+        'total_resultados': paginator.count,
+        'titulo': 'Buscar Músicos',
+    }
+    
+    return render(request, 'usuarios/buscar_portafolios.html', context)
