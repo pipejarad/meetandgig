@@ -1,55 +1,271 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Inicio - Meet & Gig{% endblock %}
+{% block title %}Meet & Gig - Conecta músicos con oportunidades{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-<div class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">
-        <h4 class="card-title">Usuarios Registrados</h4>
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+  <div class="container">
+    <div class="row align-items-center min-vh-50">
+      <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-4">
+          Conecta músicos con oportunidades
+        </h1>
+        <p class="lead mb-4">
+          La plataforma líder para encontrar talento musical o conseguir tu próximo gig en Chile
+        </p>
+        <div class="d-grid gap-2 d-md-flex">
+          <a href="#musicos-destacados" class="btn btn-light btn-lg px-4">
+            <i class="fas fa-search me-2"></i>Explorar Músicos
+          </a>
+          <a href="{% url 'registro' %}" class="btn btn-outline-light btn-lg px-4">
+            <i class="fas fa-user-plus me-2"></i>Únete Gratis
+          </a>
+        </div>
       </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Tipo Usuario</th>
-                <th>Ubicación</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for usuario in usuarios %}
-              <tr>
-                <td>{{ usuario.username }}</td>
-                <td>
-                  <span class="badge bg-secondary"
-                    >{{ usuario.get_tipo_usuario_display }}</span
-                  >
-                </td>
-                <td>{{ usuario.ubicacion|default:"No especificada" }}</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-primary">
-                    Ver perfil
-                  </button>
-                </td>
-              </tr>
+      <div class="col-lg-6 text-center">
+        <i class="fas fa-music fa-10x opacity-75"></i>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Músicos Destacados -->
+{% if portafolios_destacados %}
+<section id="musicos-destacados" class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="h1 mb-3">Músicos Destacados</h2>
+        <p class="text-muted fs-5">Descubre el talento que está buscando tu evento</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      {% for portafolio in portafolios_destacados %}
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 shadow-sm border-0 hover-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              {% if portafolio.usuario.foto_perfil %}
+                <img src="{{ portafolio.usuario.foto_perfil.url }}" 
+                     class="rounded-circle me-3" width="60" height="60" 
+                     alt="Foto de {{ portafolio.usuario.get_full_name }}"
+                     style="object-fit: cover;">
+              {% else %}
+                <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                     style="width: 60px; height: 60px;">
+                  <i class="fas fa-user text-white fa-lg"></i>
+                </div>
+              {% endif %}
+              <div>
+                <h5 class="card-title mb-1">
+                  {{ portafolio.usuario.get_full_name|default:portafolio.usuario.username }}
+                </h5>
+                <small class="text-muted">
+                  <i class="fas fa-map-marker-alt me-1"></i>{{ portafolio.ubicacion.nombre }}
+                </small>
+              </div>
+            </div>
+            
+            {% if portafolio.biografia %}
+            <p class="card-text text-muted mb-3">
+              {{ portafolio.biografia|truncatewords:15 }}
+            </p>
+            {% endif %}
+            
+            <div class="mb-3">
+              <small class="text-muted d-block mb-2">Instrumentos principales:</small>
+              {% for pi in portafolio.get_instrumentos_principales|slice:":3" %}
+                <span class="badge bg-primary me-1 mb-1">{{ pi.instrumento.nombre }}</span>
               {% empty %}
-              <tr>
-                <td colspan="4" class="text-center text-muted">
-                  No hay usuarios registrados
-                </td>
-              </tr>
+                <span class="text-muted">No especificados</span>
               {% endfor %}
-            </tbody>
-          </table>
+            </div>
+            
+            <div class="mb-3">
+              <small class="text-muted d-block mb-2">Géneros:</small>
+              {% for pg in portafolio.get_generos|slice:":3" %}
+                <span class="badge bg-secondary me-1 mb-1">{{ pg.genero.nombre }}</span>
+              {% empty %}
+                <span class="text-muted">No especificados</span>
+              {% endfor %}
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center">
+              <a href="{% url 'ver_portafolio_musico' portafolio.usuario.username %}" 
+                 class="btn btn-primary">
+                <i class="fas fa-eye me-1"></i>Ver Perfil
+              </a>
+              {% if portafolio.disponible_para_gigs %}
+                <span class="badge bg-success">
+                  <i class="fas fa-check-circle me-1"></i>Disponible
+                </span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div class="text-center mt-5">
+      <a href="#" class="btn btn-outline-primary btn-lg disabled" title="Próximamente">
+        Ver Todos los Músicos
+      </a>
+      <p class="text-muted mt-2">
+        <small>La función de búsqueda estará disponible próximamente</small>
+      </p>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Call to Actions por Tipo de Usuario -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card bg-primary text-white h-100 border-0">
+          <div class="card-body text-center p-5 d-flex flex-column">
+            <i class="fas fa-music fa-4x mb-4"></i>
+            <h3 class="h2 mb-3">¿Eres Músico?</h3>
+            <p class="fs-5 flex-grow-1 mb-4">
+              Crea tu portafolio profesional, muestra tu talento y encuentra 
+              oportunidades laborales en eventos en vivo.
+            </p>
+            <div class="mt-auto">
+              <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-4">
+                <i class="fas fa-guitar me-2"></i>Crear Perfil de Músico
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card bg-success text-white h-100 border-0">
+          <div class="card-body text-center p-5 d-flex flex-column">
+            <i class="fas fa-briefcase fa-4x mb-4"></i>
+            <h3 class="h2 mb-3">¿Organizas Eventos?</h3>
+            <p class="fs-5 flex-grow-1 mb-4">
+              Encuentra músicos profesionales para tu evento. Publica ofertas 
+              y conecta con el talento perfecto para tu ocasión especial.
+            </p>
+            <div class="mt-auto">
+              <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-4">
+                <i class="fas fa-calendar-alt me-2"></i>Crear Perfil de Empleador
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-</div>
+</section>
+
+<!-- Estadísticas -->
+<section class="py-5 bg-dark text-white">
+  <div class="container">
+    <div class="row text-center g-4">
+      <div class="col-lg-3 col-sm-6">
+        <div class="stat-item">
+          <h2 class="display-3 fw-bold text-primary mb-2">{{ stats.total_musicos }}</h2>
+          <p class="fs-5 mb-0">Músicos Registrados</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-sm-6">
+        <div class="stat-item">
+          <h2 class="display-3 fw-bold text-success mb-2">{{ stats.total_portafolios }}</h2>
+          <p class="fs-5 mb-0">Portafolios Activos</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-sm-6">
+        <div class="stat-item">
+          <h2 class="display-3 fw-bold text-warning mb-2">0</h2>
+          <p class="fs-5 mb-0">Ofertas Publicadas</p>
+          <small class="text-muted">(Próximamente)</small>
+        </div>
+      </div>
+      <div class="col-lg-3 col-sm-6">
+        <div class="stat-item">
+          <h2 class="display-3 fw-bold text-info mb-2">{{ stats.total_empleadores }}</h2>
+          <p class="fs-5 mb-0">Empleadores Activos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Funcionalidades Próximas -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="h1 mb-3">Próximamente</h2>
+        <p class="text-muted fs-5">Nuevas funcionalidades en desarrollo</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6">
+        <div class="text-center p-4 h-100">
+          <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+               style="width: 80px; height: 80px;">
+            <i class="fas fa-search fa-2x"></i>
+          </div>
+          <h4 class="mb-3">Búsqueda Avanzada</h4>
+          <p class="text-muted">
+            Encuentra músicos por instrumento, género, ubicación y experiencia
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="text-center p-4 h-100">
+          <div class="bg-success text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+               style="width: 80px; height: 80px;">
+            <i class="fas fa-clipboard-list fa-2x"></i>
+          </div>
+          <h4 class="mb-3">Ofertas Laborales</h4>
+          <p class="text-muted">
+            Publica y gestiona ofertas de trabajo para eventos musicales
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="text-center p-4 h-100">
+          <div class="bg-warning text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+               style="width: 80px; height: 80px;">
+            <i class="fas fa-star fa-2x"></i>
+          </div>
+          <h4 class="mb-3">Sistema de Referencias</h4>
+          <p class="text-muted">
+            Referencias y testimonios para construir reputación profesional
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .min-vh-50 {
+    min-height: 50vh;
+  }
+  
+  .hover-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  
+  .hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+  }
+  
+  .stat-item {
+    padding: 1.5rem;
+  }
+  
+  .fa-10x {
+    font-size: 10em;
+  }
+</style>
 {% endblock %}

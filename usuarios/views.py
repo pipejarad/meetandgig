@@ -21,8 +21,27 @@ from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio
 
 
 def inicio(request):
-    usuarios = Usuario.objects.all()
-    return render(request, 'usuarios/inicio.html', context={'usuarios': usuarios})
+    portafolios_destacados = Portafolio.objects.filter(
+        activo=True,
+        disponible_para_gigs=True
+    ).select_related('usuario', 'ubicacion').prefetch_related(
+        'portafolio_instrumentos__instrumento',
+        'portafolio_generos__genero'
+    ).order_by('-fecha_actualizacion')[:6]
+    
+    stats = {
+        'total_musicos': Usuario.objects.filter(tipo_usuario='musico').count(),
+        'total_empleadores': Usuario.objects.filter(tipo_usuario='empleador').count(),
+        'total_portafolios': Portafolio.objects.filter(activo=True).count(),
+        'total_usuarios': Usuario.objects.count(),
+    }
+    
+    context = {
+        'portafolios_destacados': portafolios_destacados,
+        'stats': stats,
+    }
+    
+    return render(request, 'usuarios/inicio.html', context)
 
 
 def registro_view(request):
