@@ -1,40 +1,24 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mi Perfil - {{ usuario.username }} - Meet & Gig{% endblock %}
+{% block title %}Perfil de {{ usuario.get_full_name|default:usuario.username }} - Meet & Gig{% endblock %}
 
 {% block extra_css %}
 <style>
-    .profile-header {
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         padding: 2rem 0;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .profile-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.1);
-        z-index: 1;
-    }
-    
-    .profile-content {
-        position: relative;
-        z-index: 2;
+        margin-bottom: 2rem;
+        border-radius: 0 0 1rem 1rem;
     }
     
     .profile-avatar {
         width: 120px;
         height: 120px;
         border-radius: 50%;
-        border: 4px solid white;
         object-fit: cover;
+        border: 4px solid rgba(255,255,255,0.2);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     
@@ -80,81 +64,6 @@
         padding: 1.5rem;
     }
     
-    .skill-badge {
-        display: inline-block;
-        background: #007bff;
-        color: white;
-        padding: 0.4rem 0.8rem;
-        border-radius: 1rem;
-        font-size: 0.875rem;
-        margin: 0.2rem;
-        font-weight: 500;
-    }
-    
-    .skill-badge.secondary {
-        background: #6c757d;
-    }
-    
-    .social-links a {
-        display: inline-block;
-        margin: 0.25rem 0.5rem 0.25rem 0;
-        padding: 0.5rem 1rem;
-        background: #007bff;
-        color: white;
-        text-decoration: none;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
-    
-    .social-links a:hover {
-        background: #0056b3;
-        transform: translateY(-1px);
-        color: white;
-        text-decoration: none;
-    }
-    
-    .social-links a.soundcloud { background: #ff5500; }
-    .social-links a.soundcloud:hover { background: #e64900; }
-    .social-links a.youtube { background: #ff0000; }
-    .social-links a.youtube:hover { background: #cc0000; }
-    .social-links a.spotify { background: #1db954; }
-    .social-links a.spotify:hover { background: #1ed760; }
-    .social-links a.instagram { background: #e4405f; }
-    .social-links a.instagram:hover { background: #d73554; }
-    .social-links a.facebook { background: #1877f2; }
-    .social-links a.facebook:hover { background: #166fe5; }
-    
-    .experience-level {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        background: #28a745;
-        color: white;
-        border-radius: 0.375rem;
-        font-weight: 500;
-        margin-bottom: 1rem;
-    }
-    
-    .availability-status {
-        display: inline-block;
-        padding: 0.4rem 0.8rem;
-        border-radius: 1rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-    
-    .availability-status.available {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-    
-    .availability-status.unavailable {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-    
     .edit-prompt {
         background: #fff3cd;
         border: 1px solid #ffeaa7;
@@ -163,74 +72,74 @@
         margin-bottom: 1.5rem;
     }
     
-    .video-container {
-        position: relative;
-        width: 100%;
-        padding-bottom: 56.25%;
-        height: 0;
-        overflow: hidden;
-        border-radius: 0.375rem;
+    .contact-info {
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
     }
     
-    .video-container iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+    .contact-info .contact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    
+    .contact-info .contact-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .contact-info .contact-item i {
+        width: 20px;
+        color: #6c757d;
+        margin-right: 0.75rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Header del perfil -->
-<div class="profile-header">
-    <div class="profile-content">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-auto">
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="d-flex align-items-center">
                     {% if usuario.foto_perfil %}
                         <img src="{{ usuario.foto_perfil.url }}?v={{ usuario.date_joined|date:'U' }}" alt="{{ usuario.username }}" class="profile-avatar">
                     {% else %}
                         <img src="{% static 'img/user.png' %}" alt="{{ usuario.username }}" class="profile-avatar">
                     {% endif %}
                 </div>
-                <div class="col">
-                    <div class="profile-info">
-                        <h1 class="profile-name">
-                            {{ usuario.get_full_name|default:usuario.username }}
-                        </h1>
-                        <div class="profile-subtitle">
-                            {{ perfil.get_instrumento_principal_display }}
-                            {% if perfil.generos_musicales %}
-                                • {{ perfil.generos_musicales|truncatewords:3 }}
-                            {% endif %}
-                        </div>
-                        <div class="profile-location">
-                            <i class="icon-location"></i> {{ perfil.ubicacion }}
-                        </div>
+            </div>
+            <div class="col">
+                <div class="profile-info">
+                    <h1 class="profile-name">
+                        {{ usuario.get_full_name|default:usuario.username }}
+                    </h1>
+                    <div class="profile-subtitle">
+                        Músico Profesional
                     </div>
-                </div>
-                <div class="col-auto">
-                    <div class="text-end">
-                        <div class="availability-status {% if perfil.disponible_para_gigs %}available{% else %}unavailable{% endif %}">
-                            {% if perfil.disponible_para_gigs %}
-                                <i class="icon-check"></i> Disponible
-                            {% else %}
-                                <i class="icon-x"></i> No disponible
-                            {% endif %}
-                        </div>
-                        {% if es_mi_perfil %}
-                            <div class="mt-2">
-                                <a href="{% url 'ver_mi_portafolio' %}" class="btn btn-success btn-sm me-2">
-                                    <i class="icon-briefcase"></i> Ver Mi Portafolio
-                                </a>
-                                <a href="{% url 'editar_perfil_musico' %}" class="btn btn-light btn-sm">
-                                    <i class="icon-edit"></i> Editar Perfil
-                                </a>
-                            </div>
+                    <div class="profile-location">
+                        <i class="icon-location"></i> 
+                        {% if perfil.direccion %}
+                            {{ perfil.direccion|truncatewords:4 }}
+                        {% else %}
+                            Ubicación no especificada
                         {% endif %}
                     </div>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="text-end">
+                    {% if es_mi_perfil %}
+                        <div class="mt-2">
+                            <a href="{% url 'ver_mi_portafolio' %}" class="btn btn-success btn-sm me-2">
+                                <i class="icon-briefcase"></i> Ver Mi Portafolio
+                            </a>
+                            <a href="{% url 'editar_perfil_musico' %}" class="btn btn-light btn-sm">
+                                <i class="icon-edit"></i> Editar Perfil
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -238,186 +147,161 @@
 </div>
 
 <div class="container py-4">
-    {% if es_mi_perfil and not perfil.perfil_publico %}
+    {% if es_mi_perfil %}
         <div class="edit-prompt">
-            <h6><i class="icon-info"></i> Tu perfil está privado</h6>
-            <p class="mb-0">Tu perfil no es visible públicamente. <a href="{% url 'editar_perfil_musico' %}">Edita tu perfil</a> para hacerlo público y que otros músicos y empleadores puedan encontrarte.</p>
+            <h6><i class="icon-info"></i> Tu Perfil Personal</h6>
+            <p class="mb-0">Este es tu perfil con información personal y privada. Para mostrar tu trabajo profesional, <a href="{% url 'ver_mi_portafolio' %}"><strong>completa tu portafolio</strong></a>.</p>
         </div>
     {% endif %}
 
     <div class="row">
         <!-- Columna principal -->
         <div class="col-lg-8">
-            <!-- Biografía -->
-            {% if perfil.biografia %}
+            <!-- Información de Contacto -->
             <div class="card info-card">
                 <div class="card-header">
-                    <i class="icon-user"></i> Acerca de mí
+                    <i class="icon-user"></i> Información Personal
                 </div>
                 <div class="card-body">
-                    {{ perfil.biografia|linebreaks }}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Instrumentos y Géneros -->
-            <div class="card info-card">
-                <div class="card-header">
-                    <i class="icon-music"></i> Instrumentos y Géneros
-                </div>
-                <div class="card-body">
-                    <h6>Instrumentos</h6>
-                    <div class="mb-3">
-                        <span class="skill-badge">{{ perfil.get_instrumento_principal_display }}</span>
-                        {% if perfil.instrumentos_secundarios %}
-                            {% for instrumento in perfil.get_instrumentos_list %}
-                                {% if not forloop.first %}
-                                    <span class="skill-badge secondary">{{ instrumento }}</span>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Nombre Completo</h6>
+                            <p>{{ usuario.get_full_name|default:usuario.username }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Fecha de Nacimiento</h6>
+                            <p>
+                                {% if perfil.fecha_nacimiento %}
+                                    {{ perfil.fecha_nacimiento|date:"d/m/Y" }}
+                                {% else %}
+                                    <span class="text-muted">No especificada</span>
                                 {% endif %}
-                            {% endfor %}
-                        {% endif %}
+                            </p>
+                        </div>
                     </div>
                     
-                    {% if perfil.generos_musicales %}
-                    <h6>Géneros Musicales</h6>
-                    <div>
-                        {% for genero in perfil.get_generos_list %}
-                            <span class="skill-badge">{{ genero }}</span>
-                        {% endfor %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6>Dirección</h6>
+                            <p>
+                                {% if perfil.direccion %}
+                                    {{ perfil.direccion }}
+                                {% else %}
+                                    <span class="text-muted">No especificada</span>
+                                {% endif %}
+                            </p>
+                        </div>
                     </div>
+                    
+                    <!-- Solo mostrar si es mi perfil -->
+                    {% if es_mi_perfil %}
+                        <div class="contact-info">
+                            <h6>Información de Contacto</h6>
+                            <div class="contact-item">
+                                <i class="icon-phone"></i>
+                                <span>
+                                    {% if perfil.telefono %}
+                                        {{ perfil.telefono }}
+                                        {% if perfil.mostrar_telefono_publico %}
+                                            <small class="text-success">(Público)</small>
+                                        {% else %}
+                                            <small class="text-warning">(Privado)</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">Teléfono no especificado</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="icon-mail"></i>
+                                <span>
+                                    {{ usuario.email }}
+                                    {% if perfil.recibir_notificaciones_email %}
+                                        <small class="text-success">(Notificaciones activas)</small>
+                                    {% else %}
+                                        <small class="text-muted">(Notificaciones desactivadas)</small>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Vista pública del teléfono -->
+                        {% if perfil.mostrar_telefono_publico and perfil.telefono %}
+                            <div class="contact-info">
+                                <h6>Contacto</h6>
+                                <div class="contact-item">
+                                    <i class="icon-phone"></i>
+                                    <span>{{ perfil.telefono }}</span>
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
-
-            <!-- Formación y Experiencia -->
-            <div class="card info-card">
-                <div class="card-header">
-                    <i class="icon-graduation-cap"></i> Experiencia y Formación
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <span class="experience-level">
-                            {{ perfil.get_nivel_experiencia_display }}
-                        </span>
-                        <span class="text-muted ms-2">
-                            ({{ perfil.años_experiencia }} año{{ perfil.años_experiencia|pluralize }} de experiencia)
-                        </span>
-                    </div>
-                    
-                    {% if perfil.formacion_musical %}
-                    <h6>Formación Musical</h6>
-                    <p class="mb-0">{{ perfil.formacion_musical|linebreaks }}</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Video Demo -->
-            {% if perfil.video_demo %}
-            <div class="card info-card">
-                <div class="card-header">
-                    <i class="icon-video"></i> Video Demostración
-                </div>
-                <div class="card-body">
-                    <div class="video-container">
-                        {% if 'youtube.com' in perfil.video_demo or 'youtu.be' in perfil.video_demo %}
-                            {% if 'youtu.be' in perfil.video_demo %}
-                                <iframe src="https://www.youtube.com/embed/{{ perfil.video_demo|slice:'17:' }}" frameborder="0" allowfullscreen></iframe>
-                            {% else %}
-                                <iframe src="https://www.youtube.com/embed/{{ perfil.video_demo|slice:'32:' }}" frameborder="0" allowfullscreen></iframe>
-                            {% endif %}
-                        {% else %}
-                            <p><a href="{{ perfil.video_demo }}" target="_blank" rel="noopener">Ver video demostración</a></p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
         </div>
 
         <!-- Sidebar -->
         <div class="col-lg-4">
-            <!-- Información de contacto -->
+            <!-- Información del Portafolio -->
             <div class="card info-card">
                 <div class="card-header">
-                    <i class="icon-info"></i> Información Profesional
+                    <i class="icon-briefcase"></i> Portafolio Profesional
                 </div>
-                <div class="card-body">
-                    {% if perfil.tarifa_base %}
-                    <div class="mb-3">
-                        <strong>Tarifa base:</strong><br>
-                        <span class="h5 text-success">${{ perfil.tarifa_base|floatformat:0 }} CLP</span>
-                    </div>
+                <div class="card-body text-center">
+                    <p class="mb-3">Para ver la información profesional completa:</p>
+                    
+                    {% if es_mi_perfil %}
+                        <a href="{% url 'ver_mi_portafolio' %}" class="btn btn-primary btn-sm d-block mb-2">
+                            <i class="icon-briefcase"></i> Ver Mi Portafolio
+                        </a>
+                        <a href="{% url 'editar_portafolio_musico' %}" class="btn btn-outline-primary btn-sm d-block">
+                            <i class="icon-edit"></i> Editar Portafolio
+                        </a>
+                    {% else %}
+                        {% if usuario.portafolio %}
+                            <a href="{% url 'ver_portafolio_musico' usuario.username %}" class="btn btn-primary btn-sm d-block">
+                                <i class="icon-briefcase"></i> Ver Portafolio
+                            </a>
+                        {% else %}
+                            <p class="text-muted">
+                                <i class="icon-info"></i> 
+                                Este músico aún no ha completado su portafolio profesional.
+                            </p>
+                        {% endif %}
                     {% endif %}
-                    
-                    <div class="mb-3">
-                        <strong>Experiencia:</strong><br>
-                        {{ perfil.get_nivel_experiencia_display }}
+                </div>
+            </div>
+            
+            <!-- Configuración de Cuenta -->
+            {% if es_mi_perfil %}
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="icon-settings"></i> Configuración
                     </div>
-                    
-                    <div class="mb-3">
-                        <strong>Ubicación:</strong><br>
-                        {{ perfil.ubicacion }}
-                    </div>
-                    
-                    <div>
-                        <strong>Estado:</strong><br>
-                        <span class="availability-status {% if perfil.disponible_para_gigs %}available{% else %}unavailable{% endif %}">
-                            {% if perfil.disponible_para_gigs %}
-                                Disponible para presentaciones
+                    <div class="card-body">
+                        <p><strong>Notificaciones Email:</strong></p>
+                        <p class="{% if perfil.recibir_notificaciones_email %}text-success{% else %}text-danger{% endif %} mb-3">
+                            {% if perfil.recibir_notificaciones_email %}
+                                <i class="icon-check"></i> Activadas
                             {% else %}
-                                No disponible actualmente
+                                <i class="icon-x"></i> Desactivadas
                             {% endif %}
-                        </span>
+                        </p>
+                        
+                        <p><strong>Teléfono Público:</strong></p>
+                        <p class="{% if perfil.mostrar_telefono_publico %}text-success{% else %}text-warning{% endif %} mb-3">
+                            {% if perfil.mostrar_telefono_publico %}
+                                <i class="icon-check"></i> Visible públicamente
+                            {% else %}
+                                <i class="icon-eye-off"></i> Solo para ti
+                            {% endif %}
+                        </p>
+                        
+                        <a href="{% url 'editar_perfil_musico' %}" class="btn btn-outline-primary btn-sm d-block">
+                            <i class="icon-edit"></i> Cambiar Configuración
+                        </a>
                     </div>
                 </div>
-            </div>
-
-            <!-- Enlaces y redes sociales -->
-            {% if perfil.website_personal or perfil.soundcloud_url or perfil.youtube_url or perfil.spotify_url or perfil.instagram_url or perfil.facebook_url %}
-            <div class="card info-card">
-                <div class="card-header">
-                    <i class="icon-link"></i> Enlaces y Redes
-                </div>
-                <div class="card-body">
-                    <div class="social-links">
-                        {% if perfil.website_personal %}
-                            <a href="{{ perfil.website_personal }}" target="_blank" rel="noopener">
-                                <i class="icon-globe"></i> Sitio Web
-                            </a>
-                        {% endif %}
-                        
-                        {% if perfil.soundcloud_url %}
-                            <a href="{{ perfil.soundcloud_url }}" target="_blank" rel="noopener" class="soundcloud">
-                                <i class="icon-soundcloud"></i> SoundCloud
-                            </a>
-                        {% endif %}
-                        
-                        {% if perfil.youtube_url %}
-                            <a href="{{ perfil.youtube_url }}" target="_blank" rel="noopener" class="youtube">
-                                <i class="icon-youtube"></i> YouTube
-                            </a>
-                        {% endif %}
-                        
-                        {% if perfil.spotify_url %}
-                            <a href="{{ perfil.spotify_url }}" target="_blank" rel="noopener" class="spotify">
-                                <i class="icon-spotify"></i> Spotify
-                            </a>
-                        {% endif %}
-                        
-                        {% if perfil.instagram_url %}
-                            <a href="{{ perfil.instagram_url }}" target="_blank" rel="noopener" class="instagram">
-                                <i class="icon-instagram"></i> Instagram
-                            </a>
-                        {% endif %}
-                        
-                        {% if perfil.facebook_url %}
-                            <a href="{{ perfil.facebook_url }}" target="_blank" rel="noopener" class="facebook">
-                                <i class="icon-facebook"></i> Facebook
-                            </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
             {% endif %}
         </div>
     </div>

@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetP
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from PIL import Image
-from .models import Usuario, PerfilMusico, PerfilEmpleador, PortafolioMusico
+from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio
 
 
 def validate_image_file(image):
@@ -198,91 +198,34 @@ class PerfilMusicoForm(forms.ModelForm):
         required=False,
         label="Foto de perfil",
         help_text="Imagen de perfil (máx. 5MB, mín. 100x100px, formatos: JPG, PNG, GIF)",
+        widget=forms.FileInput(attrs={'class': 'form-control'}),
         validators=[validate_image_file]
     )
 
     class Meta:
         model = PerfilMusico
         fields = [
-            'biografia', 'instrumento_principal', 'instrumentos_secundarios',
-            'generos_musicales', 'nivel_experiencia', 'años_experiencia',
-            'formacion_musical', 'website_personal', 'soundcloud_url',
-            'youtube_url', 'spotify_url', 'instagram_url', 'facebook_url',
-            'ubicacion', 'disponible_para_gigs', 'tarifa_base', 'video_demo',
-            'perfil_publico'
+            'telefono', 'fecha_nacimiento', 'direccion',
+            'recibir_notificaciones_email', 'mostrar_telefono_publico'
         ]
         
         widgets = {
-            'biografia': forms.Textarea(attrs={
+            'telefono': forms.TextInput(attrs={
                 'class': 'form-control',
-                'rows': 4,
-                'maxlength': 1000
+                'placeholder': '+56912345678'
             }),
-            'instrumento_principal': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'instrumentos_secundarios': forms.TextInput(attrs={
+            'fecha_nacimiento': forms.DateInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Bajo, Teclados, Voz'
+                'type': 'date'
             }),
-            'generos_musicales': forms.TextInput(attrs={
+            'direccion': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Rock, Blues, Jazz'
+                'placeholder': 'Dirección completa'
             }),
-            'nivel_experiencia': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'años_experiencia': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': 0,
-                'max': 50
-            }),
-            'formacion_musical': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3
-            }),
-            'website_personal': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'https://mipagina.com'
-            }),
-            'soundcloud_url': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'https://soundcloud.com/usuario'
-            }),
-            'youtube_url': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'https://youtube.com/usuario'
-            }),
-            'spotify_url': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'https://open.spotify.com/artist/...'
-            }),
-            'instagram_url': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'https://instagram.com/usuario'
-            }),
-            'facebook_url': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'https://facebook.com/usuario'
-            }),
-            'ubicacion': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Santiago, Chile'
-            }),
-            'disponible_para_gigs': forms.CheckboxInput(attrs={
+            'recibir_notificaciones_email': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
-            'tarifa_base': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': 0,
-                'step': 1000,
-                'placeholder': '50000'
-            }),
-            'video_demo': forms.URLInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'https://youtube.com/watch?v=...'
-            }),
-            'perfil_publico': forms.CheckboxInput(attrs={
+            'mostrar_telefono_publico': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             })
         }
@@ -294,13 +237,8 @@ class PerfilMusicoForm(forms.ModelForm):
         if self.usuario:
             self.fields['first_name'].initial = self.usuario.first_name
             self.fields['last_name'].initial = self.usuario.last_name
-            if hasattr(self.usuario, 'foto_perfil'):
+            if hasattr(self.usuario, 'foto_perfil') and self.usuario.foto_perfil:
                 self.fields['foto_perfil'].initial = self.usuario.foto_perfil
-        
-        self.fields['foto_perfil'].widget.attrs.update({
-            'class': 'form-control',
-            'accept': 'image/*'
-        })
     
     def clean_telefono(self):
         telefono = self.cleaned_data.get('telefono', '')
@@ -316,12 +254,12 @@ class PerfilMusicoForm(forms.ModelForm):
         
         if commit:
             perfil.save()
-            self.save_m2m()
             
             if self.usuario:
                 self.usuario.first_name = self.cleaned_data.get('first_name', '')
                 self.usuario.last_name = self.cleaned_data.get('last_name', '')
                 
+                # Manejar foto_perfil
                 if self.cleaned_data.get('foto_perfil'):
                     self.usuario.foto_perfil = self.cleaned_data['foto_perfil']
                 
@@ -330,24 +268,33 @@ class PerfilMusicoForm(forms.ModelForm):
         return perfil
 
 
-class PortafolioMusicoForm(forms.ModelForm):
-    generos_musicales = forms.CharField(
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Ej: Rock, Blues, Jazz'
-        }),
-        help_text='Separa los géneros musicales con comas'
+class PortafolioForm(forms.ModelForm):
+    # Campos M2M personalizados para instrumentos
+    instrumento_principal = forms.ModelChoiceField(
+        queryset=None,
+        required=True,
+        label='Instrumento Principal',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        help_text='Selecciona tu instrumento principal'
     )
     
-    instrumentos_secundarios = forms.CharField(
+    instrumentos_secundarios = forms.ModelMultipleChoiceField(
+        queryset=None,
         required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Ej: Piano, Bajo, Armónica'
-        }),
-        help_text='Otros instrumentos que tocas (separados por comas)'
+        label='Instrumentos Secundarios',
+        widget=forms.CheckboxSelectMultiple(),
+        help_text='Selecciona otros instrumentos que domines (máximo 5)'
     )
     
+    # Campos M2M personalizados para géneros
+    generos_musicales = forms.ModelMultipleChoiceField(
+        queryset=None,
+        required=True,
+        label='Géneros Musicales',
+        widget=forms.CheckboxSelectMultiple(),
+        help_text='Selecciona los géneros que tocas (máximo 8)'
+    )
+
     biografia = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={
@@ -380,19 +327,29 @@ class PortafolioMusicoForm(forms.ModelForm):
     )
 
     class Meta:
-        model = PortafolioMusico
+        model = Portafolio
         fields = [
-            'biografia', 'instrumento_principal', 'instrumentos_secundarios',
-            'generos_musicales', 'nivel_experiencia', 'años_experiencia',
-            'formacion_musical', 'website_personal', 'soundcloud_url',
+            'biografia', 'formacion_musical', 'años_experiencia',
+            'nivel_experiencia', 'ubicacion', 'website_personal', 'soundcloud_url',
             'youtube_url', 'spotify_url', 'instagram_url', 'facebook_url',
-            'ubicacion', 'disponible_para_gigs', 'tarifa_base',
-            'video_demo', 'portafolio_publico'
+            'video_demo', 'disponible_para_gigs', 'tarifa_base',
+            'show_email', 'show_social_links', 'show_education', 'show_tarifa', 'show_telefono'
         ]
         
         widgets = {
-            'instrumento_principal': forms.Select(attrs={'class': 'form-select'}),
+            'biografia': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Cuéntanos sobre tu trayectoria musical...',
+                'maxlength': 1000
+            }),
+            'formacion_musical': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Estudios musicales, cursos, talleres...'
+            }),
             'nivel_experiencia': forms.Select(attrs={'class': 'form-select'}),
+            'ubicacion': forms.Select(attrs={'class': 'form-select'}),
             'años_experiencia': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
@@ -422,38 +379,65 @@ class PortafolioMusicoForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'https://facebook.com/tu-pagina'
             }),
-            'ubicacion': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ciudad, País'
-            }),
-            'disponible_para_gigs': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
             'video_demo': forms.URLInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'https://youtube.com/watch?v=...'
             }),
-            'portafolio_publico': forms.CheckboxInput(attrs={
+            'disponible_para_gigs': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
-            })
+            }),
+            'tarifa_base': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '1000',
+                'placeholder': '150000'
+            }),
+            'show_email': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_social_links': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_education': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_tarifa': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_telefono': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Obtener querysets para los campos M2M
+        from .models import Instrumento, Genero
+        
+        self.fields['instrumento_principal'].queryset = Instrumento.objects.all()
+        self.fields['instrumentos_secundarios'].queryset = Instrumento.objects.all()
+        self.fields['generos_musicales'].queryset = Genero.objects.all()
+        
+        # Si estamos editando, prellenar los campos M2M
+        if self.instance.pk:
+            # Instrumento principal
+            principal = self.instance.portafolio_instrumentos.filter(es_principal=True).first()
+            if principal:
+                self.fields['instrumento_principal'].initial = principal.instrumento
+                
+            # Instrumentos secundarios
+            secundarios = self.instance.portafolio_instrumentos.filter(es_principal=False)
+            self.fields['instrumentos_secundarios'].initial = [
+                pi.instrumento for pi in secundarios
+            ]
+            
+            # Géneros
+            generos = self.instance.portafolio_generos.all()
+            self.fields['generos_musicales'].initial = [
+                pg.genero for pg in generos
+            ]
     
     def clean_generos_musicales(self):
-        generos = self.cleaned_data.get('generos_musicales', '')
-        if generos:
-            generos_list = [g.strip() for g in generos.split(',') if g.strip()]
-            if len(generos_list) > 10:
-                raise ValidationError("Máximo 10 géneros musicales permitidos.")
-            return ', '.join(generos_list)
+        generos = self.cleaned_data.get('generos_musicales')
+        if generos and len(generos) > 8:
+            raise ValidationError("No puedes seleccionar más de 8 géneros musicales.")
         return generos
-    
+
     def clean_instrumentos_secundarios(self):
-        instrumentos = self.cleaned_data.get('instrumentos_secundarios', '')
-        if instrumentos:
-            instrumentos_list = [i.strip() for i in instrumentos.split(',') if i.strip()]
-            if len(instrumentos_list) > 8:
-                raise ValidationError("Máximo 8 instrumentos secundarios permitidos.")
-            return ', '.join(instrumentos_list)
+        instrumentos = self.cleaned_data.get('instrumentos_secundarios')
+        if instrumentos and len(instrumentos) > 5:
+            raise ValidationError("No puedes seleccionar más de 5 instrumentos secundarios.")
         return instrumentos
     
     def clean_años_experiencia(self):
@@ -461,6 +445,51 @@ class PortafolioMusicoForm(forms.ModelForm):
         if años is not None and años > 80:
             raise ValidationError("Los años de experiencia no pueden exceder 80.")
         return años
+
+    def save(self, commit=True):
+        # Guardar el portafolio principal
+        portafolio = super().save(commit=commit)
+        
+        if commit:
+            # Limpiar relaciones existentes
+            portafolio.portafolio_instrumentos.all().delete()
+            portafolio.portafolio_generos.all().delete()
+            
+            # Manejar instrumento principal
+            instrumento_principal = self.cleaned_data.get('instrumento_principal')
+            if instrumento_principal:
+                from .models import PortafolioInstrumento
+                PortafolioInstrumento.objects.create(
+                    portafolio=portafolio,
+                    instrumento=instrumento_principal,
+                    es_principal=True,
+                    prioridad=1
+                )
+            
+            # Manejar instrumentos secundarios
+            instrumentos_secundarios = self.cleaned_data.get('instrumentos_secundarios')
+            if instrumentos_secundarios:
+                from .models import PortafolioInstrumento
+                for i, instrumento in enumerate(instrumentos_secundarios, start=2):
+                    PortafolioInstrumento.objects.create(
+                        portafolio=portafolio,
+                        instrumento=instrumento,
+                        es_principal=False,
+                        prioridad=i
+                    )
+            
+            # Manejar géneros musicales
+            generos = self.cleaned_data.get('generos_musicales')
+            if generos:
+                from .models import PortafolioGenero
+                for i, genero in enumerate(generos, start=1):
+                    PortafolioGenero.objects.create(
+                        portafolio=portafolio,
+                        genero=genero,
+                        prioridad=i
+                    )
+        
+        return portafolio
 
 
 class PerfilEmpleadorForm(forms.ModelForm):

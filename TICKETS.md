@@ -2,32 +2,30 @@
 
 ## 🟩 Sprint 1: Autenticación y Acceso Básico
 
-| Ticket | Título                            | Descripción breve                                    |
-| ------ | --------------------------------- | ---------------------------------------------------- |
-| 1.1    | Registro de usuario               | Registro con validación de email único y contraseña. |
-| 1.2    | Inicio de sesión                  | Validación de credenciales y persistencia de sesión. |
-| 1.3    | Cierre de sesión                  | Destruye sesión y redirige al login.                 |
-| 1.4    | Recuperación de contraseña        | Envío de enlace por correo.                          |
-| 1.5    | Acceso al panel de administración | Permite acceso a Django admin para superusuarios.    |
-| 1.6    | Diseño de la pantalla de login    | UI responsiva y amigable para login.                 |
+| Ticket | Título                            | Estado        | Descripción breve                                    |
+| ------ | --------------------------------- | ------------- | ---------------------------------------------------- |
+| 1.1    | Registro de usuario               | ✅ COMPLETADO | Registro con validación de email único y contraseña. |
+| 1.2    | Inicio de sesión                  | ✅ COMPLETADO | Validación de credenciales y persistencia de sesión. |
+| 1.3    | Cierre de sesión                  | ✅ COMPLETADO | Destruye sesión y redirige al login.                 |
+| 1.4    | Recuperación de contraseña        | ✅ COMPLETADO | Envío de enlace por correo.                          |
+| 1.5    | Acceso al panel de administración | ✅ COMPLETADO | Permite acceso a Django admin para superusuarios.    |
+| 1.6    | Diseño de la pantalla de login    | ✅ COMPLETADO | UI responsiva y amigable para login.                 |
 
 ---
 
 ## 🟩 Sprint 2: Perfiles de Usuario
 
-| Ticket | Título                             | Estado                 | Descripción                                                                                                                                                                                                                                                          |
-| ------ | ---------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2.1    | Crear y editar perfil de músico    | ✅ HECHO → 🔄 REFACTOR | **REFACTORIZAR:** Separar campos profesionales del perfil actual hacia el nuevo modelo de portafolio. Mantener solo datos personales/administrativos.                                                                                                                |
-| 2.2    | Crear y editar perfil de empleador | ✅ HECHO               | Formulario para datos de empleador (organización, contacto, etc.).                                                                                                                                                                                                   |
-| 2.3    | Subida de foto de perfil           | ✅ HECHO               | Carga y visualización de imagen para perfiles.                                                                                                                                                                                                                       |
-| 2.4    | Vista del portafolio del músico    | 🆕 NUEVO               | Página pública que muestra la biografía, instrumentos, géneros, experiencia musical, material multimedia y referencias del músico. Esta vista actúa como su presentación profesional ante empleadores. Incluye diseño responsivo e integración con datos del perfil. |
-
-| 2.5 | Crear y editar contenido del portafolio | 🆕 NUEVO | Formulario para que músicos gestionen su información profesional: instrumentos, géneros, experiencia musical, enlaces externos, formación, y secciones multimedia para construir su portafolio profesional.  
- |
-| 2.6 | Diseño de pantallas de perfil | 🔄 PENDIENTE | Diseño responsivo para perfiles según tipo de usuario (privados/administrativos). |
-| 2.7 | Validación de unicidad de perfil | ✅ HECHO | Lógica para que un usuario tenga un solo perfil y un solo portafolio. |
-| 🔥 2.8 | Búsqueda y listado de portafolios | 🆕 NUEVO | Permite buscar y filtrar músicos públicamente a través de sus portafolios. |
-| 🔥 2.9 | Normalización de categorías en portafolio | 🆕 NUEVO | Define categorías preestablecidas en campos clave del portafolio (instrumentos, géneros musicales, etc.). |
+| Ticket | Título                                    | Estado        | Descripción                                                                                                                                                                                                                                                          |
+| ------ | ----------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2.1    | Crear y editar perfil de músico           | ✅ COMPLETADO | Perfil administrativo/personal del músico. Datos profesionales migrados al modelo Portafolio.                                                                                                                                                                        |
+| 2.2    | Crear y editar perfil de empleador        | ✅ HECHO      | Formulario para datos de empleador (organización, contacto, etc.).                                                                                                                                                                                                   |
+| 2.3    | Subida de foto de perfil                  | ✅ HECHO      | Carga y visualización de imagen para perfiles.                                                                                                                                                                                                                       |
+| 2.4    | Vista del portafolio del músico           | ✅ COMPLETADO | Página pública que muestra la biografía, instrumentos, géneros, experiencia musical, material multimedia y referencias del músico. Esta vista actúa como su presentación profesional ante empleadores. Incluye diseño responsivo e integración con datos del perfil. |
+| 2.5    | Crear y editar contenido del portafolio   | ✅ COMPLETADO | Formulario para que músicos gestionen su información profesional: instrumentos, géneros, experiencia musical, enlaces externos, formación, y secciones multimedia para construir su portafolio profesional.                                                          |
+| 2.6    | Diseño de pantallas de perfil             | 🔄 PENDIENTE  | Diseño responsivo para perfiles según tipo de usuario (privados/administrativos). **INCLUYE:** Ruta `/p/<slug>/` y SEO básico para portafolios.                                                                                                                      |
+| 2.7    | Validación de unicidad de perfil          | ✅ HECHO      | Lógica para que un usuario tenga un solo perfil y un solo portafolio.                                                                                                                                                                                                |
+| 🔥 2.8 | Búsqueda y listado de portafolios         | 🆕 NUEVO      | Permite buscar y filtrar músicos públicamente a través de sus portafolios.                                                                                                                                                                                           |
+| 🔥 2.9 | Normalización de categorías en portafolio | 🆕 NUEVO      | Define categorías preestablecidas en campos clave del portafolio (instrumentos, géneros musicales, etc.).                                                                                                                                                            |
 
 ---
 

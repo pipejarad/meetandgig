@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+from django.utils.text import slugify
 
 
 class Usuario(AbstractUser):
@@ -35,140 +36,96 @@ class Usuario(AbstractUser):
         verbose_name_plural = 'Usuarios'
 
 
-class PerfilMusico(models.Model):
-    GENEROS_CHOICES = [
-        ('rock', 'Rock'),
-        ('pop', 'Pop'),
-        ('jazz', 'Jazz'),
-        ('blues', 'Blues'),
-        ('country', 'Country'),
-        ('folk', 'Folk'),
-        ('reggae', 'Reggae'),
-        ('latin', 'Música Latina'),
-        ('classical', 'Clásica'),
-        ('electronic', 'Electrónica'),
-        ('indie', 'Indie'),
-        ('alternative', 'Alternativo'),
-        ('punk', 'Punk'),
-        ('metal', 'Metal'),
-        ('hip_hop', 'Hip Hop'),
-        ('r_and_b', 'R&B'),
-        ('otro', 'Otro')
-    ]
-    
-    INSTRUMENTOS_CHOICES = [
-        ('guitarra', 'Guitarra'),
-        ('bajo', 'Bajo'),
-        ('bateria', 'Batería'),
-        ('piano', 'Piano'),
-        ('teclados', 'Teclados'),
-        ('violin', 'Violín'),
-        ('saxofon', 'Saxofón'),
-        ('trompeta', 'Trompeta'),
-        ('flauta', 'Flauta'),
-        ('voz', 'Voz/Canto'),
-        ('armonica', 'Armónica'),
-        ('ukulele', 'Ukulele'),
-        ('mandolina', 'Mandolina'),
-        ('acordeon', 'Acordeón'),
-        ('otro', 'Otro')
-    ]
-    
-    NIVEL_EXPERIENCIA_CHOICES = [
-        ('principiante', 'Principiante (0-2 años)'),
-        ('intermedio', 'Intermedio (3-5 años)'),
-        ('avanzado', 'Avanzado (6-10 años)'),
-        ('profesional', 'Profesional (10+ años)')
-    ]
+# CATÁLOGOS NORMALIZADOS (Ticket 2.11)
+class Instrumento(models.Model):
+    """Catálogo de instrumentos musicales (tabla existente)"""
+    nombre = models.CharField(max_length=50, unique=True, verbose_name='Nombre')
+    categoria = models.CharField(max_length=50, blank=True, verbose_name='Categoría')
 
+    class Meta:
+        managed = False  # Django no gestiona esta tabla
+        db_table = 'usuarios_instrumento'
+        verbose_name = 'Instrumento'
+        verbose_name_plural = 'Instrumentos'
+
+    def __str__(self):
+        return self.nombre
+
+
+class Genero(models.Model):
+    """Catálogo de géneros musicales (tabla existente)"""
+    nombre = models.CharField(max_length=50, unique=True, verbose_name='Nombre')
+    descripcion = models.TextField(blank=True, verbose_name='Descripción')
+
+    class Meta:
+        managed = False  # Django no gestiona esta tabla
+        db_table = 'usuarios_generomusical'
+        verbose_name = 'Género Musical'
+        verbose_name_plural = 'Géneros Musicales'
+
+    def __str__(self):
+        return self.nombre
+
+
+class NivelExperiencia(models.Model):
+    """Catálogo de niveles de experiencia musical"""
+    nombre = models.CharField(max_length=50, unique=True, verbose_name='Nombre')
+    descripcion = models.CharField(max_length=100, blank=True, verbose_name='Descripción')
+    orden = models.PositiveIntegerField(unique=True, verbose_name='Orden')
+    años_minimos = models.PositiveIntegerField(default=0, verbose_name='Años mínimos')
+    años_maximos = models.PositiveIntegerField(null=True, blank=True, verbose_name='Años máximos')
+
+    class Meta:
+        verbose_name = 'Nivel de Experiencia'
+        verbose_name_plural = 'Niveles de Experiencia'
+        ordering = ['orden']
+
+    def __str__(self):
+        return self.nombre
+
+
+class Ubicacion(models.Model):
+    """Catálogo de ubicaciones geográficas"""
+    nombre = models.CharField(max_length=100, unique=True, verbose_name='Nombre')
+    region = models.CharField(max_length=50, blank=True, verbose_name='Región')
+    pais = models.CharField(max_length=50, default='Chile', verbose_name='País')
+    activo = models.BooleanField(default=True, verbose_name='Activo')
+    orden = models.PositiveIntegerField(default=0, verbose_name='Orden')
+
+    class Meta:
+        verbose_name = 'Ubicación'
+        verbose_name_plural = 'Ubicaciones'
+        ordering = ['orden', 'region', 'nombre']
+
+    def __str__(self):
+        if self.region:
+            return f"{self.nombre}, {self.region}"
+        return self.nombre
+
+
+class PerfilMusico(models.Model):
+    """Perfil personal y administrativo del músico (NO información profesional)"""
+    
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name='perfil_musico')
     
-    # Información básica profesional
-    biografia = models.TextField(
-        max_length=1000, 
-        help_text='Cuéntanos sobre tu trayectoria musical (máx. 1000 caracteres)',
-        blank=True
-    )
+    # DATOS PERSONALES/ADMINISTRATIVOS ÚNICAMENTE
+    telefono = models.CharField(max_length=20, blank=True, verbose_name='Teléfono')
+    fecha_nacimiento = models.DateField(null=True, blank=True, verbose_name='Fecha de nacimiento')
+    direccion = models.CharField(max_length=200, blank=True, verbose_name='Dirección')
     
-    # Instrumentos y géneros (selección múltiple)
-    instrumento_principal = models.CharField(
-        max_length=50, 
-        choices=INSTRUMENTOS_CHOICES,
-        verbose_name='Instrumento principal',
-        default='guitarra'
-    )
-    instrumentos_secundarios = models.CharField(
-        max_length=200,
-        blank=True,
-        help_text='Otros instrumentos que tocas (separados por comas)',
-        verbose_name='Instrumentos secundarios'
-    )
-    generos_musicales = models.CharField(
-        max_length=200,
-        help_text='Géneros musicales que interpretas (separados por comas)',
-        verbose_name='Géneros musicales',
-        default='rock'
-    )
-    
-    # Experiencia y formación
-    nivel_experiencia = models.CharField(
-        max_length=20,
-        choices=NIVEL_EXPERIENCIA_CHOICES,
-        verbose_name='Nivel de experiencia',
-        default='principiante'
-    )
-    años_experiencia = models.PositiveIntegerField(
-        verbose_name='Años de experiencia',
-        help_text='Número de años tocando música',
-        default=1
-    )
-    formacion_musical = models.TextField(
-        max_length=500,
-        blank=True,
-        help_text='Estudios musicales, cursos, talleres, etc.',
-        verbose_name='Formación musical'
-    )
-    
-    # Enlaces externos
-    website_personal = models.URLField(blank=True, verbose_name='Sitio web personal')
-    soundcloud_url = models.URLField(blank=True, verbose_name='SoundCloud')
-    youtube_url = models.URLField(blank=True, verbose_name='YouTube')
-    spotify_url = models.URLField(blank=True, verbose_name='Spotify')
-    instagram_url = models.URLField(blank=True, verbose_name='Instagram')
-    facebook_url = models.URLField(blank=True, verbose_name='Facebook')
-    
-    # Información profesional
-    ubicacion = models.CharField(
-        max_length=100, 
-        verbose_name='Ubicación',
-        default='No especificada'
-    )
-    disponible_para_gigs = models.BooleanField(
+    # CONFIGURACIONES PRIVADAS
+    recibir_notificaciones_email = models.BooleanField(
         default=True, 
-        verbose_name='Disponible para presentaciones'
+        verbose_name='Recibir notificaciones por email'
     )
-    tarifa_base = models.PositiveIntegerField(
-        null=True, 
-        blank=True,
-        help_text='Tarifa base por presentación en pesos chilenos (CLP)',
-        verbose_name='Tarifa base (CLP)'
+    mostrar_telefono_publico = models.BooleanField(
+        default=False, 
+        verbose_name='Mostrar teléfono públicamente'
     )
     
-    # Material multimedia
-    video_demo = models.URLField(
-        blank=True,
-        help_text='Enlace a video demo (YouTube, Vimeo, etc.)',
-        verbose_name='Video demostración'
-    )
-    
-    # Metadatos
+    # METADATOS
     fecha_creacion = models.DateTimeField(default=timezone.now)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
-    perfil_publico = models.BooleanField(
-        default=True,
-        help_text='¿Deseas que tu perfil sea visible públicamente?',
-        verbose_name='Perfil público'
-    )
 
     class Meta:
         verbose_name = 'Perfil de Músico'
@@ -176,19 +133,6 @@ class PerfilMusico(models.Model):
 
     def __str__(self):
         return f"Perfil de {self.usuario.get_full_name() or self.usuario.username}"
-    
-    def get_instrumentos_list(self):
-        """Retorna lista de instrumentos como array"""
-        instrumentos = [self.get_instrumento_principal_display()]
-        if self.instrumentos_secundarios:
-            instrumentos.extend([i.strip() for i in self.instrumentos_secundarios.split(',')])
-        return instrumentos
-    
-    def get_generos_list(self):
-        """Retorna lista de géneros como array"""
-        if self.generos_musicales:
-            return [g.strip() for g in self.generos_musicales.split(',')]
-        return []
 
 
 class PerfilEmpleador(models.Model):
@@ -317,92 +261,44 @@ class PerfilEmpleador(models.Model):
         return self.email_corporativo or self.usuario.email
 
 
-class PortafolioMusico(models.Model):
-    """
-    Modelo para el portafolio público de músicos
-    (separado del perfil personal)
-    """
-    INSTRUMENTO_CHOICES = [
-        ('guitarra', 'Guitarra'),
-        ('bajo', 'Bajo'),
-        ('bateria', 'Batería'),
-        ('piano', 'Piano'),
-        ('teclados', 'Teclados'),
-        ('violin', 'Violín'),
-        ('saxofon', 'Saxofón'),
-        ('trompeta', 'Trompeta'),
-        ('flauta', 'Flauta'),
-        ('voz', 'Voz/Canto'),
-        ('armonica', 'Armónica'),
-        ('ukulele', 'Ukulele'),
-        ('mandolina', 'Mandolina'),
-        ('acordeon', 'Acordeón'),
-        ('otro', 'Otro'),
-    ]
+class Portafolio(models.Model):
+    """Portafolio profesional público del músico"""
     
-    NIVEL_CHOICES = [
-        ('principiante', 'Principiante (0-2 años)'),
-        ('intermedio', 'Intermedio (3-5 años)'),
-        ('avanzado', 'Avanzado (6-10 años)'),
-        ('profesional', 'Profesional (10+ años)'),
-    ]
-
-    # Relación con usuario
-    usuario = models.OneToOneField(
-        Usuario, 
-        on_delete=models.CASCADE,
-        related_name='portafolio_musico'
-    )
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name='portafolio')
+    slug = models.SlugField(unique=True, max_length=100, verbose_name='Slug público')
     
-    # Información musical
+    # INFORMACIÓN PROFESIONAL
     biografia = models.TextField(
-        max_length=1000,
-        blank=True,
+        max_length=1000, 
+        blank=True, 
+        verbose_name='Biografía profesional',
         help_text='Cuéntanos sobre tu trayectoria musical (máx. 1000 caracteres)'
     )
-    
-    instrumento_principal = models.CharField(
-        max_length=50,
-        choices=INSTRUMENTO_CHOICES,
-        default='guitarra',
-        verbose_name='Instrumento principal'
+    formacion_musical = models.TextField(
+        max_length=500, 
+        blank=True, 
+        verbose_name='Formación musical',
+        help_text='Estudios musicales, cursos, talleres, etc.'
     )
-    
-    instrumentos_secundarios = models.CharField(
-        max_length=200,
-        blank=True,
-        verbose_name='Instrumentos secundarios',
-        help_text='Otros instrumentos que tocas (separados por comas)'
-    )
-    
-    generos_musicales = models.CharField(
-        max_length=200,
-        verbose_name='Géneros musicales',
-        help_text='Géneros musicales que interpretas (separados por comas)',
-        default='rock'
-    )
-    
-    nivel_experiencia = models.CharField(
-        max_length=20,
-        choices=NIVEL_CHOICES,
-        default='principiante',
-        verbose_name='Nivel de experiencia'
-    )
-    
     años_experiencia = models.PositiveIntegerField(
-        default=1,
+        default=1, 
         verbose_name='Años de experiencia',
         help_text='Número de años tocando música'
     )
     
-    formacion_musical = models.TextField(
-        max_length=500,
-        blank=True,
-        verbose_name='Formación musical',
-        help_text='Estudios musicales, cursos, talleres, etc.'
+    # RELACIONES CON CATÁLOGOS NORMALIZADOS
+    nivel_experiencia = models.ForeignKey(
+        NivelExperiencia, 
+        on_delete=models.PROTECT, 
+        verbose_name='Nivel de experiencia'
+    )
+    ubicacion = models.ForeignKey(
+        Ubicacion, 
+        on_delete=models.PROTECT, 
+        verbose_name='Ubicación'
     )
     
-    # Enlaces profesionales
+    # ENLACES PROFESIONALES
     website_personal = models.URLField(blank=True, verbose_name='Sitio web personal')
     soundcloud_url = models.URLField(blank=True, verbose_name='SoundCloud')
     youtube_url = models.URLField(blank=True, verbose_name='YouTube')
@@ -410,62 +306,86 @@ class PortafolioMusico(models.Model):
     instagram_url = models.URLField(blank=True, verbose_name='Instagram')
     facebook_url = models.URLField(blank=True, verbose_name='Facebook')
     video_demo = models.URLField(
-        blank=True,
+        blank=True, 
         verbose_name='Video demostración',
         help_text='Enlace a video demo (YouTube, Vimeo, etc.)'
     )
     
-    # Información de contacto profesional
-    ubicacion = models.CharField(
-        max_length=100,
-        verbose_name='Ubicación',
-        default='No especificada'
-    )
-    
+    # INFORMACIÓN COMERCIAL
     disponible_para_gigs = models.BooleanField(
-        default=True,
+        default=True, 
         verbose_name='Disponible para presentaciones'
     )
-    
     tarifa_base = models.PositiveIntegerField(
-        null=True,
-        blank=True,
+        null=True, 
+        blank=True, 
         verbose_name='Tarifa base (CLP)',
         help_text='Tarifa base por presentación en pesos chilenos (CLP)'
     )
     
-    # Metadatos
+    # FLAGS DE VISIBILIDAD
+    show_email = models.BooleanField(default=False, verbose_name='Mostrar email')
+    show_social_links = models.BooleanField(default=True, verbose_name='Mostrar enlaces sociales')
+    show_education = models.BooleanField(default=True, verbose_name='Mostrar formación')
+    show_tarifa = models.BooleanField(default=True, verbose_name='Mostrar tarifa')
+    show_telefono = models.BooleanField(default=False, verbose_name='Mostrar teléfono')
+    
+    # METADATOS
     fecha_creacion = models.DateTimeField(default=timezone.now)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
-    
-    portafolio_publico = models.BooleanField(
-        default=True,
-        verbose_name='Portafolio público',
-        help_text='¿Deseas que tu portafolio sea visible públicamente?'
-    )
+    activo = models.BooleanField(default=True, verbose_name='Portafolio activo')
 
     class Meta:
-        verbose_name = 'Portafolio de Músico'
-        verbose_name_plural = 'Portafolios de Músicos'
+        verbose_name = 'Portafolio'
+        verbose_name_plural = 'Portafolios'
 
     def __str__(self):
         return f"Portafolio - {self.usuario.get_full_name() or self.usuario.username}"
-
-    def get_instrumentos_list(self):
-        """Retorna lista de instrumentos como array"""
-        instrumentos = [self.get_instrumento_principal_display()]
-        if self.instrumentos_secundarios:
-            instrumentos.extend([i.strip() for i in self.instrumentos_secundarios.split(',')])
-        return instrumentos
     
-    def get_generos_list(self):
-        """Retorna lista de géneros como array"""
-        if self.generos_musicales:
-            return [g.strip() for g in self.generos_musicales.split(',')]
-        return []
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.usuario.get_full_name() or self.usuario.username)
+            slug = base_slug
+            counter = 1
+            while Portafolio.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def get_instrumentos_principales(self):
+        """Retorna los instrumentos marcados como principales"""
+        return self.portafolio_instrumentos.filter(es_principal=True).select_related('instrumento')
+
+    def get_instrumentos_secundarios(self):
+        """Retorna los instrumentos secundarios"""
+        return self.portafolio_instrumentos.filter(es_principal=False).select_related('instrumento')
+
+    def get_generos(self):
+        """Retorna todos los géneros del portafolio"""
+        return self.portafolio_generos.all().select_related('genero')
+
+    @property
+    def instrumentos(self):
+        """Property para acceso fácil a instrumentos - para compatibilidad"""
+        from django.db.models import Q
+        return Instrumento.objects.filter(
+            Q(portafolioinstrumento__portafolio=self)
+        ).distinct()
+
+    @property 
+    def generos(self):
+        """Property para acceso fácil a géneros - para compatibilidad"""
+        from django.db.models import Q
+        return Genero.objects.filter(
+            Q(portafoliogenero__portafolio=self)  
+        ).distinct()
 
     def get_enlaces_sociales(self):
-        """Retorna lista de objetos con enlaces sociales no vacíos con iconos"""
+        """Retorna lista de enlaces sociales no vacíos con iconos"""
+        if not self.show_social_links:
+            return []
+        
         enlaces = []
         
         if self.website_personal:
@@ -510,11 +430,125 @@ class PortafolioMusico(models.Model):
                 'icon': 'fab fa-facebook'
             })
             
-        if self.video_demo:
-            enlaces.append({
-                'nombre': 'Video Demo',
-                'url': self.video_demo,
-                'icon': 'fas fa-play-circle'
-            })
-            
         return enlaces
+
+
+# TABLAS INTERMEDIAS (M2M con metadata)
+class PortafolioInstrumento(models.Model):
+    """Relación entre portafolio e instrumentos con metadata"""
+    portafolio = models.ForeignKey(
+        Portafolio, 
+        on_delete=models.CASCADE, 
+        related_name='portafolio_instrumentos'
+    )
+    instrumento = models.ForeignKey(Instrumento, on_delete=models.CASCADE)
+    es_principal = models.BooleanField(default=False, verbose_name='Es instrumento principal')
+    prioridad = models.PositiveIntegerField(default=1, verbose_name='Prioridad')
+    años_experiencia = models.PositiveIntegerField(
+        null=True, 
+        blank=True, 
+        verbose_name='Años de experiencia con este instrumento'
+    )
+
+    class Meta:
+        verbose_name = 'Instrumento del Portafolio'
+        verbose_name_plural = 'Instrumentos del Portafolio'
+        unique_together = [('portafolio', 'instrumento')]
+        ordering = ['prioridad', '-es_principal']
+
+    def __str__(self):
+        tipo = "Principal" if self.es_principal else "Secundario"
+        return f"{self.portafolio.usuario.username} - {self.instrumento.nombre} ({tipo})"
+
+
+class PortafolioGenero(models.Model):
+    """Relación entre portafolio y géneros musicales"""
+    portafolio = models.ForeignKey(
+        Portafolio, 
+        on_delete=models.CASCADE, 
+        related_name='portafolio_generos'
+    )
+    genero = models.ForeignKey(Genero, on_delete=models.CASCADE)
+    prioridad = models.PositiveIntegerField(default=1, verbose_name='Prioridad')
+
+    class Meta:
+        verbose_name = 'Género del Portafolio'
+        verbose_name_plural = 'Géneros del Portafolio'
+        unique_together = [('portafolio', 'genero')]
+        ordering = ['prioridad']
+
+    def __str__(self):
+        return f"{self.portafolio.usuario.username} - {self.genero.nombre}"
+
+
+class Multimedia(models.Model):
+    """Multimedia del portafolio (imágenes y enlaces a videos/audio)"""
+    TIPO_CHOICES = [
+        ('imagen', 'Imagen'),
+        ('video_youtube', 'Video de YouTube'),
+        ('video_vimeo', 'Video de Vimeo'),
+        ('audio_soundcloud', 'Audio de SoundCloud'),
+        ('audio_spotify', 'Audio de Spotify'),
+    ]
+
+    portafolio = models.ForeignKey(
+        Portafolio, 
+        on_delete=models.CASCADE, 
+        related_name='multimedia'
+    )
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, verbose_name='Tipo')
+    titulo = models.CharField(max_length=100, verbose_name='Título')
+    descripcion = models.TextField(max_length=300, blank=True, verbose_name='Descripción')
+    
+    # Para imágenes
+    imagen = models.ImageField(
+        upload_to='portafolios/multimedia/', 
+        null=True, 
+        blank=True, 
+        verbose_name='Imagen'
+    )
+    
+    # Para enlaces externos
+    url = models.URLField(blank=True, verbose_name='URL')
+    
+    orden = models.PositiveIntegerField(default=1, verbose_name='Orden')
+    activo = models.BooleanField(default=True, verbose_name='Activo')
+    fecha_creacion = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        verbose_name = 'Multimedia'
+        verbose_name_plural = 'Multimedia'
+        ordering = ['orden', '-fecha_creacion']
+
+    def __str__(self):
+        return f"{self.portafolio.usuario.username} - {self.titulo}"
+
+
+class Testimonio(models.Model):
+    """Testimonios y referencias en el portafolio"""
+    portafolio = models.ForeignKey(
+        Portafolio, 
+        on_delete=models.CASCADE, 
+        related_name='testimonios'
+    )
+    autor_nombre = models.CharField(max_length=100, verbose_name='Nombre del autor')
+    autor_usuario = models.ForeignKey(
+        Usuario, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        verbose_name='Usuario autor (opcional)',
+        help_text='Si el testimonio es de un usuario registrado'
+    )
+    texto = models.TextField(max_length=500, verbose_name='Testimonio')
+    fecha_publicacion = models.DateTimeField(default=timezone.now, verbose_name='Fecha de publicación')
+    verificado = models.BooleanField(default=False, verbose_name='Verificado')
+    activo = models.BooleanField(default=True, verbose_name='Activo')
+
+    class Meta:
+        verbose_name = 'Testimonio'
+        verbose_name_plural = 'Testimonios'
+        ordering = ['-fecha_publicacion']
+
+    def __str__(self):
+        return f"Testimonio de {self.autor_nombre} para {self.portafolio.usuario.username}"

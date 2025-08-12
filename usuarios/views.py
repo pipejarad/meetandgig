@@ -15,9 +15,9 @@ from django.views.generic import CreateView, UpdateView
 from django.core.exceptions import PermissionDenied
 from .forms import (
     RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, 
-    PerfilMusicoForm, PerfilEmpleadorForm, PortafolioMusicoForm
+    PerfilMusicoForm, PerfilEmpleadorForm, PortafolioForm
 )
-from .models import Usuario, PerfilMusico, PerfilEmpleador, PortafolioMusico
+from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio
 
 
 def inicio(request):
@@ -336,19 +336,30 @@ def ver_mi_portafolio(request):
     if request.user.tipo_usuario != 'musico':
         raise PermissionDenied("Solo los músicos pueden ver esta página.")
     
-    portafolio, created = PortafolioMusico.objects.get_or_create(
-        usuario=request.user,
-        defaults={
-            'biografia': '',
-            'instrumento_principal': 'guitarra',
-            'generos_musicales': 'rock',
-            'nivel_experiencia': 'principiante',
-            'años_experiencia': 1,
-            'ubicacion': 'No especificada',
-            'disponible_para_gigs': True,
-            'portafolio_publico': True,
-        }
-    )
+    try:
+        portafolio = Portafolio.objects.get(usuario=request.user)
+        created = False
+    except Portafolio.DoesNotExist:
+        # Obtener valores por defecto
+        from usuarios.models import NivelExperiencia, Ubicacion
+        
+        nivel_default = NivelExperiencia.objects.filter(nombre='Principiante').first()
+        ubicacion_default = Ubicacion.objects.filter(nombre='Santiago').first()
+        
+        if not nivel_default:
+            nivel_default = NivelExperiencia.objects.first()
+        if not ubicacion_default:
+            ubicacion_default = Ubicacion.objects.first()
+            
+        portafolio = Portafolio.objects.create(
+            usuario=request.user,
+            biografia='',
+            años_experiencia=1,
+            nivel_experiencia=nivel_default,
+            ubicacion=ubicacion_default,
+            disponible_para_gigs=True,
+        )
+        created = True
     
     context = {
         'portafolio': portafolio,
@@ -364,11 +375,12 @@ def ver_portafolio_musico(request, username):
     usuario = get_object_or_404(Usuario, username=username, tipo_usuario='musico')
     
     try:
-        portafolio = usuario.portafolio_musico
-        if not portafolio.portafolio_publico:
-            if not request.user.is_authenticated or request.user != usuario:
-                raise Http404("Este portafolio no está disponible públicamente.")
-    except PortafolioMusico.DoesNotExist:
+        portafolio = usuario.portafolio
+        # TODO: Agregar flag para portafolio público en el nuevo modelo
+        # if not portafolio.activo:
+        #     if not request.user.is_authenticated or request.user != usuario:
+        #         raise Http404("Este portafolio no está disponible públicamente.")
+    except Portafolio.DoesNotExist:
         raise Http404("Este músico no tiene un portafolio disponible.")
     
     context = {
@@ -386,36 +398,46 @@ def editar_portafolio_musico(request):
     if request.user.tipo_usuario != 'musico':
         raise PermissionDenied("Solo los músicos pueden editar portafolios.")
     
-    portafolio, created = PortafolioMusico.objects.get_or_create(
-        usuario=request.user,
-        defaults={
-            'biografia': '',
-            'instrumento_principal': 'guitarra',
-            'generos_musicales': 'rock',
-            'nivel_experiencia': 'principiante',
-            'años_experiencia': 1,
-            'ubicacion': 'No especificada',
-            'disponible_para_gigs': True,
-            'portafolio_publico': True,
-        }
-    )
+    try:
+        portafolio = Portafolio.objects.get(usuario=request.user)
+        created = False
+    except Portafolio.DoesNotExist:
+        # Obtener valores por defecto
+        from usuarios.models import NivelExperiencia, Ubicacion
+        
+        nivel_default = NivelExperiencia.objects.filter(nombre='Principiante').first()
+        ubicacion_default = Ubicacion.objects.filter(nombre='Santiago').first()
+        
+        if not nivel_default:
+            nivel_default = NivelExperiencia.objects.first()
+        if not ubicacion_default:
+            ubicacion_default = Ubicacion.objects.first()
+            
+        portafolio = Portafolio.objects.create(
+            usuario=request.user,
+            biografia='',
+            años_experiencia=1,
+            nivel_experiencia=nivel_default,
+            ubicacion=ubicacion_default,
+            disponible_para_gigs=True,
+        )
+        created = True
     
     es_creacion = created or not any([
         portafolio.biografia, 
-        portafolio.instrumentos_secundarios,
         portafolio.formacion_musical,
         portafolio.website_personal
     ])
     
     if request.method == 'POST':
-        form = PortafolioMusicoForm(request.POST, instance=portafolio)
+        form = PortafolioForm(request.POST, instance=portafolio)
         if form.is_valid():
             form.save()
             mensaje = 'Portafolio creado exitosamente.' if es_creacion else 'Portafolio actualizado exitosamente.'
             messages.success(request, mensaje)
             return redirect('ver_mi_portafolio')
     else:
-        form = PortafolioMusicoForm(instance=portafolio)
+        form = PortafolioForm(instance=portafolio)
     
     titulo = 'Crear Mi Portafolio Musical' if es_creacion else 'Editar Mi Portafolio Musical'
     
@@ -434,9 +456,6 @@ def ver_perfil_musico(request, username):
     
     try:
         perfil = usuario.perfil_musico
-        if not perfil.perfil_publico:
-            if not request.user.is_authenticated or request.user != usuario:
-                raise Http404("Este perfil no está disponible públicamente.")
     except PerfilMusico.DoesNotExist:
         raise Http404("Este músico no tiene un perfil disponible.")
     

@@ -8,10 +8,7 @@
     .portfolio-header {
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         color: white;
-        padding: 3rem 2rem;
-        border-radius: 0.5rem;
-        margin-bottom: 2rem;
-        text-align: center;
+        padding: 2rem 0;
         position: relative;
         overflow: hidden;
     }
@@ -23,91 +20,143 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="80" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="30" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
-        opacity: 0.3;
+        background: rgba(0,0,0,0.1);
+        z-index: 1;
     }
     
-    .portfolio-header h1 {
-        margin-bottom: 0.5rem;
+    .portfolio-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .portfolio-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        object-fit: cover;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .portfolio-info {
+        margin-left: 1.5rem;
+    }
+    
+    .portfolio-name {
+        font-size: 2rem;
         font-weight: 700;
-        position: relative;
-        z-index: 1;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    .portfolio-header p {
-        margin-bottom: 0;
+    .portfolio-subtitle {
+        font-size: 1.1rem;
         opacity: 0.9;
-        position: relative;
-        z-index: 1;
+        margin-bottom: 0.5rem;
+    }
+    
+    .portfolio-location {
+        opacity: 0.8;
+        font-size: 0.95rem;
     }
     
     .info-card {
-        background: white;
-        border-radius: 0.5rem;
-        padding: 1.5rem;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         margin-bottom: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        border-left: 4px solid #28a745;
+        border-radius: 0.75rem;
+        overflow: hidden;
     }
     
-    .info-card h5 {
-        color: #28a745;
-        margin-bottom: 1rem;
+    .info-card .card-header {
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+        padding: 1rem 1.5rem;
         font-weight: 600;
+        color: #495057;
     }
     
-    .badge-custom {
-        background: linear-gradient(45deg, #28a745, #20c997);
+    .info-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .skill-badge {
+        display: inline-block;
+        background: #28a745;
         color: white;
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.8rem;
         border-radius: 1rem;
         font-size: 0.875rem;
-        margin: 0.25rem;
-        display: inline-block;
+        margin: 0.2rem;
+        font-weight: 500;
+    }
+    
+    .skill-badge.secondary {
+        background: #6c757d;
     }
     
     .social-links a {
         display: inline-block;
-        padding: 0.75rem;
-        margin: 0.25rem;
-        background: #f8f9fa;
-        border-radius: 0.5rem;
-        color: #495057;
+        margin: 0.25rem 0.5rem 0.25rem 0;
+        padding: 0.5rem 1rem;
+        background: #28a745;
+        color: white;
         text-decoration: none;
-        transition: all 0.3s ease;
-        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
     }
     
     .social-links a:hover {
+        background: #218838;
+        transform: translateY(-1px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .social-links a.soundcloud { background: #ff5500; }
+    .social-links a.soundcloud:hover { background: #e64900; }
+    .social-links a.youtube { background: #ff0000; }
+    .social-links a.youtube:hover { background: #cc0000; }
+    .social-links a.spotify { background: #1db954; }
+    .social-links a.spotify:hover { background: #1ed760; }
+    .social-links a.instagram { background: #e4405f; }
+    .social-links a.instagram:hover { background: #d73554; }
+    .social-links a.facebook { background: #1877f2; }
+    .social-links a.facebook:hover { background: #166fe5; }
+    
+    .experience-level {
+        display: inline-block;
+        padding: 0.5rem 1rem;
         background: #28a745;
         color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        border-radius: 0.375rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
     }
     
-    .status-badge {
-        padding: 0.5rem 1rem;
+    .availability-status {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
         border-radius: 1rem;
         font-size: 0.875rem;
-        font-weight: 600;
-        display: block;
-        margin-top: 0.5rem;
+        font-weight: 500;
     }
     
-    .status-available {
+    .availability-status.available {
         background: #d4edda;
         color: #155724;
         border: 1px solid #c3e6cb;
     }
     
-    .status-unavailable {
+    .availability-status.unavailable {
         background: #f8d7da;
         color: #721c24;
         border: 1px solid #f5c6cb;
     }
     
     .btn-edit {
-        background: linear-gradient(45deg, #007bff, #0056b3);
+        background: linear-gradient(45deg, #28a745, #20c997);
         border: none;
         color: white;
         padding: 0.75rem 2rem;
@@ -118,7 +167,7 @@
     
     .btn-edit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
         color: white;
     }
     
@@ -126,7 +175,7 @@
         text-align: center;
         padding: 3rem;
         background: #f8f9fa;
-        border-radius: 0.5rem;
+        border-radius: 0.75rem;
         border: 2px dashed #dee2e6;
     }
     
@@ -135,181 +184,268 @@
         color: #6c757d;
         margin-bottom: 1rem;
     }
+    
+    .video-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        border-radius: 0.375rem;
+    }
+    
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <div class="col-12">
-            <div class="portfolio-header">
-                <h1>
-                    <i class="fas fa-music me-2"></i>
-                    Mi Portafolio Profesional
-                </h1>
-                <p>Tu showcase musical para empleadores y colaboradores</p>
+<!-- Header del portafolio -->
+<div class="portfolio-header">
+    <div class="portfolio-content">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    {% if portafolio.usuario.foto_perfil %}
+                        <img src="{{ portafolio.usuario.foto_perfil.url }}?v={{ portafolio.usuario.date_joined|date:'U' }}" alt="{{ portafolio.usuario.username }}" class="portfolio-avatar">
+                    {% else %}
+                        <img src="{% static 'img/user.png' %}" alt="{{ portafolio.usuario.username }}" class="portfolio-avatar">
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <div class="portfolio-info">
+                        <h1 class="portfolio-name">
+                            {{ portafolio.usuario.get_full_name|default:portafolio.usuario.username }}
+                        </h1>
+                        <div class="portfolio-subtitle">
+                            {% if portafolio.get_instrumentos_principales %}
+                                {{ portafolio.get_instrumentos_principales.first.instrumento.nombre }}
+                                {% if portafolio.get_generos %}
+                                    • {{ portafolio.get_generos.first.genero.nombre }}{% if portafolio.get_generos.count > 1 %}, {{ portafolio.get_generos.1.genero.nombre }}{% endif %}
+                                {% endif %}
+                            {% else %}
+                                Músico Profesional
+                            {% endif %}
+                        </div>
+                        <div class="portfolio-location">
+                            <i class="icon-location"></i> 
+                            {% if portafolio.ubicacion %}
+                                {{ portafolio.ubicacion.nombre }}
+                            {% else %}
+                                Ubicación no especificada
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="text-end">
+                        <div class="availability-status {% if portafolio.disponible_para_gigs %}available{% else %}unavailable{% endif %}">
+                            {% if portafolio.disponible_para_gigs %}
+                                <i class="icon-check"></i> Disponible
+                            {% else %}
+                                <i class="icon-x"></i> No disponible
+                            {% endif %}
+                        </div>
+                        <div class="mt-2">
+                            <a href="{% url 'editar_portafolio_musico' %}" class="btn btn-light btn-sm me-2">
+                                <i class="icon-edit"></i> Editar Portafolio
+                            </a>
+                            <a href="{% url 'ver_mi_perfil' %}" class="btn btn-outline-light btn-sm">
+                                <i class="icon-user"></i> Ver Perfil
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+</div>
+
+<div class="container py-4">
 
     {% if portafolio %}
         <div class="row">
-            <!-- Información Musical -->
-            <div class="col-md-6">
-                <div class="info-card">
-                    <h5><i class="fas fa-guitar me-2"></i>Información Musical</h5>
-                    
-                    <div class="mb-3">
-                        <strong>Instrumento Principal:</strong>
-                        <span class="badge-custom ms-2">{{ portafolio.get_instrumento_principal_display }}</span>
+            <!-- Columna principal -->
+            <div class="col-lg-8">
+                <!-- Biografía -->
+                {% if portafolio.biografia %}
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="icon-user"></i> Biografía Profesional
                     </div>
-                    
-                    {% if portafolio.generos_musicales %}
-                        <div class="mb-3">
-                            <strong>Géneros Musicales:</strong><br>
-                            {% for genero in portafolio.get_generos_list %}
-                                <span class="badge-custom">{{ genero }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    
-                    {% if portafolio.instrumentos_secundarios %}
-                        <div class="mb-3">
-                            <strong>Instrumentos Secundarios:</strong><br>
-                            {% for instrumento in portafolio.get_instrumentos_list %}
-                                <span class="badge-custom">{{ instrumento }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    
-                    <div class="row">
-                        {% if portafolio.nivel_experiencia %}
-                            <div class="col-sm-6 mb-2">
-                                <strong>Nivel:</strong><br>
-                                {{ portafolio.get_nivel_experiencia_display }}
+                    <div class="card-body">
+                        {{ portafolio.biografia|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Instrumentos y Géneros -->
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="icon-music"></i> Instrumentos y Géneros
+                    </div>
+                    <div class="card-body">
+                        {% if portafolio.get_instrumentos_principales %}
+                            <h6>Instrumento Principal</h6>
+                            <div class="mb-3">
+                                {% for instrumento_rel in portafolio.get_instrumentos_principales %}
+                                    <span class="skill-badge">{{ instrumento_rel.instrumento.nombre }}</span>
+                                {% endfor %}
                             </div>
                         {% endif %}
                         
-                        {% if portafolio.años_experiencia %}
-                            <div class="col-sm-6 mb-2">
-                                <strong>Experiencia:</strong><br>
-                                {{ portafolio.años_experiencia }} años
+                        {% if portafolio.get_instrumentos_secundarios %}
+                            <h6>Instrumentos Secundarios</h6>
+                            <div class="mb-3">
+                                {% for instrumento_rel in portafolio.get_instrumentos_secundarios %}
+                                    <span class="skill-badge secondary">{{ instrumento_rel.instrumento.nombre }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        {% if portafolio.get_generos %}
+                            <h6>Géneros Musicales</h6>
+                            <div>
+                                {% for genero_rel in portafolio.get_generos %}
+                                    <span class="skill-badge">{{ genero_rel.genero.nombre }}</span>
+                                {% endfor %}
                             </div>
                         {% endif %}
                     </div>
                 </div>
-            </div>
 
-            <!-- Información Comercial -->
-            <div class="col-md-6">
-                <div class="info-card">
-                    <h5><i class="fas fa-briefcase me-2"></i>Información Comercial</h5>
-                    
-                    {% if portafolio.ubicacion %}
-                        <div class="mb-3">
-                            <strong><i class="fas fa-map-marker-alt me-1"></i>Ubicación:</strong><br>
-                            {{ portafolio.ubicacion }}
-                        </div>
-                    {% endif %}
-                    
-                    {% if portafolio.tarifa_base %}
-                        <div class="mb-3">
-                            <strong><i class="fas fa-dollar-sign me-1"></i>Tarifa Base:</strong><br>
-                            ${{ portafolio.tarifa_base|floatformat:0 }} CLP
-                        </div>
-                    {% endif %}
-                    
-                    <div class="mb-3">
-                        <strong><i class="fas fa-calendar-check me-1"></i>Estado:</strong><br>
-                        {% if portafolio.disponible_para_gigs %}
-                            <span class="status-badge status-available">
-                                <i class="fas fa-check-circle me-1"></i>Disponible para contrataciones
-                            </span>
-                        {% else %}
-                            <span class="status-badge status-unavailable">
-                                <i class="fas fa-times-circle me-1"></i>No disponible
-                            </span>
-                        {% endif %}
+                <!-- Experiencia y Formación -->
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="icon-graduation-cap"></i> Experiencia y Formación
                     </div>
-                    
-                    <div class="mb-3">
-                        <strong><i class="fas fa-eye me-1"></i>Visibilidad:</strong><br>
-                        {% if portafolio.portafolio_publico %}
-                            <span class="status-badge status-available">
-                                <i class="fas fa-globe me-1"></i>Portafolio público
-                            </span>
-                        {% else %}
-                            <span class="status-badge status-unavailable">
-                                <i class="fas fa-lock me-1"></i>Portafolio privado
-                            </span>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {% if portafolio.nivel_experiencia %}
+                                <span class="experience-level">
+                                    {{ portafolio.nivel_experiencia.nombre }}
+                                </span>
+                                {% if portafolio.años_experiencia %}
+                                    <span class="text-muted ms-2">
+                                        ({{ portafolio.años_experiencia }} año{{ portafolio.años_experiencia|pluralize }} de experiencia)
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        
+                        {% if portafolio.formacion_musical %}
+                            <h6>Formación Musical</h6>
+                            <p class="mb-0">{{ portafolio.formacion_musical|linebreaks }}</p>
                         {% endif %}
                     </div>
                 </div>
+
+                <!-- Video Demo -->
+                {% if portafolio.video_demo %}
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="icon-video"></i> Video Demostración
+                    </div>
+                    <div class="card-body">
+                        <div class="video-container">
+                            {% if 'youtube.com' in portafolio.video_demo or 'youtu.be' in portafolio.video_demo %}
+                                {% if 'youtu.be' in portafolio.video_demo %}
+                                    <iframe src="https://www.youtube.com/embed/{{ portafolio.video_demo|slice:'17:' }}" frameborder="0" allowfullscreen></iframe>
+                                {% else %}
+                                    <iframe src="https://www.youtube.com/embed/{{ portafolio.video_demo|slice:'32:' }}" frameborder="0" allowfullscreen></iframe>
+                                {% endif %}
+                            {% else %}
+                                <p><a href="{{ portafolio.video_demo }}" target="_blank" rel="noopener">Ver video demostración</a></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-        </div>
 
-        <!-- Biografía y Formación -->
-        <div class="row">
-            {% if portafolio.biografia %}
-                <div class="col-md-6">
-                    <div class="info-card">
-                        <h5><i class="fas fa-user-circle me-2"></i>Biografía</h5>
-                        <p style="white-space: pre-line;">{{ portafolio.biografia }}</p>
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Información Profesional -->
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="icon-info"></i> Información Profesional
+                    </div>
+                    <div class="card-body">
+                        {% if portafolio.tarifa_base %}
+                            <div class="mb-3">
+                                <strong>Tarifa base:</strong><br>
+                                <span class="h5 text-success">${{ portafolio.tarifa_base|floatformat:0 }} CLP</span>
+                            </div>
+                        {% endif %}
+                        
+                        {% if portafolio.nivel_experiencia %}
+                            <div class="mb-3">
+                                <strong>Nivel:</strong><br>
+                                {{ portafolio.nivel_experiencia.nombre }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if portafolio.ubicacion %}
+                            <div class="mb-3">
+                                <strong>Ubicación:</strong><br>
+                                {{ portafolio.ubicacion.nombre }}
+                            </div>
+                        {% endif %}
+                        
+                        <div>
+                            <strong>Estado:</strong><br>
+                            <span class="availability-status {% if portafolio.disponible_para_gigs %}available{% else %}unavailable{% endif %}">
+                                {% if portafolio.disponible_para_gigs %}
+                                    Disponible para presentaciones
+                                {% else %}
+                                    No disponible actualmente
+                                {% endif %}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            {% endif %}
-            
-            {% if portafolio.formacion_musical %}
-                <div class="col-md-6">
-                    <div class="info-card">
-                        <h5><i class="fas fa-graduation-cap me-2"></i>Formación Musical</h5>
-                        <p style="white-space: pre-line;">{{ portafolio.formacion_musical }}</p>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
 
-        <!-- Enlaces y Redes Sociales -->
-        {% if portafolio.get_enlaces_sociales %}
-            <div class="row">
-                <div class="col-12">
-                    <div class="info-card">
-                        <h5><i class="fas fa-link me-2"></i>Enlaces y Redes Sociales</h5>
+                <!-- Enlaces y redes sociales -->
+                {% if portafolio.get_enlaces_sociales %}
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="icon-link"></i> Enlaces y Redes
+                    </div>
+                    <div class="card-body">
                         <div class="social-links">
                             {% for enlace in portafolio.get_enlaces_sociales %}
-                                <a href="{{ enlace.url }}" target="_blank" rel="noopener noreferrer">
-                                    <i class="{{ enlace.icon }} me-2"></i>{{ enlace.nombre }}
+                                <a href="{{ enlace.url }}" target="_blank" rel="noopener" 
+                                   {% if 'soundcloud' in enlace.nombre|lower %}class="soundcloud"
+                                   {% elif 'youtube' in enlace.nombre|lower %}class="youtube"
+                                   {% elif 'spotify' in enlace.nombre|lower %}class="spotify"
+                                   {% elif 'instagram' in enlace.nombre|lower %}class="instagram"
+                                   {% elif 'facebook' in enlace.nombre|lower %}class="facebook"
+                                   {% endif %}>
+                                    <i class="{% if 'soundcloud' in enlace.nombre|lower %}icon-soundcloud{% elif 'youtube' in enlace.nombre|lower %}icon-youtube{% elif 'spotify' in enlace.nombre|lower %}icon-spotify{% elif 'instagram' in enlace.nombre|lower %}icon-instagram{% elif 'facebook' in enlace.nombre|lower %}icon-facebook{% else %}icon-globe{% endif %}"></i> {{ enlace.nombre }}
                                 </a>
                             {% endfor %}
                         </div>
                     </div>
                 </div>
-            </div>
-        {% endif %}
-
-        <!-- Acciones -->
-        <div class="row">
-            <div class="col-12 text-center">
-                <a href="{% url 'editar_portafolio_musico' %}" class="btn btn-edit btn-lg">
-                    <i class="fas fa-edit me-2"></i>Editar Portafolio
-                </a>
-                
-                <a href="{% url 'ver_mi_perfil' %}" class="btn btn-outline-secondary btn-lg ms-3">
-                    <i class="fas fa-user me-2"></i>Ver Perfil Personal
-                </a>
+                {% endif %}
             </div>
         </div>
-
     {% else %}
         <!-- Estado vacío -->
         <div class="row">
             <div class="col-12">
                 <div class="empty-state">
-                    <i class="fas fa-music"></i>
+                    <i class="icon-music"></i>
                     <h3>Aún no has creado tu portafolio</h3>
                     <p>Crea tu portafolio profesional para mostrar tu talento musical y ser encontrado por empleadores.</p>
                     <a href="{% url 'crear_portafolio_musico' %}" class="btn btn-success btn-lg mt-3">
-                        <i class="fas fa-plus me-2"></i>Crear Mi Portafolio
+                        <i class="icon-plus me-2"></i>Crear Mi Portafolio
                     </a>
                 </div>
             </div>

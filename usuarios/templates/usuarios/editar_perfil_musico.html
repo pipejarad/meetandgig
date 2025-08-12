@@ -19,23 +19,6 @@
         font-weight: 600;
     }
     
-    .url-field {
-        position: relative;
-    }
-    
-    .url-field .form-control {
-        padding-left: 2.5rem;
-    }
-    
-    .url-field .url-icon {
-        position: absolute;
-        left: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        z-index: 3;
-    }
-    
     .preview-image {
         max-width: 200px;
         max-height: 200px;
@@ -43,11 +26,17 @@
         margin-top: 0.5rem;
     }
     
-    .character-counter {
-        font-size: 0.875rem;
-        color: #6c757d;
-        text-align: right;
-        margin-top: 0.25rem;
+    .info-banner {
+        background: #e3f2fd;
+        border: 1px solid #90caf9;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-banner h6 {
+        color: #1976d2;
+        margin-bottom: 0.5rem;
     }
 </style>
 {% endblock %}
@@ -67,11 +56,22 @@
                         {% endif %}
                     </h4>
                     <small class="text-white-50">
-                        Completa tu información para crear un portafolio profesional
+                        Información personal y configuración de privacidad
                     </small>
                 </div>
                 
                 <div class="card-body">
+                    <!-- Banner informativo -->
+                    <div class="info-banner">
+                        <h6><i class="icon-info"></i> Información Personal vs Portafolio Profesional</h6>
+                        <p class="mb-2">
+                            <strong>Aquí editas:</strong> Información personal, contacto y configuración de privacidad.
+                        </p>
+                        <p class="mb-0">
+                            <strong>Para información profesional:</strong> <a href="{% url 'editar_portafolio_musico' %}">Edita tu portafolio</a> (instrumentos, experiencia, biografía, etc.)
+                        </p>
+                    </div>
+
                     <form method="post" enctype="multipart/form-data" id="perfil-form">
                         {% csrf_token %}
                         
@@ -88,7 +88,7 @@
                                 <ul class="mb-0">
                                 {% for field, errors in form.errors.items %}
                                     {% for error in errors %}
-                                        <li><strong>{% if field == 'first_name' %}Nombre{% elif field == 'last_name' %}Apellido{% elif field == 'instrumento_principal' %}Instrumento principal{% elif field == 'generos_musicales' %}Géneros musicales{% elif field == 'nivel_experiencia' %}Nivel de experiencia{% elif field == 'años_experiencia' %}Años de experiencia{% elif field == 'ubicacion' %}Ubicación{% elif field == 'biografia' %}Biografía{% elif field == 'formacion_musical' %}Formación musical{% elif field == 'instrumentos_secundarios' %}Instrumentos secundarios{% else %}{{ field|title }}{% endif %}:</strong> {{ error }}</li>
+                                        <li><strong>{% if field == 'first_name' %}Nombre{% elif field == 'last_name' %}Apellido{% elif field == 'telefono' %}Teléfono{% elif field == 'fecha_nacimiento' %}Fecha de nacimiento{% elif field == 'direccion' %}Dirección{% else %}{{ field|title }}{% endif %}:</strong> {{ error }}</li>
                                     {% endfor %}
                                 {% endfor %}
                                 </ul>
@@ -132,31 +132,22 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="mb-3">
-                                        <label for="{{ form.biografia.id_for_label }}" class="form-label">
-                                            {{ form.biografia.label }}
-                                        </label>
-                                        {{ form.biografia }}
-                                        <div class="character-counter">
-                                            <span id="biografia-count">0</span>/1000 caracteres
-                                        </div>
-                                        {% if form.biografia.help_text %}
-                                            <div class="form-text">{{ form.biografia.help_text }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            
+
+                            <!-- Fecha de nacimiento -->
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="{{ form.ubicacion.id_for_label }}" class="form-label">
-                                            {{ form.ubicacion.label }} *
+                                        <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label">
+                                            {{ form.fecha_nacimiento.label }}
                                         </label>
-                                        {{ form.ubicacion }}
+                                        {{ form.fecha_nacimiento }}
+                                        {% if form.fecha_nacimiento.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.fecha_nacimiento.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -180,229 +171,109 @@
                             </div>
                         </div>
 
-                        <!-- Instrumentos y Géneros -->
+                        <!-- Información de Contacto -->
                         <div class="form-section">
-                            <h5><i class="icon-music"></i> Instrumentos y Géneros</h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.instrumento_principal.id_for_label }}" class="form-label">
-                                            {{ form.instrumento_principal.label }} *
-                                        </label>
-                                        {{ form.instrumento_principal }}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.instrumentos_secundarios.id_for_label }}" class="form-label">
-                                            {{ form.instrumentos_secundarios.label }}
-                                        </label>
-                                        {{ form.instrumentos_secundarios }}
-                                        {% if form.instrumentos_secundarios.help_text %}
-                                            <div class="form-text">{{ form.instrumentos_secundarios.help_text }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="{{ form.generos_musicales.id_for_label }}" class="form-label">
-                                    {{ form.generos_musicales.label }} *
-                                </label>
-                                {{ form.generos_musicales }}
-                                {% if form.generos_musicales.help_text %}
-                                    <div class="form-text">{{ form.generos_musicales.help_text }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Experiencia y Formación -->
-                        <div class="form-section">
-                            <h5><i class="icon-graduation-cap"></i> Experiencia y Formación</h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.nivel_experiencia.id_for_label }}" class="form-label">
-                                            {{ form.nivel_experiencia.label }} *
-                                        </label>
-                                        {{ form.nivel_experiencia }}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.años_experiencia.id_for_label }}" class="form-label">
-                                            {{ form.años_experiencia.label }} *
-                                        </label>
-                                        {{ form.años_experiencia }}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="{{ form.formacion_musical.id_for_label }}" class="form-label">
-                                    {{ form.formacion_musical.label }}
-                                </label>
-                                {{ form.formacion_musical }}
-                                <div class="character-counter">
-                                    <span id="formacion-count">0</span>/500 caracteres
-                                </div>
-                                {% if form.formacion_musical.help_text %}
-                                    <div class="form-text">{{ form.formacion_musical.help_text }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Enlaces Externos -->
-                        <div class="form-section">
-                            <h5><i class="icon-link"></i> Enlaces y Redes Sociales</h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.website_personal.id_for_label }}" class="form-label">
-                                            {{ form.website_personal.label }}
-                                        </label>
-                                        <div class="url-field">
-                                            <i class="icon-globe url-icon"></i>
-                                            {{ form.website_personal }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.soundcloud_url.id_for_label }}" class="form-label">
-                                            {{ form.soundcloud_url.label }}
-                                        </label>
-                                        <div class="url-field">
-                                            <i class="icon-soundcloud url-icon"></i>
-                                            {{ form.soundcloud_url }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <h5><i class="icon-phone"></i> Información de Contacto</h5>
                             
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="{{ form.youtube_url.id_for_label }}" class="form-label">
-                                            {{ form.youtube_url.label }}
+                                        <label for="{{ form.telefono.id_for_label }}" class="form-label">
+                                            {{ form.telefono.label }}
                                         </label>
-                                        <div class="url-field">
-                                            <i class="icon-youtube url-icon"></i>
-                                            {{ form.youtube_url }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.spotify_url.id_for_label }}" class="form-label">
-                                            {{ form.spotify_url.label }}
-                                        </label>
-                                        <div class="url-field">
-                                            <i class="icon-spotify url-icon"></i>
-                                            {{ form.spotify_url }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.instagram_url.id_for_label }}" class="form-label">
-                                            {{ form.instagram_url.label }}
-                                        </label>
-                                        <div class="url-field">
-                                            <i class="icon-instagram url-icon"></i>
-                                            {{ form.instagram_url }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.facebook_url.id_for_label }}" class="form-label">
-                                            {{ form.facebook_url.label }}
-                                        </label>
-                                        <div class="url-field">
-                                            <i class="icon-facebook url-icon"></i>
-                                            {{ form.facebook_url }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Información Profesional -->
-                        <div class="form-section">
-                            <h5><i class="icon-briefcase"></i> Información Profesional</h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="{{ form.tarifa_base.id_for_label }}" class="form-label">
-                                            {{ form.tarifa_base.label }}
-                                        </label>
-                                        {{ form.tarifa_base }}
-                                        {% if form.tarifa_base.help_text %}
-                                            <div class="form-text">{{ form.tarifa_base.help_text }}</div>
+                                        {{ form.telefono }}
+                                        {% if form.telefono.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.telefono.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
                                         {% endif %}
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="{{ form.video_demo.id_for_label }}" class="form-label">
-                                            {{ form.video_demo.label }}
+                                        <label for="{{ form.direccion.id_for_label }}" class="form-label">
+                                            {{ form.direccion.label }}
                                         </label>
-                                        <div class="url-field">
-                                            <i class="icon-video url-icon"></i>
-                                            {{ form.video_demo }}
-                                        </div>
-                                        {% if form.video_demo.help_text %}
-                                            <div class="form-text">{{ form.video_demo.help_text }}</div>
+                                        {{ form.direccion }}
+                                        {% if form.direccion.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.direccion.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Configuración de Privacidad -->
+                        <div class="form-section">
+                            <h5><i class="icon-shield"></i> Configuración de Privacidad</h5>
                             
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-check mb-3">
-                                        {{ form.disponible_para_gigs }}
-                                        <label class="form-check-label" for="{{ form.disponible_para_gigs.id_for_label }}">
-                                            {{ form.disponible_para_gigs.label }}
+                                        {{ form.recibir_notificaciones_email }}
+                                        <label class="form-check-label" for="{{ form.recibir_notificaciones_email.id_for_label }}">
+                                            {{ form.recibir_notificaciones_email.label }}
                                         </label>
+                                        <small class="form-text text-muted d-block">
+                                            Recibe notificaciones de nuevas oportunidades por email
+                                        </small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-check mb-3">
-                                        {{ form.perfil_publico }}
-                                        <label class="form-check-label" for="{{ form.perfil_publico.id_for_label }}">
-                                            {{ form.perfil_publico.label }}
+                                        {{ form.mostrar_telefono_publico }}
+                                        <label class="form-check-label" for="{{ form.mostrar_telefono_publico.id_for_label }}">
+                                            {{ form.mostrar_telefono_publico.label }}
                                         </label>
-                                        {% if form.perfil_publico.help_text %}
-                                            <div class="form-text">{{ form.perfil_publico.help_text }}</div>
-                                        {% endif %}
+                                        <small class="form-text text-muted d-block">
+                                            Permite que otros usuarios vean tu número de teléfono
+                                        </small>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Botones de acción -->
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'inicio' %}" class="btn btn-secondary">
-                                <i class="icon-arrow-left"></i> Cancelar
-                            </a>
-                            <div>
-                                {% if not es_nuevo_perfil %}
-                                    <a href="{% url 'ver_mi_perfil' %}" class="btn btn-outline-primary me-2">
-                                        <i class="icon-eye"></i> Ver Perfil
+                        <!-- Botones -->
+                        <div class="row">
+                            <div class="col-12 d-flex justify-content-between">
+                                <div>
+                                    <a href="{% url 'ver_perfil_musico' usuario.username %}" class="btn btn-secondary">
+                                        <i class="icon-arrow-left"></i> Cancelar
                                     </a>
-                                    <a href="{% url 'ver_mi_portafolio' %}" class="btn btn-outline-success me-2">
-                                        <i class="icon-briefcase"></i> Mi Portafolio
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="icon-save"></i>
+                                        {% if es_nuevo_perfil %}
+                                            Crear Perfil
+                                        {% else %}
+                                            Guardar Cambios
+                                        {% endif %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enlaces rápidos -->
+                        <div class="form-section mt-4">
+                            <h5><i class="icon-briefcase"></i> Enlaces Rápidos</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <a href="{% url 'ver_mi_portafolio' %}" class="btn btn-success btn-sm d-block">
+                                        <i class="icon-briefcase"></i> Ver Mi Portafolio
                                     </a>
-                                {% endif %}
-                                <button type="submit" class="btn btn-success">
-                                    <i class="icon-save"></i> 
-                                    {% if es_nuevo_perfil %}Crear Perfil{% else %}Guardar Cambios{% endif %}
-                                </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="{% url 'editar_portafolio_musico' %}" class="btn btn-outline-success btn-sm d-block">
+                                        <i class="icon-edit"></i> Editar Portafolio
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -416,57 +287,14 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Character counter para biografía
-    const biografiaField = document.getElementById('{{ form.biografia.id_for_label }}');
-    const biografiaCounter = document.getElementById('biografia-count');
-    
-    if (biografiaField && biografiaCounter) {
-        function updateBiografiaCounter() {
-            const count = biografiaField.value.length;
-            biografiaCounter.textContent = count;
-            
-            if (count > 900) {
-                biografiaCounter.style.color = '#dc3545';
-            } else if (count > 700) {
-                biografiaCounter.style.color = '#fd7e14';
-            } else {
-                biografiaCounter.style.color = '#6c757d';
-            }
-        }
-        
-        biografiaField.addEventListener('input', updateBiografiaCounter);
-        updateBiografiaCounter();
-    }
-    
-    // Character counter para formación
-    const formacionField = document.getElementById('{{ form.formacion_musical.id_for_label }}');
-    const formacionCounter = document.getElementById('formacion-count');
-    
-    if (formacionField && formacionCounter) {
-        function updateFormacionCounter() {
-            const count = formacionField.value.length;
-            formacionCounter.textContent = count;
-            
-            if (count > 400) {
-                formacionCounter.style.color = '#dc3545';
-            } else if (count > 300) {
-                formacionCounter.style.color = '#fd7e14';
-            } else {
-                formacionCounter.style.color = '#6c757d';
-            }
-        }
-        
-        formacionField.addEventListener('input', updateFormacionCounter);
-        updateFormacionCounter();
-    }
-    
-    // Validación básica del formulario
+    // Validación del formulario
     const form = document.getElementById('perfil-form');
+    
     form.addEventListener('submit', function(e) {
-        const requiredFields = form.querySelectorAll('[required]');
         let isValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
         
-        requiredFields.forEach(field => {
+        requiredFields.forEach(function(field) {
             if (!field.value.trim()) {
                 isValid = false;
                 field.classList.add('is-invalid');
