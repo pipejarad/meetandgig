@@ -17,14 +17,14 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 - ✅ **Ticket 1.5**: Acceso al panel de administración para superusuarios
 - ✅ **Ticket 1.6**: Diseño responsivo y amigable para pantallas de login
 
-### 🎼 Sprint 2: Perfiles de Usuario (90% COMPLETADO)
+### 🎼 Sprint 2: Perfiles de Usuario (100% COMPLETADO)
 
 - ✅ **Ticket 2.1**: Crear y editar perfil de músico (administrativo/personal)
 - ✅ **Ticket 2.2**: Crear y editar perfil de empleador (organización, contacto)
 - ✅ **Ticket 2.3**: Subida de foto de perfil con carga y visualización
 - ✅ **Ticket 2.4**: Vista del portafolio del músico (página pública profesional)
 - ✅ **Ticket 2.5**: Crear y editar contenido del portafolio (instrumentos, géneros, multimedia)
-- 🔄 **Ticket 2.6**: Diseño de pantallas de perfil (incluye ruta /p/<slug>/ y SEO básico)
+- ✅ **Ticket 2.6**: Diseño de pantallas de perfil (incluye ruta /p/<slug>/ y SEO básico)
 - ✅ **Ticket 2.7**: Validación de unicidad de perfil (un usuario = un perfil + un portafolio)
 - ✅ **Ticket 2.8**: Sistema completo de búsqueda y filtrado de portafolios con catálogos normalizados
 - ✅ **Ticket 2.9**: Normalización de categorías con 63 instrumentos, 28 géneros, management commands y admin avanzado
@@ -221,7 +221,7 @@ meetandgig/
   - ✅ Acceso al panel de administración
   - ✅ Templates responsive con diseño profesional
 
-#### 🎼 Sprint 2: Sistema de Perfiles y Portafolios (90%)
+#### 🎼 Sprint 2: Sistema de Perfiles y Portafolios (100%)
 
 - [x] **Arquitectura separada de datos**
 
@@ -278,13 +278,7 @@ meetandgig/
 
 ### 🔄 En Desarrollo
 
-#### 🎼 Sprint 2: Funcionalidades Finales (10%)
-
-- [ ] **Ticket 2.6**: Diseño de pantallas de perfil
-
-  - Rutas públicas `/p/<slug>/` para portafolios
-  - SEO básico para portafolios (meta tags, structured data)
-  - Mejoras visuales y UI/UX finales
+Actualmente no hay tickets en desarrollo activo.
 
 ### 📋 Planificado
 

@@ -11,7 +11,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, DetailView
 from django.core.exceptions import PermissionDenied
 from .forms import (
     RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, 
@@ -351,24 +351,18 @@ def perfil_empleador_view(request):
 
 @login_required
 def ver_mi_portafolio(request):
-    """Vista para que el músico vea su propio portafolio"""
+    """Vista que redirige al músico a su portafolio unificado"""
     if request.user.tipo_usuario != 'musico':
         raise PermissionDenied("Solo los músicos pueden ver esta página.")
     
     try:
         portafolio = Portafolio.objects.get(usuario=request.user)
-        created = False
     except Portafolio.DoesNotExist:
-        # Obtener valores por defecto
+        # Crear portafolio básico si no existe
         from usuarios.models import NivelExperiencia, Ubicacion
         
-        nivel_default = NivelExperiencia.objects.filter(nombre='Principiante').first()
-        ubicacion_default = Ubicacion.objects.filter(nombre='Santiago').first()
-        
-        if not nivel_default:
-            nivel_default = NivelExperiencia.objects.first()
-        if not ubicacion_default:
-            ubicacion_default = Ubicacion.objects.first()
+        nivel_default = NivelExperiencia.objects.filter(nombre='Principiante').first() or NivelExperiencia.objects.first()
+        ubicacion_default = Ubicacion.objects.filter(nombre='Santiago').first() or Ubicacion.objects.first()
             
         portafolio = Portafolio.objects.create(
             usuario=request.user,
@@ -378,37 +372,9 @@ def ver_mi_portafolio(request):
             ubicacion=ubicacion_default,
             disponible_para_gigs=True,
         )
-        created = True
+        messages.success(request, 'Se ha creado tu portafolio básico. ¡Complétalo para destacar!')
     
-    context = {
-        'portafolio': portafolio,
-        'usuario': request.user,
-        'es_mi_portafolio': True,
-        'titulo': 'Mi Portafolio Musical'
-    }
-    return render(request, 'usuarios/ver_portafolio_musico.html', context)
-
-
-def ver_portafolio_musico(request, username):
-    """Vista pública del portafolio de un músico"""
-    usuario = get_object_or_404(Usuario, username=username, tipo_usuario='musico')
-    
-    try:
-        portafolio = usuario.portafolio
-        # TODO: Agregar flag para portafolio público en el nuevo modelo
-        # if not portafolio.activo:
-        #     if not request.user.is_authenticated or request.user != usuario:
-        #         raise Http404("Este portafolio no está disponible públicamente.")
-    except Portafolio.DoesNotExist:
-        raise Http404("Este músico no tiene un portafolio disponible.")
-    
-    context = {
-        'portafolio': portafolio,
-        'usuario': usuario,
-        'es_mi_portafolio': request.user.is_authenticated and request.user == usuario,
-        'titulo': f'Portafolio de {usuario.get_full_name() or usuario.username}'
-    }
-    return render(request, 'usuarios/ver_portafolio_musico.html', context)
+    return redirect('ver_portafolio', slug=portafolio.slug)
 
 
 @login_required
@@ -603,3 +569,45 @@ def buscar_portafolios(request):
     }
     
     return render(request, 'usuarios/buscar_portafolios.html', context)
+
+
+class PortafolioUnificadoView(DetailView):
+    model = Portafolio
+    template_name = 'usuarios/portafolio_publico.html'
+    slug_field = 'slug'
+    context_object_name = 'portafolio'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        portafolio = self.get_object()
+        
+        # Detectar si el usuario es propietario del portafolio
+        context['es_propietario'] = (
+            self.request.user.is_authenticated and 
+            self.request.user == portafolio.usuario
+        )
+        
+        # SEO data
+        nombre_completo = portafolio.usuario.get_full_name() or portafolio.usuario.username
+        context['seo_title'] = f"{nombre_completo} - Músico en Meet&Gig"
+        biografia_truncada = portafolio.biografia[:160] if portafolio.biografia else "Músico profesional en Meet&Gig"
+        context['seo_description'] = biografia_truncada
+        context['seo_keywords'] = self._generate_keywords(portafolio)
+        context['canonical_url'] = self.request.build_absolute_uri()
+        
+        return context
+    
+    def _generate_keywords(self, portafolio):
+        keywords = []
+        try:
+            keywords.extend([inst.nombre for inst in portafolio.instrumentos.all()])
+            keywords.extend([gen.nombre for gen in portafolio.generos.all()])
+        except Exception:
+            keywords.extend(['músico', 'música'])
+            
+        if portafolio.ubicacion:
+            keywords.append(f"músico {portafolio.ubicacion}")
+        
+        keywords.extend(['meet&gig', 'portafolio musical'])
+        
+        return ", ".join(keywords[:10])

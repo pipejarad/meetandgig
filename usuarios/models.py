@@ -346,7 +346,8 @@ class Portafolio(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.usuario.get_full_name() or self.usuario.username)
+            # Usar username como base para el slug (más estable y único)
+            base_slug = slugify(self.usuario.username)
             slug = base_slug
             counter = 1
             while Portafolio.objects.filter(slug=slug).exists():
