@@ -138,11 +138,58 @@ admin.site.register(PerfilEmpleador, PerfilEmpleadorAdmin)
 admin.site.register(PerfilMusico, PerfilMusicoAdmin)
 admin.site.register(Portafolio, PortafolioAdmin)
 
-# Registrar catálogos  
-admin.site.register(Instrumento)
-admin.site.register(Genero)
-admin.site.register(NivelExperiencia)
-admin.site.register(Ubicacion)
+# Admin para catálogos normalizados
+@admin.register(Instrumento)
+class InstrumentoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'categoria', 'portafolios_count')
+    list_filter = ('categoria',)
+    search_fields = ('nombre', 'categoria')
+    ordering = ('categoria', 'nombre')
+    
+    def portafolios_count(self, obj):
+        return obj.portafolioinstrumento_set.count()
+    portafolios_count.short_description = 'Portafolios'
+    portafolios_count.admin_order_field = 'portafolioinstrumento__count'
+
+
+@admin.register(Genero)
+class GeneroAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'descripcion_corta', 'portafolios_count')
+    search_fields = ('nombre', 'descripcion')
+    ordering = ('nombre',)
+    
+    def descripcion_corta(self, obj):
+        return obj.descripcion[:50] + '...' if len(obj.descripcion) > 50 else obj.descripcion
+    descripcion_corta.short_description = 'Descripción'
+    
+    def portafolios_count(self, obj):
+        return obj.portafoliogenero_set.count()
+    portafolios_count.short_description = 'Portafolios'
+
+
+@admin.register(NivelExperiencia)
+class NivelExperienciaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'descripcion', 'años_rango', 'orden')
+    list_filter = ('orden',)
+    ordering = ('orden',)
+    
+    def años_rango(self, obj):
+        if obj.años_maximos:
+            return f"{obj.años_minimos}-{obj.años_maximos} años"
+        return f"{obj.años_minimos}+ años"
+    años_rango.short_description = 'Rango años'
+
+
+@admin.register(Ubicacion)
+class UbicacionAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'region', 'pais', 'activo', 'portafolios_count')
+    list_filter = ('region', 'pais', 'activo')
+    search_fields = ('nombre', 'region')
+    ordering = ('orden', 'region', 'nombre')
+    
+    def portafolios_count(self, obj):
+        return obj.portafolio_set.count()
+    portafolios_count.short_description = 'Portafolios'
 
 # Registrar modelos adicionales
 admin.site.register(PortafolioInstrumento)

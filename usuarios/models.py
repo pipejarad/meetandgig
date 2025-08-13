@@ -36,32 +36,34 @@ class Usuario(AbstractUser):
         verbose_name_plural = 'Usuarios'
 
 
-# CATÁLOGOS NORMALIZADOS (Ticket 2.11)
+# CATÁLOGOS NORMALIZADOS (Ticket 2.9)
 class Instrumento(models.Model):
-    """Catálogo de instrumentos musicales (tabla existente)"""
+    """Catálogo de instrumentos musicales"""
     nombre = models.CharField(max_length=50, unique=True, verbose_name='Nombre')
     categoria = models.CharField(max_length=50, blank=True, verbose_name='Categoría')
 
     class Meta:
-        managed = False  # Django no gestiona esta tabla
+        managed = False  # Tabla existente, no gestionada por Django
         db_table = 'usuarios_instrumento'
         verbose_name = 'Instrumento'
         verbose_name_plural = 'Instrumentos'
+        ordering = ['categoria', 'nombre']
 
     def __str__(self):
         return self.nombre
 
 
 class Genero(models.Model):
-    """Catálogo de géneros musicales (tabla existente)"""
+    """Catálogo de géneros musicales"""
     nombre = models.CharField(max_length=50, unique=True, verbose_name='Nombre')
     descripcion = models.TextField(blank=True, verbose_name='Descripción')
 
     class Meta:
-        managed = False  # Django no gestiona esta tabla
+        managed = False  # Tabla existente, no gestionada por Django
         db_table = 'usuarios_generomusical'
         verbose_name = 'Género Musical'
         verbose_name_plural = 'Géneros Musicales'
+        ordering = ['nombre']
 
     def __str__(self):
         return self.nombre

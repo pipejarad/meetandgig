@@ -17,7 +17,7 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 - ✅ **Ticket 1.5**: Acceso al panel de administración para superusuarios
 - ✅ **Ticket 1.6**: Diseño responsivo y amigable para pantallas de login
 
-### 🎼 Sprint 2: Perfiles de Usuario (80% COMPLETADO)
+### 🎼 Sprint 2: Perfiles de Usuario (90% COMPLETADO)
 
 - ✅ **Ticket 2.1**: Crear y editar perfil de músico (administrativo/personal)
 - ✅ **Ticket 2.2**: Crear y editar perfil de empleador (organización, contacto)
@@ -26,8 +26,8 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 - ✅ **Ticket 2.5**: Crear y editar contenido del portafolio (instrumentos, géneros, multimedia)
 - 🔄 **Ticket 2.6**: Diseño de pantallas de perfil (incluye ruta /p/<slug>/ y SEO básico)
 - ✅ **Ticket 2.7**: Validación de unicidad de perfil (un usuario = un perfil + un portafolio)
-- 🆕 **Ticket 2.8**: Búsqueda y listado de portafolios (buscar músicos públicamente)
-- 🆕 **Ticket 2.9**: Normalización de categorías (instrumentos, géneros predefinidos)
+- ✅ **Ticket 2.8**: Sistema completo de búsqueda y filtrado de portafolios con catálogos normalizados
+- ✅ **Ticket 2.9**: Normalización de categorías con 63 instrumentos, 28 géneros, management commands y admin avanzado
 
 ### � Sprint 3: Publicación y Ofertas Laborales (PENDIENTE)
 
@@ -221,7 +221,7 @@ meetandgig/
   - ✅ Acceso al panel de administración
   - ✅ Templates responsive con diseño profesional
 
-#### 🎼 Sprint 2: Sistema de Perfiles y Portafolios (80%)
+#### 🎼 Sprint 2: Sistema de Perfiles y Portafolios (90%)
 
 - [x] **Arquitectura separada de datos**
 
@@ -245,11 +245,19 @@ meetandgig/
   - ✅ Subida de fotos de perfil con preview
 
 - [x] **Templates profesionales**
+
   - ✅ Vista de perfil personal (administrativo)
   - ✅ Vista de portafolio público (profesional)
   - ✅ Diseño consistente y responsive
   - ✅ Integración con Bootstrap 4
   - ✅ Sistema de mensajes automático
+
+- [x] **Sistema de búsqueda y catálogos**
+  - ✅ Búsqueda avanzada de portafolios con filtros múltiples
+  - ✅ Catálogos normalizados: 63 instrumentos, 28 géneros, ubicaciones
+  - ✅ Management commands para poblado automático
+  - ✅ Admin interface avanzado con estadísticas de uso
+  - ✅ Tests completos de funcionalidad
 
 #### 🏗️ Infraestructura y Calidad
 
@@ -270,24 +278,13 @@ meetandgig/
 
 ### 🔄 En Desarrollo
 
-#### 🎼 Sprint 2: Funcionalidades Pendientes (20%)
+#### 🎼 Sprint 2: Funcionalidades Finales (10%)
 
 - [ ] **Ticket 2.6**: Diseño de pantallas de perfil
 
   - Rutas públicas `/p/<slug>/` para portafolios
-  - SEO básico para portafolios
-  - Mejoras visuales finales
-
-- [ ] **Ticket 2.8**: Búsqueda y listado de portafolios
-
-  - Página de búsqueda pública
-  - Filtros por instrumento, género, ubicación
-  - Paginación y ordenamiento
-
-- [ ] **Ticket 2.9**: Normalización de categorías
-  - Catálogo predefinido de instrumentos
-  - Catálogo predefinido de géneros musicales
-  - Sistema de admin para gestión de categorías
+  - SEO básico para portafolios (meta tags, structured data)
+  - Mejoras visuales y UI/UX finales
 
 ### 📋 Planificado
 
@@ -354,17 +351,18 @@ Una vez iniciado el servidor:
 
 ### 🗂️ Datos de Prueba
 
-Para poblar catálogos con datos de prueba:
+Para poblar catálogos con datos reales:
 
 ```bash
-python populate_catalogs.py
+python manage.py poblar_catalogos
 ```
 
 Esto añadirá:
 
-- Géneros musicales comunes (Rock, Jazz, Pop, etc.)
-- Instrumentos populares (Guitarra, Piano, Batería, etc.)
-- Niveles de experiencia estándar
+- **63 instrumentos** organizados en 5 categorías (Cuerdas, Vientos, Percusión, Teclas, Folclore Chileno)
+- **28 géneros musicales** con descripciones detalladas
+- **16 ubicaciones** principales de Chile
+- **4 niveles de experiencia** estructurados
 
 ### 🧪 Testing
 
