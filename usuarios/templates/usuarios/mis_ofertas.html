@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary">
+                    <i class="fas fa-briefcase me-2"></i>{{ titulo_pagina }}
+                </h2>
+                <a href="{% url 'crear_oferta_laboral' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Nueva Oferta
+                </a>
+            </div>
+
+            {% if ofertas %}
+                <div class="row">
+                    {% for oferta in ofertas %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-{{ oferta.estado|yesno:'success,warning,danger' }}">
+                                        {% if oferta.estado == 'borrador' %}
+                                            <i class="fas fa-edit me-1"></i>Borrador
+                                        {% elif oferta.estado == 'publicada' %}
+                                            <i class="fas fa-eye me-1"></i>Publicada
+                                        {% elif oferta.estado == 'cerrada' %}
+                                            <i class="fas fa-lock me-1"></i>Cerrada
+                                        {% else %}
+                                            <i class="fas fa-times me-1"></i>Cancelada
+                                        {% endif %}
+                                    </span>
+                                    <small class="text-muted">
+                                        {{ oferta.fecha_creacion|date:"d M Y" }}
+                                    </small>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ oferta.titulo }}</h5>
+                                    <p class="card-text text-muted small">
+                                        {{ oferta.descripcion|truncatewords:15 }}
+                                    </p>
+                                    
+                                    <!-- Información básica -->
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ oferta.ubicacion }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-layer-group me-1"></i>{{ oferta.nivel_experiencia_minimo }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-dollar-sign me-1"></i>{{ oferta.get_presupuesto_display }}
+                                        </small>
+                                    </div>
+
+                                    {% if oferta.tipo_contrato == 'evento_unico' and oferta.fecha_evento %}
+                                        <div class="mb-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>{{ oferta.fecha_evento|date:"d M Y - H:i" }}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Instrumentos requeridos -->
+                                    {% with instrumentos=oferta.get_instrumentos_requeridos %}
+                                        {% if instrumentos %}
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-music me-1"></i>
+                                                    {% for inst_oferta in instrumentos|slice:":3" %}
+                                                        {{ inst_oferta.instrumento.nombre }}{% if not forloop.last %}, {% endif %}
+                                                    {% endfor %}
+                                                    {% if instrumentos.count > 3 %}
+                                                        <span class="text-primary">+{{ instrumentos.count|add:"-3" }} más</span>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+
+                                    <!-- Cupos y postulaciones -->
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-users me-1"></i>{{ oferta.cupos_disponibles }} cupo{{ oferta.cupos_disponibles|pluralize }}
+                                        </small>
+                                    </div>
+
+                                    {% if oferta.estado == 'publicada' %}
+                                        <div class="mb-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-paper-plane me-1"></i>{{ oferta.postulaciones.count }} postulacion{{ oferta.postulaciones.count|pluralize:"es" }}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="card-footer bg-light">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        {% if oferta.estado == 'borrador' %}
+                                            <a href="{% url 'publicar_oferta' oferta.slug %}" class="btn btn-sm btn-success" title="Publicar oferta">
+                                                <i class="fas fa-share"></i>
+                                            </a>
+                                        {% elif oferta.estado == 'publicada' and oferta.esta_vigente %}
+                                            <span class="badge bg-success">Vigente</span>
+                                        {% elif oferta.estado == 'cerrada' %}
+                                            <a href="{% url 'reabrir_oferta' oferta.slug %}" class="btn btn-sm btn-success" title="Reabrir oferta">
+                                                <i class="fas fa-unlock"></i>
+                                            </a>
+                                        {% elif oferta.fecha_limite_postulacion and oferta.fecha_limite_postulacion|date:"Y-m-d" < today|date:"Y-m-d" %}
+                                            <span class="badge bg-warning">Vencida</span>
+                                        {% endif %}
+                                        
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'detalle_oferta' oferta.slug %}" class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if oferta.estado != 'cerrada' %}
+                                                <a href="{% url 'editar_oferta' oferta.slug %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            {% endif %}
+                                            {% if oferta.estado == 'publicada' %}
+                                                <a href="{% url 'cerrar_oferta' oferta.slug %}" class="btn btn-sm btn-outline-warning" title="Cerrar oferta">
+                                                    <i class="fas fa-lock"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginación (para implementar más adelante) -->
+                <nav aria-label="Paginación de ofertas">
+                    <!-- Paginación se implementará cuando sea necesario -->
+                </nav>
+
+            {% else %}
+                <!-- Estado vacío -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-briefcase text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No tienes ofertas laborales</h4>
+                    <p class="text-muted mb-4">
+                        Crea tu primera oferta laboral para comenzar a encontrar músicos talentosos para tus proyectos.
+                    </p>
+                    <a href="{% url 'crear_oferta_laboral' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Crear Mi Primera Oferta
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal para confirmar acciones (placeholder para futuras implementaciones) -->
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Acción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas realizar esta acción?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Funcionalidad para botones de acción (placeholder)
+    const actionButtons = document.querySelectorAll('.btn-group .btn');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.getAttribute('title');
+            console.log(`Acción: ${action}`);
+            // Aquí se implementarán las acciones específicas en futuros tickets
+        });
+    });
+});
+</script>
+{% endblock %}

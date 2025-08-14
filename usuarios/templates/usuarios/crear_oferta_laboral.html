@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-briefcase me-2"></i>
+                        {% if es_edicion %}
+                            Editar Oferta Laboral
+                        {% else %}
+                            {{ titulo_pagina }}
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Información importante:</strong> Tu oferta se guardará como borrador inicialmente. 
+                        Podrás revisarla y publicarla cuando esté lista.
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Información básica -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Información Básica
+                                </h5>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="{{ form.titulo.id_for_label }}" class="form-label">
+                                        {{ form.titulo.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.titulo }}
+                                    {% if form.titulo.errors %}
+                                        <div class="text-danger small">{{ form.titulo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.tipo_contrato.id_for_label }}" class="form-label">
+                                        {{ form.tipo_contrato.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.tipo_contrato }}
+                                    {% if form.tipo_contrato.errors %}
+                                        <div class="text-danger small">{{ form.tipo_contrato.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                        {{ form.descripcion.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.descripcion }}
+                                    {% if form.descripcion.errors %}
+                                        <div class="text-danger small">{{ form.descripcion.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.requisitos.id_for_label }}" class="form-label">
+                                        {{ form.requisitos.label }}
+                                    </label>
+                                    {{ form.requisitos }}
+                                    {% if form.requisitos.errors %}
+                                        <div class="text-danger small">{{ form.requisitos.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ubicación y experiencia -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Ubicación y Experiencia
+                                </h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.ubicacion.id_for_label }}" class="form-label">
+                                        {{ form.ubicacion.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.ubicacion }}
+                                    {% if form.ubicacion.errors %}
+                                        <div class="text-danger small">{{ form.ubicacion.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.nivel_experiencia_minimo.id_for_label }}" class="form-label">
+                                        {{ form.nivel_experiencia_minimo.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.nivel_experiencia_minimo }}
+                                    {% if form.nivel_experiencia_minimo.errors %}
+                                        <div class="text-danger small">{{ form.nivel_experiencia_minimo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fechas y duración -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-calendar me-2"></i>Fechas y Duración
+                                </h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.fecha_evento.id_for_label }}" class="form-label">
+                                        {{ form.fecha_evento.label }}
+                                    </label>
+                                    {{ form.fecha_evento }}
+                                    {% if form.fecha_evento.errors %}
+                                        <div class="text-danger small">{{ form.fecha_evento.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.fecha_limite_postulacion.id_for_label }}" class="form-label">
+                                        {{ form.fecha_limite_postulacion.label }}
+                                    </label>
+                                    {{ form.fecha_limite_postulacion }}
+                                    {% if form.fecha_limite_postulacion.errors %}
+                                        <div class="text-danger small">{{ form.fecha_limite_postulacion.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.duracion_estimada.id_for_label }}" class="form-label">
+                                        {{ form.duracion_estimada.label }}
+                                    </label>
+                                    {{ form.duracion_estimada }}
+                                    {% if form.duracion_estimada.errors %}
+                                        <div class="text-danger small">{{ form.duracion_estimada.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.cupos_disponibles.id_for_label }}" class="form-label">
+                                        {{ form.cupos_disponibles.label }}
+                                    </label>
+                                    {{ form.cupos_disponibles }}
+                                    {% if form.cupos_disponibles.errors %}
+                                        <div class="text-danger small">{{ form.cupos_disponibles.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Presupuesto -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-dollar-sign me-2"></i>Presupuesto
+                                </h5>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.presupuesto_minimo.id_for_label }}" class="form-label">
+                                        {{ form.presupuesto_minimo.label }}
+                                    </label>
+                                    {{ form.presupuesto_minimo }}
+                                    {% if form.presupuesto_minimo.errors %}
+                                        <div class="text-danger small">{{ form.presupuesto_minimo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.presupuesto_maximo.id_for_label }}" class="form-label">
+                                        {{ form.presupuesto_maximo.label }}
+                                    </label>
+                                    {{ form.presupuesto_maximo }}
+                                    {% if form.presupuesto_maximo.errors %}
+                                        <div class="text-danger small">{{ form.presupuesto_maximo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="form-check mt-4">
+                                        {{ form.presupuesto_a_convenir }}
+                                        <label class="form-check-label" for="{{ form.presupuesto_a_convenir.id_for_label }}">
+                                            {{ form.presupuesto_a_convenir.label }}
+                                        </label>
+                                    </div>
+                                    {% if form.presupuesto_a_convenir.errors %}
+                                        <div class="text-danger small">{{ form.presupuesto_a_convenir.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instrumentos -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-music me-2"></i>Instrumentos Requeridos
+                                </h5>
+                                <p class="text-muted small">Selecciona los instrumentos que necesitas para esta oferta:</p>
+                                <div class="row">
+                                    {% for checkbox in form.instrumentos %}
+                                        <div class="col-md-4 col-sm-6">
+                                            <div class="form-check mb-2">
+                                                {{ checkbox.tag }}
+                                                <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                                    {{ checkbox.choice_label }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% if form.instrumentos.errors %}
+                                    <div class="text-danger small">{{ form.instrumentos.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Géneros -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-headphones me-2"></i>Géneros Musicales Preferidos
+                                </h5>
+                                <p class="text-muted small">Selecciona los géneros musicales que mejor se adapten a la oferta:</p>
+                                <div class="row">
+                                    {% for checkbox in form.generos %}
+                                        <div class="col-md-4 col-sm-6">
+                                            <div class="form-check mb-2">
+                                                {{ checkbox.tag }}
+                                                <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                                    {{ checkbox.choice_label }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% if form.generos.errors %}
+                                    <div class="text-danger small">{{ form.generos.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Errores globales del formulario -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Botones de acción -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    {% if es_edicion %}
+                                        <a href="{% url 'detalle_oferta' oferta.slug %}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Guardar Cambios
+                                        </button>
+                                    {% else %}
+                                        <a href="{% url 'ver_mis_ofertas' %}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Crear Oferta (Borrador)
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar checkbox "Presupuesto a convenir"
+    const presupuestoConvenirCheck = document.getElementById('{{ form.presupuesto_a_convenir.id_for_label }}');
+    const presupuestoMinimo = document.getElementById('{{ form.presupuesto_minimo.id_for_label }}');
+    const presupuestoMaximo = document.getElementById('{{ form.presupuesto_maximo.id_for_label }}');
+    
+    function togglePresupuesto() {
+        if (presupuestoConvenirCheck && presupuestoConvenirCheck.checked) {
+            presupuestoMinimo.disabled = true;
+            presupuestoMaximo.disabled = true;
+            presupuestoMinimo.value = '';
+            presupuestoMaximo.value = '';
+        } else if (presupuestoMinimo && presupuestoMaximo) {
+            presupuestoMinimo.disabled = false;
+            presupuestoMaximo.disabled = false;
+        }
+    }
+    
+    if (presupuestoConvenirCheck) {
+        presupuestoConvenirCheck.addEventListener('change', togglePresupuesto);
+        togglePresupuesto(); // Ejecutar al cargar
+    }
+});
+</script>
+{% endblock %}

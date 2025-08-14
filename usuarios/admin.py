@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (
     Usuario, PerfilEmpleador, PerfilMusico, Portafolio, 
     Instrumento, Genero, NivelExperiencia, Ubicacion,
-    PortafolioInstrumento, PortafolioGenero, Multimedia, Testimonio
+    PortafolioInstrumento, PortafolioGenero, Multimedia, Testimonio,
+    OfertaLaboral, Postulacion, OfertaInstrumento, OfertaGenero
 )
 
 
@@ -196,3 +197,110 @@ admin.site.register(PortafolioInstrumento)
 admin.site.register(PortafolioGenero)
 admin.site.register(Multimedia)
 admin.site.register(Testimonio)
+
+
+# ADMIN PARA OFERTAS LABORALES (Sprint 3)
+class OfertaInstrumentoInline(admin.TabularInline):
+    model = OfertaInstrumento
+    extra = 1
+    fields = ('instrumento', 'es_obligatorio', 'prioridad')
+
+
+class OfertaGeneroInline(admin.TabularInline):
+    model = OfertaGenero
+    extra = 1
+    fields = ('genero', 'prioridad')
+
+
+@admin.register(OfertaLaboral)
+class OfertaLaboralAdmin(admin.ModelAdmin):
+    list_display = (
+        'titulo', 'empleador', 'estado', 'ubicacion', 'nivel_experiencia_minimo',
+        'cupos_disponibles', 'fecha_publicacion', 'fecha_limite_postulacion'
+    )
+    list_filter = (
+        'estado', 'tipo_contrato', 'ubicacion__region', 
+        'nivel_experiencia_minimo', 'fecha_creacion'
+    )
+    search_fields = (
+        'titulo', 'descripcion', 'empleador__nombre_organizacion',
+        'empleador__usuario__username', 'empleador__usuario__email'
+    )
+    readonly_fields = ('slug', 'fecha_creacion', 'fecha_actualizacion', 'fecha_publicacion')
+    inlines = [OfertaInstrumentoInline, OfertaGeneroInline]
+    
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('empleador', 'titulo', 'slug', 'descripcion', 'requisitos')
+        }),
+        ('Detalles Laborales', {
+            'fields': (
+                'tipo_contrato', 'fecha_evento', 'duracion_estimada',
+                'cupos_disponibles', 'fecha_limite_postulacion'
+            )
+        }),
+        ('Ubicación y Experiencia', {
+            'fields': ('ubicacion', 'nivel_experiencia_minimo')
+        }),
+        ('Presupuesto', {
+            'fields': ('presupuesto_minimo', 'presupuesto_maximo', 'presupuesto_a_convenir')
+        }),
+        ('Estado', {
+            'fields': ('estado',)
+        }),
+        ('Metadatos', {
+            'fields': ('fecha_creacion', 'fecha_actualizacion', 'fecha_publicacion'),
+            'classes': ('collapse',)
+        })
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'empleador__usuario', 'ubicacion', 'nivel_experiencia_minimo'
+        )
+
+
+@admin.register(Postulacion)
+class PostulacionAdmin(admin.ModelAdmin):
+    list_display = (
+        'musico', 'oferta_laboral', 'tipo_postulacion', 'estado',
+        'fecha_postulacion', 'fecha_respuesta'
+    )
+    list_filter = (
+        'tipo_postulacion', 'estado', 'fecha_postulacion',
+        'oferta_laboral__empleador__nombre_organizacion'
+    )
+    search_fields = (
+        'musico__username', 'musico__email', 'oferta_laboral__titulo',
+        'portafolio__usuario__username'
+    )
+    readonly_fields = ('fecha_postulacion', 'fecha_respuesta')
+    
+    fieldsets = (
+        ('Información Principal', {
+            'fields': ('oferta_laboral', 'musico', 'portafolio')
+        }),
+        ('Tipo y Estado', {
+            'fields': ('tipo_postulacion', 'estado')
+        }),
+        ('Información Adicional', {
+            'fields': ('mensaje_personalizado', 'tarifa_propuesta')
+        }),
+        ('Notas del Empleador', {
+            'fields': ('notas_empleador',)
+        }),
+        ('Fechas', {
+            'fields': ('fecha_postulacion', 'fecha_respuesta'),
+            'classes': ('collapse',)
+        })
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'musico', 'oferta_laboral__empleador', 'portafolio'
+        )
+
+
+# Registrar modelos de ofertas
+admin.site.register(OfertaInstrumento)
+admin.site.register(OfertaGenero)

@@ -177,6 +177,32 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Acciones Rápidas - Ofertas Laborales -->
+            <div class="card shadow mt-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-briefcase me-2"></i>Ofertas Laborales
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        Gestiona tus ofertas laborales y encuentra los músicos perfectos para tus proyectos.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'crear_oferta_laboral' %}" class="btn btn-primary w-100">
+                                <i class="fas fa-plus me-2"></i>Crear Nueva Oferta
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'ver_mis_ofertas' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-list me-2"></i>Ver Mis Ofertas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

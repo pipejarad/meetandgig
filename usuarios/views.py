@@ -15,9 +15,9 @@ from django.views.generic import CreateView, UpdateView, DetailView
 from django.core.exceptions import PermissionDenied
 from .forms import (
     RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, 
-    PerfilMusicoForm, PerfilEmpleadorForm, PortafolioForm
+    PerfilMusicoForm, PerfilEmpleadorForm, PortafolioForm, CrearOfertaLaboralForm
 )
-from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio
+from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio, OfertaLaboral
 
 
 def inicio(request):
@@ -611,3 +611,207 @@ class PortafolioUnificadoView(DetailView):
         keywords.extend(['meet&gig', 'portafolio musical'])
         
         return ", ".join(keywords[:10])
+
+
+# VISTAS PARA OFERTAS LABORALES (Sprint 3)
+@login_required
+def crear_oferta_laboral_view(request):
+    """Vista para crear ofertas laborales (solo empleadores)"""
+    
+    # Verificar que sea empleador
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden crear ofertas laborales.')
+        return redirect('inicio')
+    
+    # Verificar que tenga perfil de empleador
+    try:
+        perfil_empleador = request.user.perfil_empleador
+    except PerfilEmpleador.DoesNotExist:
+        messages.error(request, 'Debes completar tu perfil de empleador antes de crear ofertas.')
+        return redirect('crear_perfil_empleador')
+    
+    if request.method == 'POST':
+        form = CrearOfertaLaboralForm(request.POST)
+        if form.is_valid():
+            oferta = form.save(commit=True, empleador=perfil_empleador)
+            messages.success(
+                request, 
+                f'Oferta "{oferta.titulo}" creada exitosamente como borrador. Puedes publicarla cuando esté lista.'
+            )
+            return redirect('ver_mis_ofertas')
+    else:
+        form = CrearOfertaLaboralForm()
+    
+    context = {
+        'form': form,
+        'perfil_empleador': perfil_empleador,
+        'titulo_pagina': 'Crear Nueva Oferta Laboral'
+    }
+    
+    return render(request, 'usuarios/crear_oferta_laboral.html', context)
+
+
+@login_required 
+def ver_mis_ofertas_view(request):
+    """Vista para que empleadores vean sus ofertas laborales"""
+    
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden acceder a esta sección.')
+        return redirect('inicio')
+    
+    try:
+        perfil_empleador = request.user.perfil_empleador
+        ofertas = OfertaLaboral.objects.filter(empleador=perfil_empleador).order_by('-fecha_creacion')
+    except PerfilEmpleador.DoesNotExist:
+        messages.error(request, 'Debes completar tu perfil de empleador.')
+        return redirect('crear_perfil_empleador')
+    
+    context = {
+        'ofertas': ofertas,
+        'perfil_empleador': perfil_empleador,
+        'titulo_pagina': 'Mis Ofertas Laborales'
+    }
+    
+    return render(request, 'usuarios/mis_ofertas.html', context)
+
+
+@login_required 
+def detalle_oferta_view(request, slug):
+    """Vista de detalle de una oferta laboral"""
+    oferta = get_object_or_404(OfertaLaboral, slug=slug)
+    
+    if request.user.tipo_usuario == 'empleador':
+        if oferta.empleador != request.user.perfil_empleador:
+            messages.error(request, 'No tienes permisos para ver esta oferta.')
+            return redirect('ver_mis_ofertas')
+    
+    context = {
+        'oferta': oferta,
+        'titulo_pagina': oferta.titulo
+    }
+    
+    return render(request, 'usuarios/detalle_oferta.html', context)
+
+
+@login_required
+def editar_oferta_view(request, slug):
+    """Vista para editar una oferta laboral existente"""
+    oferta = get_object_or_404(OfertaLaboral, slug=slug)
+    
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden editar ofertas.')
+        return redirect('inicio')
+    
+    if oferta.empleador != request.user.perfil_empleador:
+        messages.error(request, 'No tienes permisos para editar esta oferta.')
+        return redirect('ver_mis_ofertas')
+    
+    if oferta.estado == 'cerrada':
+        messages.error(request, 'No puedes editar una oferta cerrada.')
+        return redirect('detalle_oferta', slug=slug)
+    
+    if request.method == 'POST':
+        form = CrearOfertaLaboralForm(request.POST, instance=oferta)
+        if form.is_valid():
+            oferta_editada = form.save(commit=False)
+            if oferta.estado == 'publicada':
+                oferta_editada.estado = 'borrador'
+                messages.info(request, 'La oferta ha vuelto a estado borrador debido a los cambios realizados.')
+            oferta_editada.save()
+            form.save_m2m()
+            
+            messages.success(request, 'Oferta editada exitosamente.')
+            return redirect('detalle_oferta', slug=oferta_editada.slug)
+    else:
+        form = CrearOfertaLaboralForm(instance=oferta)
+    
+    context = {
+        'form': form,
+        'oferta': oferta,
+        'titulo_pagina': f'Editar: {oferta.titulo}',
+        'es_edicion': True
+    }
+    
+    return render(request, 'usuarios/crear_oferta_laboral.html', context)
+
+
+@login_required
+def publicar_oferta_view(request, slug):
+    """Vista para publicar una oferta (cambiar de borrador a publicada)"""
+    oferta = get_object_or_404(OfertaLaboral, slug=slug)
+    
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden publicar ofertas.')
+        return redirect('inicio')
+    
+    if oferta.empleador != request.user.perfil_empleador:
+        messages.error(request, 'No tienes permisos para publicar esta oferta.')
+        return redirect('ver_mis_ofertas')
+    
+    if oferta.estado != 'borrador':
+        messages.warning(request, 'Solo se pueden publicar ofertas en estado borrador.')
+        return redirect('detalle_oferta', slug=slug)
+    
+    oferta.estado = 'publicada'
+    oferta.save()
+    
+    messages.success(request, f'¡Oferta "{oferta.titulo}" publicada exitosamente!')
+    return redirect('detalle_oferta', slug=slug)
+
+
+@login_required
+def cerrar_oferta_view(request, slug):
+    """Vista para cerrar una oferta laboral"""
+    oferta = get_object_or_404(OfertaLaboral, slug=slug)
+    
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden cerrar ofertas.')
+        return redirect('inicio')
+    
+    if oferta.empleador != request.user.perfil_empleador:
+        messages.error(request, 'No tienes permisos para cerrar esta oferta.')
+        return redirect('ver_mis_ofertas')
+    
+    if oferta.estado not in ['publicada', 'borrador']:
+        messages.warning(request, 'Solo se pueden cerrar ofertas publicadas o en borrador.')
+        return redirect('detalle_oferta', slug=slug)
+    
+    if request.method == 'POST':
+        oferta.estado = 'cerrada'
+        oferta.save()
+        messages.success(request, f'Oferta "{oferta.titulo}" cerrada exitosamente.')
+        return redirect('detalle_oferta', slug=slug)
+    
+    return render(request, 'usuarios/confirmar_cerrar_oferta.html', {
+        'oferta': oferta,
+        'titulo_pagina': f'Cerrar: {oferta.titulo}'
+    })
+
+
+@login_required
+def reabrir_oferta_view(request, slug):
+    """Vista para reabrir una oferta laboral cerrada"""
+    oferta = get_object_or_404(OfertaLaboral, slug=slug)
+    
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden reabrir ofertas.')
+        return redirect('inicio')
+    
+    if oferta.empleador != request.user.perfil_empleador:
+        messages.error(request, 'No tienes permisos para reabrir esta oferta.')
+        return redirect('ver_mis_ofertas')
+    
+    if oferta.estado != 'cerrada':
+        messages.warning(request, 'Solo se pueden reabrir ofertas cerradas.')
+        return redirect('detalle_oferta', slug=slug)
+    
+    if request.method == 'POST':
+        oferta.estado = 'publicada'
+        oferta.save()
+        messages.success(request, f'¡Oferta "{oferta.titulo}" reabierta exitosamente! Ahora está visible para músicos nuevamente.')
+        return redirect('detalle_oferta', slug=slug)
+    
+    return render(request, 'usuarios/confirmar_reabrir_oferta.html', {
+        'oferta': oferta,
+        'titulo_pagina': f'Reabrir: {oferta.titulo}'
+    })

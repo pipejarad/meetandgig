@@ -555,3 +555,324 @@ class Testimonio(models.Model):
 
     def __str__(self):
         return f"Testimonio de {self.autor_nombre} para {self.portafolio.usuario.username}"
+
+
+# SISTEMA DE OFERTAS LABORALES (Sprint 3)
+class OfertaLaboral(models.Model):
+    """Oferta laboral publicada por empleadores"""
+    
+    ESTADO_CHOICES = [
+        ('borrador', 'Borrador'),
+        ('publicada', 'Publicada'),
+        ('cerrada', 'Cerrada'),
+        ('cancelada', 'Cancelada'),
+    ]
+    
+    TIPO_CONTRATO_CHOICES = [
+        ('evento_unico', 'Evento único'),
+        ('contrato_temporal', 'Contrato temporal'),
+        ('contrato_indefinido', 'Contrato indefinido'),
+        ('freelance', 'Freelance'),
+        ('colaboracion', 'Colaboración'),
+    ]
+    
+    empleador = models.ForeignKey(
+        PerfilEmpleador,
+        on_delete=models.CASCADE,
+        related_name='ofertas_laborales',
+        verbose_name='Empleador'
+    )
+    slug = models.SlugField(unique=True, max_length=150, verbose_name='Slug público')
+    
+    # INFORMACIÓN BÁSICA
+    titulo = models.CharField(max_length=200, verbose_name='Título de la oferta')
+    descripcion = models.TextField(
+        max_length=2000,
+        verbose_name='Descripción detallada',
+        help_text='Describe la oportunidad laboral (máx. 2000 caracteres)'
+    )
+    requisitos = models.TextField(
+        max_length=1000,
+        blank=True,
+        verbose_name='Requisitos específicos',
+        help_text='Requisitos técnicos y experiencia requerida'
+    )
+    
+    # DETALLES LABORALES
+    tipo_contrato = models.CharField(
+        max_length=30,
+        choices=TIPO_CONTRATO_CHOICES,
+        verbose_name='Tipo de contrato'
+    )
+    fecha_evento = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha del evento',
+        help_text='Para eventos únicos, fecha y hora específica'
+    )
+    duracion_estimada = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='Duración estimada',
+        help_text='Ej: 3 horas, 2 días, 1 mes'
+    )
+    
+    # INFORMACIÓN ECONÓMICA
+    presupuesto_minimo = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Presupuesto mínimo (CLP)',
+        help_text='Presupuesto mínimo ofrecido en pesos chilenos'
+    )
+    presupuesto_maximo = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Presupuesto máximo (CLP)',
+        help_text='Presupuesto máximo disponible en pesos chilenos'
+    )
+    presupuesto_a_convenir = models.BooleanField(
+        default=False,
+        verbose_name='Presupuesto a convenir'
+    )
+    
+    # RELACIONES CON CATÁLOGOS NORMALIZADOS
+    ubicacion = models.ForeignKey(
+        Ubicacion,
+        on_delete=models.PROTECT,
+        verbose_name='Ubicación'
+    )
+    nivel_experiencia_minimo = models.ForeignKey(
+        NivelExperiencia,
+        on_delete=models.PROTECT,
+        verbose_name='Nivel de experiencia mínimo requerido'
+    )
+    
+    # CONFIGURACIONES
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='borrador',
+        verbose_name='Estado de la oferta'
+    )
+    cupos_disponibles = models.PositiveIntegerField(
+        default=1,
+        verbose_name='Número de cupos disponibles'
+    )
+    fecha_limite_postulacion = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha límite para postular',
+        help_text='Fecha límite para recibir postulaciones'
+    )
+    
+    # METADATOS
+    fecha_creacion = models.DateTimeField(default=timezone.now)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_publicacion = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha de publicación'
+    )
+
+    class Meta:
+        verbose_name = 'Oferta Laboral'
+        verbose_name_plural = 'Ofertas Laborales'
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"{self.titulo} - {self.empleador.nombre_organizacion}"
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(f"{self.titulo}-{self.empleador.nombre_organizacion}")
+            slug = base_slug
+            counter = 1
+            while OfertaLaboral.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        
+        if self.estado == 'publicada' and not self.fecha_publicacion:
+            self.fecha_publicacion = timezone.now()
+            
+        super().save(*args, **kwargs)
+
+    def get_presupuesto_display(self):
+        """Retorna el rango de presupuesto formateado"""
+        if self.presupuesto_a_convenir:
+            return "A convenir"
+        
+        if self.presupuesto_minimo and self.presupuesto_maximo:
+            return f"${self.presupuesto_minimo:,} - ${self.presupuesto_maximo:,} CLP"
+        elif self.presupuesto_minimo:
+            return f"Desde ${self.presupuesto_minimo:,} CLP"
+        elif self.presupuesto_maximo:
+            return f"Hasta ${self.presupuesto_maximo:,} CLP"
+        
+        return "No especificado"
+
+    def esta_vigente(self):
+        """Verifica si la oferta está vigente para postulaciones"""
+        if self.estado != 'publicada':
+            return False
+        
+        if self.fecha_limite_postulacion:
+            return timezone.now() <= self.fecha_limite_postulacion
+        
+        return True
+
+    def get_instrumentos_requeridos(self):
+        """Retorna instrumentos requeridos ordenados por prioridad"""
+        return self.oferta_instrumentos.all().select_related('instrumento').order_by('prioridad')
+
+    def get_generos_preferidos(self):
+        """Retorna géneros preferidos ordenados por prioridad"""
+        return self.oferta_generos.all().select_related('genero').order_by('prioridad')
+
+
+class Postulacion(models.Model):
+    """Postulación de músico a oferta laboral"""
+    
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente de revisión'),
+        ('en_revision', 'En revisión'),
+        ('aceptada', 'Aceptada'),
+        ('rechazada', 'Rechazada'),
+        ('cancelada', 'Cancelada por el músico'),
+    ]
+    
+    TIPO_POSTULACION_CHOICES = [
+        ('espontanea', 'Postulación espontánea'),
+        ('invitacion', 'Invitación directa'),
+    ]
+    
+    oferta_laboral = models.ForeignKey(
+        OfertaLaboral,
+        on_delete=models.CASCADE,
+        related_name='postulaciones',
+        verbose_name='Oferta laboral'
+    )
+    musico = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='postulaciones',
+        verbose_name='Músico',
+        limit_choices_to={'tipo_usuario': 'musico'}
+    )
+    portafolio = models.ForeignKey(
+        Portafolio,
+        on_delete=models.CASCADE,
+        related_name='postulaciones',
+        verbose_name='Portafolio utilizado'
+    )
+    
+    # TIPO Y ESTADO
+    tipo_postulacion = models.CharField(
+        max_length=20,
+        choices=TIPO_POSTULACION_CHOICES,
+        default='espontanea',
+        verbose_name='Tipo de postulación'
+    )
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='pendiente',
+        verbose_name='Estado de la postulación'
+    )
+    
+    # INFORMACIÓN ADICIONAL
+    mensaje_personalizado = models.TextField(
+        max_length=1000,
+        blank=True,
+        verbose_name='Mensaje personalizado',
+        help_text='Mensaje opcional para el empleador (máx. 1000 caracteres)'
+    )
+    tarifa_propuesta = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Tarifa propuesta (CLP)',
+        help_text='Tarifa propuesta por el músico en pesos chilenos'
+    )
+    
+    # METADATOS
+    fecha_postulacion = models.DateTimeField(default=timezone.now, verbose_name='Fecha de postulación')
+    fecha_respuesta = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha de respuesta del empleador'
+    )
+    notas_empleador = models.TextField(
+        max_length=500,
+        blank=True,
+        verbose_name='Notas del empleador',
+        help_text='Comentarios internos del empleador sobre la postulación'
+    )
+
+    class Meta:
+        verbose_name = 'Postulación'
+        verbose_name_plural = 'Postulaciones'
+        unique_together = [('oferta_laboral', 'musico')]
+        ordering = ['-fecha_postulacion']
+
+    def __str__(self):
+        return f"{self.musico.get_full_name()} → {self.oferta_laboral.titulo}"
+    
+    def save(self, *args, **kwargs):
+        if self.estado in ['aceptada', 'rechazada'] and not self.fecha_respuesta:
+            self.fecha_respuesta = timezone.now()
+        super().save(*args, **kwargs)
+
+    def es_invitacion(self):
+        """Verifica si la postulación es una invitación directa"""
+        return self.tipo_postulacion == 'invitacion'
+
+    def esta_pendiente(self):
+        """Verifica si la postulación está pendiente de respuesta"""
+        return self.estado in ['pendiente', 'en_revision']
+
+
+# TABLAS INTERMEDIAS PARA OFERTAS LABORALES
+class OfertaInstrumento(models.Model):
+    """Instrumentos requeridos para una oferta laboral"""
+    oferta_laboral = models.ForeignKey(
+        OfertaLaboral,
+        on_delete=models.CASCADE,
+        related_name='oferta_instrumentos'
+    )
+    instrumento = models.ForeignKey(Instrumento, on_delete=models.CASCADE)
+    es_obligatorio = models.BooleanField(
+        default=True,
+        verbose_name='Es obligatorio',
+        help_text='Si es obligatorio o solo deseable'
+    )
+    prioridad = models.PositiveIntegerField(default=1, verbose_name='Prioridad')
+
+    class Meta:
+        verbose_name = 'Instrumento de la Oferta'
+        verbose_name_plural = 'Instrumentos de la Oferta'
+        unique_together = [('oferta_laboral', 'instrumento')]
+        ordering = ['prioridad', '-es_obligatorio']
+
+    def __str__(self):
+        tipo = "Obligatorio" if self.es_obligatorio else "Deseable"
+        return f"{self.oferta_laboral.titulo} - {self.instrumento.nombre} ({tipo})"
+
+
+class OfertaGenero(models.Model):
+    """Géneros musicales preferidos para una oferta laboral"""
+    oferta_laboral = models.ForeignKey(
+        OfertaLaboral,
+        on_delete=models.CASCADE,
+        related_name='oferta_generos'
+    )
+    genero = models.ForeignKey(Genero, on_delete=models.CASCADE)
+    prioridad = models.PositiveIntegerField(default=1, verbose_name='Prioridad')
+
+    class Meta:
+        verbose_name = 'Género de la Oferta'
+        verbose_name_plural = 'Géneros de la Oferta'
+        unique_together = [('oferta_laboral', 'genero')]
+        ordering = ['prioridad']
+
+    def __str__(self):
+        return f"{self.oferta_laboral.titulo} - {self.genero.nombre}"

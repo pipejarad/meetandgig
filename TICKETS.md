@@ -31,15 +31,16 @@
 
 ## 🟩 Sprint 3: Publicación y Ofertas Laborales
 
-| Ticket | Título                                 | Descripción breve                                        |
-| ------ | -------------------------------------- | -------------------------------------------------------- |
-| 3.1    | Crear oferta laboral                   | Formulario para empleadores.                             |
-| 3.2    | Visualizar ofertas publicadas          | Listado de ofertas accesible a músicos.                  |
-| 3.3    | Filtrar ofertas por criterios          | Filtros por estilo, instrumento, ubicación y fecha.      |
-| 3.4    | Cerrar oferta laboral                  | Cambiar estado de la oferta a "cerrada".                 |
-| 3.5    | Diseño de vista de ofertas             | UI responsive para navegación de ofertas.                |
-| 🔥 3.6 | Postulación a una oferta laboral       | Permite a músicos postularse desde la vista de oferta.   |
-| 🔥 3.7 | Validaciones de postulaciones y cierre | Reglas para evitar duplicidad, control de cupos, cierre. |
+| Ticket | Título                                 | Estado        | Descripción breve                                                                             |
+| ------ | -------------------------------------- | ------------- | --------------------------------------------------------------------------------------------- |
+| 🔥 3.1 | Crear oferta laboral                   | ✅ COMPLETADO | Formulario completo para empleadores con integración de catálogos, validaciones y navegación. |
+| 3.2    | Visualizar ofertas publicadas          | 🔄 PENDIENTE  | Listado de ofertas accesible a músicos.                                                       |
+| 3.3    | Filtrar ofertas por criterios          | 🔄 PENDIENTE  | Filtros por estilo, instrumento, ubicación y fecha.                                           |
+| 3.4    | Cerrar oferta laboral                  | 🔄 PENDIENTE  | Cambiar estado de la oferta a "cerrada".                                                      |
+| 3.5    | Diseño de vista de ofertas             | 🔄 PENDIENTE  | UI responsive para navegación de ofertas.                                                     |
+| 🔥 3.6 | Postulación a una oferta laboral       | 🔄 PENDIENTE  | Permite a músicos postularse desde la vista de oferta.                                        |
+| 🔥 3.7 | Validaciones de postulaciones y cierre | 🔄 PENDIENTE  | Reglas para evitar duplicidad, control de cupos, cierre.                                      |
+| 🔥 3.8 | Invitación directa a músicos           | 🔄 PENDIENTE  | Empleadores pueden invitar músicos específicos desde portafolios a ofertas existentes.        |
 
 ---
 

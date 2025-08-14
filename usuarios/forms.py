@@ -3,7 +3,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetP
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from PIL import Image
-from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio
+from .models import (Usuario, PerfilMusico, PerfilEmpleador, Portafolio,
+                     OfertaLaboral, OfertaInstrumento, OfertaGenero)
 
 
 def validate_image_file(image):
@@ -569,3 +570,181 @@ class PerfilEmpleadorForm(forms.ModelForm):
         if año and (año < 1800 or año > timezone.now().year):
             raise forms.ValidationError('El año de fundación debe estar entre 1800 y el año actual.')
         return año
+
+
+# FORMULARIOS PARA OFERTAS LABORALES (Sprint 3)
+class CrearOfertaLaboralForm(forms.ModelForm):
+    """Formulario para crear ofertas laborales"""
+    
+    instrumentos = forms.ModelMultipleChoiceField(
+        queryset=None,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=False,
+        label='Instrumentos requeridos',
+        help_text='Selecciona los instrumentos que necesitas para esta oferta'
+    )
+    
+    generos = forms.ModelMultipleChoiceField(
+        queryset=None,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=False,
+        label='Géneros musicales preferidos',
+        help_text='Selecciona los géneros musicales que mejor se adapten a la oferta'
+    )
+
+    class Meta:
+        model = OfertaLaboral
+        fields = [
+            'titulo', 'descripcion', 'requisitos', 'tipo_contrato',
+            'fecha_evento', 'duracion_estimada', 'presupuesto_minimo',
+            'presupuesto_maximo', 'presupuesto_a_convenir', 'ubicacion',
+            'nivel_experiencia_minimo', 'cupos_disponibles',
+            'fecha_limite_postulacion', 'instrumentos', 'generos'
+        ]
+        
+        widgets = {
+            'titulo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: Guitarrista para evento corporativo'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 6,
+                'placeholder': 'Describe en detalle la oportunidad laboral, el tipo de evento, ambiente de trabajo, etc.'
+            }),
+            'requisitos': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Especifica requisitos técnicos, experiencia mínima, equipos necesarios, etc.'
+            }),
+            'tipo_contrato': forms.Select(attrs={'class': 'form-select'}),
+            'fecha_evento': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'duracion_estimada': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 3 horas, 2 días, 1 mes'
+            }),
+            'presupuesto_minimo': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': '50000',
+                'min': '0'
+            }),
+            'presupuesto_maximo': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': '150000',
+                'min': '0'
+            }),
+            'presupuesto_a_convenir': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'ubicacion': forms.Select(attrs={'class': 'form-select'}),
+            'nivel_experiencia_minimo': forms.Select(attrs={'class': 'form-select'}),
+            'cupos_disponibles': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'value': '1'
+            }),
+            'fecha_limite_postulacion': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+        }
+        
+        labels = {
+            'titulo': 'Título de la oferta',
+            'descripcion': 'Descripción detallada',
+            'requisitos': 'Requisitos específicos',
+            'tipo_contrato': 'Tipo de contrato',
+            'fecha_evento': 'Fecha y hora del evento',
+            'duracion_estimada': 'Duración estimada',
+            'presupuesto_minimo': 'Presupuesto mínimo (CLP)',
+            'presupuesto_maximo': 'Presupuesto máximo (CLP)',
+            'presupuesto_a_convenir': 'Presupuesto a convenir',
+            'ubicacion': 'Ubicación',
+            'nivel_experiencia_minimo': 'Nivel de experiencia mínimo',
+            'cupos_disponibles': 'Número de cupos disponibles',
+            'fecha_limite_postulacion': 'Fecha límite para postular',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .models import Instrumento, Genero, Ubicacion, NivelExperiencia
+        
+        self.fields['instrumentos'].queryset = Instrumento.objects.all().order_by('categoria', 'nombre')
+        self.fields['generos'].queryset = Genero.objects.all().order_by('nombre')
+        self.fields['ubicacion'].queryset = Ubicacion.objects.filter(activo=True).order_by('region', 'nombre')
+        self.fields['nivel_experiencia_minimo'].queryset = NivelExperiencia.objects.all().order_by('orden')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        presupuesto_minimo = cleaned_data.get('presupuesto_minimo')
+        presupuesto_maximo = cleaned_data.get('presupuesto_maximo')
+        presupuesto_a_convenir = cleaned_data.get('presupuesto_a_convenir')
+        fecha_evento = cleaned_data.get('fecha_evento')
+        fecha_limite = cleaned_data.get('fecha_limite_postulacion')
+        tipo_contrato = cleaned_data.get('tipo_contrato')
+
+        if not presupuesto_a_convenir and not presupuesto_minimo and not presupuesto_maximo:
+            raise forms.ValidationError(
+                'Debes especificar un presupuesto o marcar "Presupuesto a convenir".'
+            )
+
+        if presupuesto_minimo and presupuesto_maximo:
+            if presupuesto_minimo >= presupuesto_maximo:
+                raise forms.ValidationError(
+                    'El presupuesto mínimo debe ser menor al máximo.'
+                )
+
+        if fecha_evento and fecha_evento <= timezone.now():
+            raise forms.ValidationError(
+                'La fecha del evento debe ser en el futuro.'
+            )
+
+        if fecha_limite and fecha_limite <= timezone.now():
+            raise forms.ValidationError(
+                'La fecha límite de postulación debe ser en el futuro.'
+            )
+
+        if fecha_evento and fecha_limite and fecha_limite >= fecha_evento:
+            raise forms.ValidationError(
+                'La fecha límite de postulación debe ser anterior a la fecha del evento.'
+            )
+
+        if tipo_contrato == 'evento_unico' and not fecha_evento:
+            raise forms.ValidationError(
+                'Para eventos únicos debes especificar la fecha y hora del evento.'
+            )
+
+        return cleaned_data
+
+    def save(self, commit=True, empleador=None):
+        oferta = super().save(commit=False)
+        
+        if empleador:
+            oferta.empleador = empleador
+        
+        if commit:
+            oferta.save()
+            
+            # Guardar relaciones M2M con instrumentos
+            instrumentos = self.cleaned_data.get('instrumentos', [])
+            for i, instrumento in enumerate(instrumentos, 1):
+                OfertaInstrumento.objects.create(
+                    oferta_laboral=oferta,
+                    instrumento=instrumento,
+                    es_obligatorio=True,
+                    prioridad=i
+                )
+            
+            # Guardar relaciones M2M con géneros
+            generos = self.cleaned_data.get('generos', [])
+            for i, genero in enumerate(generos, 1):
+                OfertaGenero.objects.create(
+                    oferta_laboral=oferta,
+                    genero=genero,
+                    prioridad=i
+                )
+        
+        return oferta

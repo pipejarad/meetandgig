@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Botón Volver -->
+        <div class="col-12 mb-3">
+            <a href="{% url 'ver_mis_ofertas' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver a Mis Ofertas
+            </a>
+        </div>
+
+        <!-- Información Principal -->
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">{{ oferta.titulo }}</h3>
+                    <span class="badge bg-light text-dark">
+                        {% if oferta.estado == 'borrador' %}
+                            <i class="fas fa-edit me-1"></i>Borrador
+                        {% elif oferta.estado == 'publicada' %}
+                            <i class="fas fa-eye me-1"></i>Publicada
+                        {% elif oferta.estado == 'cerrada' %}
+                            <i class="fas fa-lock me-1"></i>Cerrada
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- Descripción -->
+                    <div class="mb-4">
+                        <h5 class="text-secondary border-bottom pb-2">Descripción</h5>
+                        <p class="mb-0">{{ oferta.descripcion|linebreaks }}</p>
+                    </div>
+
+                    <!-- Requisitos -->
+                    {% if oferta.requisitos %}
+                        <div class="mb-4">
+                            <h5 class="text-secondary border-bottom pb-2">Requisitos</h5>
+                            <p class="mb-0">{{ oferta.requisitos|linebreaks }}</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Información Básica -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="text-secondary border-bottom pb-2">Detalles del Trabajo</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-map-marker-alt text-primary me-2"></i><strong>Ubicación:</strong> {{ oferta.ubicacion }}</li>
+                                <li><i class="fas fa-briefcase text-primary me-2"></i><strong>Tipo:</strong> {{ oferta.get_tipo_contrato_display }}</li>
+                                <li><i class="fas fa-star text-primary me-2"></i><strong>Experiencia:</strong> {{ oferta.nivel_experiencia_minimo }}</li>
+                                <li><i class="fas fa-users text-primary me-2"></i><strong>Cupos:</strong> {{ oferta.cupos_disponibles }}</li>
+                                {% if oferta.duracion_estimada %}
+                                    <li><i class="fas fa-clock text-primary me-2"></i><strong>Duración:</strong> {{ oferta.duracion_estimada }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-secondary border-bottom pb-2">Fechas</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-calendar text-primary me-2"></i><strong>Creada:</strong> {{ oferta.fecha_creacion|date:"d M Y" }}</li>
+                                {% if oferta.fecha_evento %}
+                                    <li><i class="fas fa-calendar-day text-primary me-2"></i><strong>Evento:</strong> {{ oferta.fecha_evento|date:"d M Y" }}</li>
+                                {% endif %}
+                                {% if oferta.fecha_limite_postulacion %}
+                                    <li><i class="fas fa-calendar-times text-primary me-2"></i><strong>Límite postulación:</strong> {{ oferta.fecha_limite_postulacion|date:"d M Y" }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Presupuesto -->
+                    <div class="mb-4">
+                        <h5 class="text-secondary border-bottom pb-2">Presupuesto</h5>
+                        {% if oferta.presupuesto_a_convenir %}
+                            <span class="badge bg-info">A Convenir</span>
+                        {% else %}
+                            <p class="mb-0">
+                                <i class="fas fa-dollar-sign text-success me-1"></i>
+                                {% if oferta.presupuesto_minimo and oferta.presupuesto_maximo %}
+                                    Entre ${{ oferta.presupuesto_minimo|floatformat:0 }} - ${{ oferta.presupuesto_maximo|floatformat:0 }} CLP
+                                {% elif oferta.presupuesto_minimo %}
+                                    Desde ${{ oferta.presupuesto_minimo|floatformat:0 }} CLP
+                                {% elif oferta.presupuesto_maximo %}
+                                    Hasta ${{ oferta.presupuesto_maximo|floatformat:0 }} CLP
+                                {% else %}
+                                    A convenir
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Instrumentos requeridos -->
+                    {% with instrumentos=oferta.instrumentos.all %}
+                        {% if instrumentos %}
+                            <div class="mb-4">
+                                <h5 class="text-secondary border-bottom pb-2">Instrumentos Requeridos</h5>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for instrumento in instrumentos %}
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-music me-1"></i>{{ instrumento.nombre }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Géneros preferidos -->
+                    {% with generos=oferta.generos.all %}
+                        {% if generos %}
+                            <div class="mb-4">
+                                <h5 class="text-secondary border-bottom pb-2">Géneros Musicales Preferidos</h5>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for genero in generos %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-headphones me-1"></i>{{ genero.nombre }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar de Acciones -->
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Acciones
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if oferta.estado == 'borrador' %}
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle me-2"></i>Esta oferta está en borrador. Publícala para que sea visible a los músicos.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'publicar_oferta' oferta.slug %}" class="btn btn-success">
+                                <i class="fas fa-share me-2"></i>Publicar Oferta
+                            </a>
+                            <a href="{% url 'editar_oferta' oferta.slug %}" class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>Editar
+                            </a>
+                        </div>
+                    {% elif oferta.estado == 'publicada' %}
+                        <div class="alert alert-success small">
+                            <i class="fas fa-check-circle me-2"></i>Esta oferta está publicada y visible para músicos.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'cerrar_oferta' oferta.slug %}" class="btn btn-warning">
+                                <i class="fas fa-lock me-2"></i>Cerrar Oferta
+                            </a>
+                            <a href="{% url 'editar_oferta' oferta.slug %}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit me-2"></i>Editar
+                            </a>
+                        </div>
+                    {% elif oferta.estado == 'cerrada' %}
+                        <div class="alert alert-secondary small">
+                            <i class="fas fa-lock me-2"></i>Esta oferta está cerrada y no recibe más postulaciones.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'reabrir_oferta' oferta.slug %}" class="btn btn-success">
+                                <i class="fas fa-unlock me-2"></i>Reabrir Oferta
+                            </a>
+                            <small class="text-muted mt-2">
+                                <i class="fas fa-info-circle me-1"></i>Al reabrir, la oferta volverá a estar visible para músicos.
+                            </small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            {% if oferta.estado == 'publicada' %}
+                <div class="card shadow mt-3">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h4 class="text-primary mb-0">{{ oferta.postulaciones.count }}</h4>
+                                    <small class="text-muted">Postulaciones</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-success mb-0">{{ oferta.cupos_disponibles }}</h4>
+                                <small class="text-muted">Cupos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

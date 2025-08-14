@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Cierre de Oferta
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>¿Estás seguro que deseas cerrar esta oferta?</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5 class="text-primary">{{ oferta.titulo }}</h5>
+                        <p class="text-muted">{{ oferta.descripcion|truncatewords:20 }}</p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6 class="mb-2">Al cerrar la oferta:</h6>
+                        <ul class="mb-0 small">
+                            <li>No recibirás nuevas postulaciones</li>
+                            <li>La oferta dejará de ser visible para músicos</li>
+                            <li>Podrás reabrirla más tarde si es necesario</li>
+                            <li>Las postulaciones existentes se mantendrán</li>
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detalle_oferta' oferta.slug %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-lock me-2"></i>Sí, Cerrar Oferta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
