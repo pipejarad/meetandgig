@@ -1,0 +1,89 @@
+/* ===== Tokens Meet & Gig ===== */
+:root{
+--mg-primary-700:#3C2380;
+--mg-primary-600:#5834BC;
+--mg-primary-400:#8467D5;
+--mg-primary-200:#B5A3E6;
+
+--mg-teal-600:#14B8A6;
+--mg-blue-600:#2563EB;
+--mg-coral-500:#FF8E6E;
+
+--mg-surface-50:#F8F7FC;
+--mg-surface-100:#F1EFFA;
+--mg-border-300:#D8D6E6;
+
+--mg-text-900:#1F2233;
+--mg-text-600:#4B4F68;
+}
+
+/* ===== Overrides Bootstrap 4 (runtime) ===== */
+body{ background-color:var(--mg-surface-50); color:var(--mg-text-900); }
+
+a{ color:var(--mg-primary-600); }
+a:hover, a:focus{ color:var(--mg-primary-700); text-decoration:underline; }
+
+/* Botones */
+.btn-primary{
+background-color:var(--mg-primary-600) !important;
+border-color:var(--mg-primary-600) !important;
+}
+.btn-primary:hover, .btn-primary:focus{
+background-color:var(--mg-primary-700) !important;
+border-color:var(--mg-primary-700) !important;
+}
+.btn-outline-primary{
+color:var(--mg-primary-600) !important;
+border-color:var(--mg-primary-600) !important;
+}
+.btn-outline-primary:hover{
+color:#fff !important;
+background-color:var(--mg-primary-700) !important;
+border-color:var(--mg-primary-700) !important;
+}
+
+/* Formularios (focus visible y accesible) */
+.form-control:focus{
+border-color: var(--mg-primary-400);
+box-shadow: 0 0 0 .2rem rgba(132,103,213,.35);
+}
+:focus-visible{ outline:3px solid var(--mg-primary-400); outline-offset:2px; }
+
+/* Nav pills / tabs activos */
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link{
+color:#fff; background-color:var(--mg-primary-600);
+}
+
+/* Badges, alerts y paginación */
+.badge-primary{ background-color:var(--mg-primary-600); }
+.alert-primary{ color:#fff; background-color:var(--mg-primary-600); border-color:var(--mg-primary-600); }
+.page-link{ color:var(--mg-primary-600); }
+.page-item.active .page-link{
+background-color:var(--mg-primary-600); border-color:var(--mg-primary-600);
+}
+
+/* Utilidad branding */
+.bg-brand-gradient{
+background: linear-gradient(135deg,#5834BC 0%,#8467D5 60%,#B5A3E6 100%);
+}
+
+/* ===== Utilidades de marca ===== */
+.bg-brand{ background-color: var(--mg-primary-600) !important; color:#fff !important; }
+.bg-brand-hover:hover{ background-color: var(--mg-primary-700) !important; }
+
+.bg-accent-teal{ background-color: var(--mg-teal-600) !important; color:#fff !important; }
+
+.bg-surface-50{ background-color: var(--mg-surface-50) !important; }
+.bg-surface-100{ background-color: var(--mg-surface-100) !important; }
+
+.text-brand{ color: var(--mg-primary-600) !important; }
+.text-brand-700{ color: var(--mg-primary-700) !important; }
+
+/* Suave para tarjetas/llamados (fallback si no hay color-mix) */
+.bg-brand-soft{ background:#EEE9FB; color:var(--mg-text-900); }
+
+/* Hero con degradado de marca */
+.bg-hero{
+  background:linear-gradient(135deg,#5834BC 0%,#8467D5 60%,#B5A3E6 100%);
+  color:#fff;
+}
