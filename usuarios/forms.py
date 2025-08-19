@@ -157,8 +157,6 @@ class RecuperarPasswordForm(forms.Form):
         if not email:
             return email
             
-        if not Usuario.objects.filter(email__iexact=email).exists():
-            raise ValidationError("No existe un usuario registrado con este email.")
         return email.lower()
 
 
@@ -317,6 +315,7 @@ class PortafolioForm(forms.ModelForm):
     
     tarifa_base = forms.IntegerField(
         required=False,
+        min_value=0,  # Validación del lado del servidor
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'placeholder': '150000',
