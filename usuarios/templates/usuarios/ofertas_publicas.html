@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ofertas de Trabajo - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="bg-hero text-white p-4 rounded-3 mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-2">🎵 Ofertas de Trabajo</h1>
+                <p class="mb-0">Encuentra oportunidades musicales que se ajusten a tu talento</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <span class="badge bg-light text-primary fs-6">{{ ofertas.count }} ofertas disponibles</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar de Filtros -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-brand text-white">
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros de Búsqueda</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{% url 'buscar_ofertas' %}">
+                        <!-- Búsqueda general -->
+                        <div class="mb-3">
+                            <label for="q" class="form-label fw-semibold">
+                                <i class="fas fa-search me-2 text-primary"></i>Búsqueda General
+                            </label>
+                            <input type="text" class="form-control" id="q" name="q" 
+                                   value="{{ request.GET.q }}" placeholder="Buscar por título...">
+                        </div>
+
+                        <!-- Instrumentos -->
+                        <div class="mb-3">
+                            <label for="instrumentos" class="form-label fw-semibold">
+                                <i class="fas fa-guitar me-2 text-primary"></i>Instrumentos
+                            </label>
+                            <select class="form-select" id="instrumentos" name="instrumentos" multiple size="4">
+                                {% for instrumento in instrumentos %}
+                                <option value="{{ instrumento.id }}" 
+                                        {% if instrumento.id|stringformat:"s" in request.GET.instrumentos %}selected{% endif %}>
+                                    {{ instrumento.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>Ctrl + clic para múltiples
+                            </small>
+                        </div>
+
+                        <!-- Géneros -->
+                        <div class="mb-3">
+                            <label for="generos" class="form-label fw-semibold">
+                                <i class="fas fa-music me-2 text-primary"></i>Géneros
+                            </label>
+                            <select class="form-select" id="generos" name="generos" multiple size="4">
+                                {% for genero in generos %}
+                                <option value="{{ genero.id }}" 
+                                        {% if genero.id|stringformat:"s" in request.GET.generos %}selected{% endif %}>
+                                    {{ genero.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>Selecciona géneros de interés
+                            </small>
+                        </div>
+
+                        <!-- Ubicación -->
+                        <div class="mb-3">
+                            <label for="ubicacion" class="form-label fw-semibold">
+                                <i class="fas fa-map-marker-alt me-2 text-primary"></i>Ubicación
+                            </label>
+                            <select class="form-select" id="ubicacion" name="ubicacion">
+                                <option value="">Todas las regiones</option>
+                                {% for ubicacion in ubicaciones %}
+                                <option value="{{ ubicacion.id }}" 
+                                        {% if ubicacion.id|stringformat:"s" == request.GET.ubicacion %}selected{% endif %}>
+                                    {{ ubicacion.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Experiencia -->
+                        <div class="mb-3">
+                            <label for="experiencia" class="form-label fw-semibold">
+                                <i class="fas fa-star me-2 text-primary"></i>Experiencia Mínima
+                            </label>
+                            <select class="form-select" id="experiencia" name="experiencia">
+                                <option value="">Cualquier nivel</option>
+                                {% for nivel in niveles %}
+                                <option value="{{ nivel.id }}" 
+                                        {% if nivel.id|stringformat:"s" == request.GET.experiencia %}selected{% endif %}>
+                                    {{ nivel.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Presupuesto -->
+                        <div class="mb-3">
+                            <label for="presupuesto_min" class="form-label fw-semibold">
+                                <i class="fas fa-dollar-sign me-2 text-success"></i>Presupuesto Mínimo
+                            </label>
+                            <select class="form-select" id="presupuesto_min" name="presupuesto_min">
+                                <option value="">Sin mínimo</option>
+                                <option value="50000" {% if request.GET.presupuesto_min == '50000' %}selected{% endif %}>
+                                    $50.000+
+                                </option>
+                                <option value="100000" {% if request.GET.presupuesto_min == '100000' %}selected{% endif %}>
+                                    $100.000+
+                                </option>
+                                <option value="200000" {% if request.GET.presupuesto_min == '200000' %}selected{% endif %}>
+                                    $200.000+
+                                </option>
+                                <option value="500000" {% if request.GET.presupuesto_min == '500000' %}selected{% endif %}>
+                                    $500.000+
+                                </option>
+                                <option value="1000000" {% if request.GET.presupuesto_min == '1000000' %}selected{% endif %}>
+                                    $1.000.000+
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Presupuesto Máximo -->
+                        <div class="mb-3">
+                            <label for="presupuesto_max" class="form-label fw-semibold">
+                                <i class="fas fa-dollar-sign me-2 text-success"></i>Presupuesto Máximo
+                            </label>
+                            <select class="form-select" id="presupuesto_max" name="presupuesto_max">
+                                <option value="">Sin máximo</option>
+                                <option value="100000" {% if request.GET.presupuesto_max == '100000' %}selected{% endif %}>
+                                    Hasta $100.000
+                                </option>
+                                <option value="200000" {% if request.GET.presupuesto_max == '200000' %}selected{% endif %}>
+                                    Hasta $200.000
+                                </option>
+                                <option value="500000" {% if request.GET.presupuesto_max == '500000' %}selected{% endif %}>
+                                    Hasta $500.000
+                                </option>
+                                <option value="1000000" {% if request.GET.presupuesto_max == '1000000' %}selected{% endif %}>
+                                    Hasta $1.000.000
+                                </option>
+                                <option value="2000000" {% if request.GET.presupuesto_max == '2000000' %}selected{% endif %}>
+                                    Hasta $2.000.000
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Fecha del Evento -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-calendar-alt me-2 text-primary"></i>Fecha del Evento
+                            </label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="date" class="form-control form-control-sm" 
+                                           id="fecha_evento_desde" name="fecha_evento_desde"
+                                           value="{{ request.GET.fecha_evento_desde }}"
+                                           placeholder="Desde">
+                                    <small class="text-muted">Desde</small>
+                                </div>
+                                <div class="col-6">
+                                    <input type="date" class="form-control form-control-sm" 
+                                           id="fecha_evento_hasta" name="fecha_evento_hasta"
+                                           value="{{ request.GET.fecha_evento_hasta }}"
+                                           placeholder="Hasta">
+                                    <small class="text-muted">Hasta</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fecha de Publicación -->
+                        <div class="mb-3">
+                            <label for="fecha_publicacion_desde" class="form-label fw-semibold">
+                                <i class="fas fa-clock me-2 text-primary"></i>Publicado Desde
+                            </label>
+                            <input type="date" class="form-control" 
+                                   id="fecha_publicacion_desde" name="fecha_publicacion_desde"
+                                   value="{{ request.GET.fecha_publicacion_desde }}">
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>Ofertas publicadas desde esta fecha
+                            </small>
+                        </div>
+
+                        <!-- Ordenamiento -->
+                        <div class="mb-3">
+                            <label for="orden" class="form-label fw-semibold">
+                                <i class="fas fa-sort me-2 text-primary"></i>Ordenar por
+                            </label>
+                            <select class="form-select" id="orden" name="orden">
+                                <option value="fecha_desc" {% if request.GET.orden == 'fecha_desc' or not request.GET.orden %}selected{% endif %}>
+                                    Más recientes
+                                </option>
+                                <option value="fecha_asc" {% if request.GET.orden == 'fecha_asc' %}selected{% endif %}>
+                                    Más antiguos
+                                </option>
+                                <option value="evento_desc" {% if request.GET.orden == 'evento_desc' %}selected{% endif %}>
+                                    Evento más próximo
+                                </option>
+                                <option value="evento_asc" {% if request.GET.orden == 'evento_asc' %}selected{% endif %}>
+                                    Evento más lejano
+                                </option>
+                                <option value="presupuesto_desc" {% if request.GET.orden == 'presupuesto_desc' %}selected{% endif %}>
+                                    Mayor presupuesto
+                                </option>
+                                <option value="presupuesto_asc" {% if request.GET.orden == 'presupuesto_asc' %}selected{% endif %}>
+                                    Menor presupuesto
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-brand">
+                                <i class="fas fa-search me-2"></i>Buscar Ofertas
+                            </button>
+                            <a href="{% url 'buscar_ofertas' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times me-2"></i>Limpiar Filtros
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Ofertas -->
+        <div class="col-lg-9 col-md-8">
+            <!-- Ordenamiento -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Ofertas Disponibles</h4>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" 
+                            data-bs-toggle="dropdown">
+                        <i class="fas fa-sort me-2"></i>Ordenar
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="?{% for key, value in request.GET.items %}{% if key != 'orden' %}{{ key }}={{ value }}&{% endif %}{% endfor %}orden=fecha_desc">
+                                Más recientes
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="?{% for key, value in request.GET.items %}{% if key != 'orden' %}{{ key }}={{ value }}&{% endif %}{% endfor %}orden=presupuesto_desc">
+                                Mayor presupuesto
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="?{% for key, value in request.GET.items %}{% if key != 'orden' %}{{ key }}={{ value }}&{% endif %}{% endfor %}orden=presupuesto_asc">
+                                Menor presupuesto
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            {% if ofertas %}
+                <div class="row g-4">
+                    {% for oferta in ofertas %}
+                        <div class="col-lg-6 col-md-12 mb-4">
+                            {% include 'usuarios/components/oferta_card.html' with oferta=oferta %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginación -->
+                {% if ofertas.has_other_pages %}
+                <nav aria-label="Paginación de ofertas">
+                    <ul class="pagination justify-content-center">
+                        {% if ofertas.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ ofertas.previous_page_number }}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in ofertas.paginator.page_range %}
+                            {% if ofertas.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > ofertas.number|add:'-3' and num < ofertas.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if ofertas.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ ofertas.next_page_number }}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <!-- Estado vacío -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-search fa-3x text-muted"></i>
+                    </div>
+                    <h4 class="text-muted">No se encontraron ofertas</h4>
+                    <p class="text-muted">
+                        {% if request.GET.q or request.GET.instrumentos or request.GET.generos %}
+                            Intenta ajustar tus filtros de búsqueda
+                        {% else %}
+                            Aún no hay ofertas de trabajo disponibles
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'buscar_ofertas' %}" class="btn btn-outline-primary">
+                        Ver todas las ofertas
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mejorar selects múltiples con mejor UX
+    const multiSelects = document.querySelectorAll('select[multiple]');
+    multiSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            const selectedCount = this.selectedOptions.length;
+            const label = this.previousElementSibling;
+            if (selectedCount > 0) {
+                label.innerHTML += ` <span class="badge bg-secondary">${selectedCount}</span>`;
+            }
+        });
+    });
+
+    // Auto-submit del formulario de filtros cuando se cambian valores
+    const filterForm = document.querySelector('form');
+    const filterInputs = filterForm.querySelectorAll('select, input');
+    
+    let timeout;
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.type !== 'text') {
+                // Para selects, enviar inmediatamente
+                filterForm.submit();
+            }
+        });
+        
+        if (input.type === 'text') {
+            input.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    filterForm.submit();
+                }, 1000); // Esperar 1 segundo después de que el usuario deje de escribir
+            });
+        }
+    });
+});
+</script>
+
+<style>
+/* Estilos para el sidebar de filtros - Diseño balanceado */
+.form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--mg-primary-600);
+    box-shadow: 0 0 0 0.2rem rgba(88, 52, 188, 0.25);
+}
+
+.form-select[multiple] {
+    background-image: none;
+}
+
+.form-select[multiple] option:checked {
+    background-color: var(--mg-primary-600);
+    color: white;
+}
+
+.btn-brand {
+    background: linear-gradient(135deg, var(--mg-primary-600) 0%, var(--mg-primary-700) 100%);
+    border: none;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-brand:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(88, 52, 188, 0.3);
+}
+
+.sticky-top {
+    position: -webkit-sticky;
+    position: sticky;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sticky-top {
+        position: relative;
+        top: auto !important;
+    }
+}
+</style>
+{% endblock %}

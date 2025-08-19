@@ -13,6 +13,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, UpdateView, DetailView
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from django.utils import timezone
 from .forms import (
     RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, 
     PerfilMusicoForm, PerfilEmpleadorForm, PortafolioForm, CrearOfertaLaboralForm
@@ -611,6 +613,157 @@ class PortafolioUnificadoView(DetailView):
         keywords.extend(['meet&gig', 'portafolio musical'])
         
         return ", ".join(keywords[:10])
+
+
+def buscar_ofertas_view(request):
+    """Vista pública para buscar ofertas laborales (accesible a músicos)"""
+    from .models import Instrumento, Genero, Ubicacion, NivelExperiencia
+    
+    ofertas = OfertaLaboral.objects.filter(
+        estado='publicada'
+    ).select_related(
+        'empleador__usuario', 'ubicacion', 'nivel_experiencia_minimo'
+    ).prefetch_related(
+        'oferta_instrumentos__instrumento',
+        'oferta_generos__genero'
+    ).order_by('-fecha_publicacion')
+    
+    # Aplicar filtros de búsqueda (mismo patrón que buscar_portafolios)
+    query = request.GET.get('q', '').strip()
+    instrumentos_ids = request.GET.getlist('instrumentos')
+    generos_ids = request.GET.getlist('generos')
+    ubicacion_id = request.GET.get('ubicacion')
+    nivel_id = request.GET.get('experiencia')
+    presupuesto_min = request.GET.get('presupuesto_min')
+    presupuesto_max = request.GET.get('presupuesto_max')
+    fecha_evento_desde = request.GET.get('fecha_evento_desde')
+    fecha_evento_hasta = request.GET.get('fecha_evento_hasta')
+    fecha_publicacion_desde = request.GET.get('fecha_publicacion_desde')
+    orden = request.GET.get('orden', 'fecha_desc')
+
+    # Búsqueda por texto en título y descripción
+    if query:
+        ofertas = ofertas.filter(
+            Q(titulo__icontains=query) | Q(descripcion__icontains=query)
+        )
+
+    # Filtros por instrumentos (M2M múltiple)
+    if instrumentos_ids:
+        ofertas = ofertas.filter(
+            oferta_instrumentos__instrumento_id__in=instrumentos_ids
+        ).distinct()
+
+    # Filtros por géneros (M2M múltiple)
+    if generos_ids:
+        ofertas = ofertas.filter(
+            oferta_generos__genero_id__in=generos_ids
+        ).distinct()
+
+    # Filtros por ubicación (FK)
+    if ubicacion_id:
+        ofertas = ofertas.filter(ubicacion_id=ubicacion_id)
+
+    # Filtros por nivel de experiencia (FK)
+    if nivel_id:
+        ofertas = ofertas.filter(nivel_experiencia_minimo_id=nivel_id)
+    
+    # Filtros por presupuesto
+    if presupuesto_min:
+        try:
+            ofertas = ofertas.filter(
+                Q(presupuesto_minimo__gte=int(presupuesto_min)) |
+                Q(presupuesto_maximo__gte=int(presupuesto_min)) |
+                Q(presupuesto_a_convenir=True)
+            )
+        except ValueError:
+            pass
+
+    if presupuesto_max:
+        try:
+            ofertas = ofertas.filter(
+                Q(presupuesto_maximo__lte=int(presupuesto_max)) |
+                Q(presupuesto_a_convenir=True)
+            )
+        except ValueError:
+            pass
+
+    # Filtros por fecha del evento
+    if fecha_evento_desde:
+        try:
+            from datetime import datetime
+            fecha_desde = datetime.strptime(fecha_evento_desde, '%Y-%m-%d').date()
+            ofertas = ofertas.filter(fecha_evento__date__gte=fecha_desde)
+        except ValueError:
+            pass
+
+    if fecha_evento_hasta:
+        try:
+            from datetime import datetime
+            fecha_hasta = datetime.strptime(fecha_evento_hasta, '%Y-%m-%d').date()
+            ofertas = ofertas.filter(fecha_evento__date__lte=fecha_hasta)
+        except ValueError:
+            pass
+
+    # Filtros por fecha de publicación
+    if fecha_publicacion_desde:
+        try:
+            from datetime import datetime
+            fecha_pub_desde = datetime.strptime(fecha_publicacion_desde, '%Y-%m-%d').date()
+            ofertas = ofertas.filter(fecha_publicacion__date__gte=fecha_pub_desde)
+        except ValueError:
+            pass
+
+    # Solo ofertas vigentes (fecha límite no vencida)
+    ofertas = ofertas.filter(
+        Q(fecha_limite_postulacion__gt=timezone.now()) |
+        Q(fecha_limite_postulacion__isnull=True)
+    )
+
+    # Aplicar ordenamiento
+    if orden == 'fecha_desc':
+        ofertas = ofertas.order_by('-fecha_publicacion')
+    elif orden == 'fecha_asc':
+        ofertas = ofertas.order_by('fecha_publicacion')
+    elif orden == 'presupuesto_desc':
+        ofertas = ofertas.order_by('-presupuesto_maximo', '-presupuesto_minimo')
+    elif orden == 'presupuesto_asc':
+        ofertas = ofertas.order_by('presupuesto_minimo', 'presupuesto_maximo')
+    elif orden == 'evento_desc':
+        ofertas = ofertas.order_by('-fecha_evento')
+    elif orden == 'evento_asc':
+        ofertas = ofertas.order_by('fecha_evento')
+    else:
+        ofertas = ofertas.order_by('-fecha_publicacion')
+    
+    # Catálogos para filtros
+    instrumentos = Instrumento.objects.all().order_by('categoria', 'nombre')
+    generos = Genero.objects.all().order_by('nombre')
+    ubicaciones = Ubicacion.objects.filter(activo=True).order_by('region', 'nombre')
+    niveles = NivelExperiencia.objects.all().order_by('orden')
+    
+    context = {
+        'ofertas': ofertas,
+        'instrumentos': instrumentos,
+        'generos': generos,
+        'ubicaciones': ubicaciones,
+        'niveles': niveles,
+        'query': query,
+        'filtros_activos': {
+            'instrumentos': instrumentos_ids,
+            'generos': generos_ids,
+            'ubicacion': ubicacion_id,
+            'nivel': nivel_id,
+            'presupuesto_min': presupuesto_min,
+            'presupuesto_max': presupuesto_max,
+            'fecha_evento_desde': fecha_evento_desde,
+            'fecha_evento_hasta': fecha_evento_hasta,
+            'fecha_publicacion_desde': fecha_publicacion_desde,
+            'orden': orden,
+        },
+        'titulo_pagina': 'Explorar Ofertas Laborales'
+    }
+    
+    return render(request, 'usuarios/ofertas_publicas.html', context)
 
 
 # VISTAS PARA OFERTAS LABORALES (Sprint 3)
