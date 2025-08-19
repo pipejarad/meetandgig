@@ -78,7 +78,14 @@
                             <a class="nav-link" href="#">Eventos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Músicos</a>
+                            <a class="nav-link" href="{% url 'buscar_ofertas' %}">
+                                <i class="fas fa-briefcase me-2"></i>Ofertas de Trabajo
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'buscar_portafolios' %}">
+                                <i class="fas fa-users me-2"></i>Músicos
+                            </a>
                         </li>
                         {% if user.tipo_usuario == 'musico' %}
                         <li class="nav-item">
@@ -93,6 +100,18 @@
                             </a>
                         </li>
                         {% endif %}
+                        {% else %}
+                        <!-- Navegación para usuarios no autenticados -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'buscar_ofertas' %}">
+                                <i class="fas fa-briefcase me-2"></i>Ofertas de Trabajo
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'buscar_portafolios' %}">
+                                <i class="fas fa-users me-2"></i>Músicos
+                            </a>
+                        </li>
                         {% endif %}
                     </ul>
 

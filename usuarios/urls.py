@@ -29,7 +29,11 @@ urlpatterns = [
     path('buscar/', views.buscar_portafolios, name='buscar_portafolios'),
     path('musicos/', views.buscar_portafolios, name='listar_portafolios'),
     
-    # URLs de ofertas laborales (Sprint 3)
+    # URLs de ofertas laborales públicas (Ticket 3.2)
+    path('ofertas/', views.buscar_ofertas_view, name='buscar_ofertas'),
+    path('trabajos/', views.buscar_ofertas_view, name='listar_ofertas'),
+    
+    # URLs de ofertas laborales privadas (Sprint 3)
     path('ofertas/nueva/', views.crear_oferta_laboral_view, name='crear_oferta_laboral'),
     path('ofertas/mis-ofertas/', views.ver_mis_ofertas_view, name='ver_mis_ofertas'),
     path('ofertas/<slug:slug>/', views.detalle_oferta_view, name='detalle_oferta'),

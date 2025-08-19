@@ -42,6 +42,33 @@ background-color:var(--mg-primary-700) !important;
 border-color:var(--mg-primary-700) !important;
 }
 
+/* Botones personalizados Meet & Gig */
+.btn-brand {
+  background-color: var(--mg-primary-600) !important;
+  border-color: var(--mg-primary-600) !important;
+  color: white !important;
+}
+.btn-brand:hover, .btn-brand:focus {
+  background-color: var(--mg-primary-700) !important;
+  border-color: var(--mg-primary-700) !important;
+  color: white !important;
+}
+
+.btn-accent-teal {
+  background-color: var(--mg-teal-600) !important;
+  border-color: var(--mg-teal-600) !important;
+  color: white !important;
+}
+.btn-accent-teal:hover, .btn-accent-teal:focus {
+  background-color: var(--mg-teal-700) !important;
+  border-color: var(--mg-teal-700) !important;
+  color: white !important;
+}
+
+.text-accent-teal {
+  color: var(--mg-teal-600) !important;
+}
+
 /* Formularios (focus visible y accesible) */
 .form-control:focus{
 border-color: var(--mg-primary-400);

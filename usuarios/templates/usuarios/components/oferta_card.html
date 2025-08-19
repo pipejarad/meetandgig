@@ -1,0 +1,192 @@
+<!-- Tarjeta de Oferta Laboral -->
+<div class="card h-100 shadow-sm border-0 oferta-card">
+    <div class="card-body d-flex flex-column">
+        <!-- Header con estado y fecha -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="badge bg-success">Publicada</span>
+            <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>
+                {{ oferta.fecha_creacion|timesince }} atrás
+            </small>
+        </div>
+
+        <!-- Título y descripción -->
+        <h5 class="card-title mb-2">
+            <a href="{% url 'detalle_oferta' oferta.slug %}" class="text-decoration-none text-brand">
+                {{ oferta.titulo }}
+            </a>
+        </h5>
+        
+        <p class="card-text text-muted mb-3" style="flex-grow: 1;">
+            {{ oferta.descripcion|truncatewords:20 }}
+        </p>
+
+        <!-- Información clave -->
+        <div class="mb-3">
+            <!-- Presupuesto -->
+            {% if oferta.presupuesto_minimo or oferta.presupuesto_maximo %}
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-dollar-sign text-success me-2"></i>
+                <span class="fw-bold text-success">
+                    {{ oferta.get_presupuesto_display }}
+                </span>
+            </div>
+            {% elif oferta.presupuesto_a_convenir %}
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-dollar-sign text-success me-2"></i>
+                <span class="fw-bold text-success">A convenir</span>
+            </div>
+            {% endif %}
+
+            <!-- Ubicación -->
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                <span>{{ oferta.ubicacion.nombre }}</span>
+            </div>
+
+            <!-- Fecha del evento -->
+            {% if oferta.fecha_evento %}
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-calendar-alt text-info me-2"></i>
+                <span>{{ oferta.fecha_evento|date:"d M Y" }}</span>
+                <span class="ms-1">{{ oferta.fecha_evento|time:"H:i" }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Tipo de contrato -->
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-handshake text-purple me-2"></i>
+                <span>{{ oferta.get_tipo_contrato_display }}</span>
+            </div>
+        </div>
+
+        <!-- Tags de instrumentos y géneros -->
+        <div class="mb-3">
+            {% if oferta.oferta_instrumentos.all %}
+                <div class="mb-2">
+                    {% for oferta_inst in oferta.oferta_instrumentos.all %}
+                        <span class="badge bg-brand me-1 mb-1">
+                            <i class="fas fa-guitar me-1"></i>{{ oferta_inst.instrumento.nombre }}
+                            {% if not oferta_inst.es_obligatorio %}
+                                <small>(deseable)</small>
+                            {% endif %}
+                        </span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if oferta.oferta_generos.all %}
+                <div class="mb-2">
+                    {% for oferta_gen in oferta.oferta_generos.all %}
+                        <span class="badge bg-accent-teal me-1 mb-1">{{ oferta_gen.genero.nombre }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Información del empleador -->
+        <div class="border-top pt-3 mt-auto">
+            <div class="d-flex align-items-center">
+                {% if oferta.empleador.foto_perfil %}
+                    <img src="{{ oferta.empleador.foto_perfil.url }}" 
+                         alt="{{ oferta.empleador.get_full_name }}"
+                         class="rounded-circle me-2" width="32" height="32"
+                         style="object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" 
+                         style="width: 32px; height: 32px;">
+                        <i class="fas fa-user text-muted"></i>
+                    </div>
+                {% endif %}
+                <div class="flex-grow-1">
+                    <div class="fw-bold">{{ oferta.empleador.get_full_name }}</div>
+                    {% if oferta.empleador.es_empresa %}
+                        <small class="text-muted">
+                            <i class="fas fa-building me-1"></i>Empresa
+                        </small>
+                    {% else %}
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i>Particular
+                        </small>
+                    {% endif %}
+                </div>
+                
+                <!-- Rating del empleador si existe -->
+                {% if oferta.empleador.rating_promedio %}
+                <div class="text-end">
+                    <div class="text-warning">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= oferta.empleador.rating_promedio %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted">{{ oferta.empleador.rating_promedio|floatformat:1 }}</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Botón de acción -->
+        <div class="mt-3">
+            <a href="{% url 'detalle_oferta' oferta.slug %}" 
+               class="btn btn-brand w-100">
+                <i class="fas fa-eye me-2"></i>Ver Detalles
+            </a>
+        </div>
+
+        <!-- Indicadores adicionales -->
+        <div class="mt-2 d-flex justify-content-between align-items-center">
+            <!-- Tiempo restante para postular -->
+            {% if oferta.fecha_limite_postulacion %}
+                <small class="text-muted">
+                    <i class="fas fa-hourglass-half me-1"></i>
+                    Hasta {{ oferta.fecha_limite_postulacion|date:"d/m" }}
+                </small>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.oferta-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.oferta-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+}
+
+.text-brand {
+    color: var(--mg-primary-600) !important;
+}
+
+.text-purple {
+    color: var(--mg-primary-600);
+}
+
+.bg-brand {
+    background-color: var(--mg-primary-600) !important;
+    color: white !important;
+}
+
+.btn-brand {
+    background-color: var(--mg-primary-600);
+    border-color: var(--mg-primary-600);
+    color: white;
+}
+
+.btn-brand:hover {
+    background-color: var(--mg-primary-700);
+    border-color: var(--mg-primary-700);
+    color: white;
+}
+
+.bg-accent-teal {
+    background-color: var(--mg-teal-600) !important;
+    color: white !important;
+}
+</style>

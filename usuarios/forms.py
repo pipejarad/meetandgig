@@ -3,8 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetP
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from PIL import Image
-from .models import (Usuario, PerfilMusico, PerfilEmpleador, Portafolio,
-                     OfertaLaboral, OfertaInstrumento, OfertaGenero)
+from .models import (Usuario, PerfilMusico, PerfilEmpleador, Portafolio,OfertaLaboral, OfertaInstrumento, OfertaGenero)
 
 
 def validate_image_file(image):

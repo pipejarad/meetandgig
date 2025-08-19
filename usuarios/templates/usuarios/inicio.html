@@ -160,6 +160,38 @@
   </div>
 </section>
 
+<!-- Acceso Rápido -->
+<section class="py-4 bg-surface-50">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center p-4">
+            <i class="fas fa-briefcase fa-2x text-brand mb-3"></i>
+            <h5 class="mb-3">Explorar Ofertas de Trabajo</h5>
+            <p class="text-muted mb-3">Descubre oportunidades musicales publicadas por organizadores de eventos</p>
+            <a href="{% url 'buscar_ofertas' %}" class="btn btn-brand">
+              <i class="fas fa-search me-2"></i>Ver Ofertas
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center p-4">
+            <i class="fas fa-users fa-2x text-accent-teal mb-3"></i>
+            <h5 class="mb-3">Buscar Músicos</h5>
+            <p class="text-muted mb-3">Encuentra el talento musical perfecto para tu evento o proyecto</p>
+            <a href="{% url 'buscar_portafolios' %}" class="btn btn-accent-teal">
+              <i class="fas fa-search me-2"></i>Buscar Talento
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Estadísticas -->
 <section class="py-5 bg-surface-100">
   <div class="container">
