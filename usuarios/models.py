@@ -43,7 +43,7 @@ class Instrumento(models.Model):
     categoria = models.CharField(max_length=50, blank=True, verbose_name='Categoría')
 
     class Meta:
-        managed = False  # Tabla existente, no gestionada por Django
+        managed = True
         db_table = 'usuarios_instrumento'
         verbose_name = 'Instrumento'
         verbose_name_plural = 'Instrumentos'
@@ -59,7 +59,7 @@ class Genero(models.Model):
     descripcion = models.TextField(blank=True, verbose_name='Descripción')
 
     class Meta:
-        managed = False  # Tabla existente, no gestionada por Django
+        managed = True
         db_table = 'usuarios_generomusical'
         verbose_name = 'Género Musical'
         verbose_name_plural = 'Géneros Musicales'
@@ -290,14 +290,18 @@ class Portafolio(models.Model):
     
     # RELACIONES CON CATÁLOGOS NORMALIZADOS
     nivel_experiencia = models.ForeignKey(
-        NivelExperiencia, 
-        on_delete=models.PROTECT, 
-        verbose_name='Nivel de experiencia'
+        NivelExperiencia,
+        on_delete=models.PROTECT,
+        verbose_name='Nivel de experiencia',
+        null=True,
+        blank=True
     )
     ubicacion = models.ForeignKey(
         Ubicacion, 
         on_delete=models.PROTECT, 
-        verbose_name='Ubicación'
+        verbose_name='Ubicación',
+        null=True,
+        blank=True
     )
     
     # ENLACES PROFESIONALES
@@ -639,7 +643,9 @@ class OfertaLaboral(models.Model):
     ubicacion = models.ForeignKey(
         Ubicacion,
         on_delete=models.PROTECT,
-        verbose_name='Ubicación'
+        verbose_name='Ubicación',
+        null=True,
+        blank=True
     )
     nivel_experiencia_minimo = models.ForeignKey(
         NivelExperiencia,
