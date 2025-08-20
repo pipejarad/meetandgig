@@ -38,7 +38,7 @@
     <!-- Espacio para CSS adicional en templates que extiendan este -->
     {% endblock %}
     
-    <!-- Bootstrap 4 specific styles -->
+    <!-- Bootstrap 4 compatible styles -->
     <style>
         .dropdown-menu-right {
             right: 0;
@@ -50,6 +50,155 @@
             border-right: 0.3em solid transparent;
             border-left: 0.3em solid transparent;
         }
+        
+        /* Fixed navbar padding adjustment */
+        body {
+            padding-top: 76px; /* Altura aproximada del navbar + margen */
+        }
+        
+        /* Mobile navbar improvements - Bootstrap 4 compatible */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background-color: rgba(33, 37, 41, 0.95);
+                backdrop-filter: blur(10px);
+                margin: 0.5rem -1rem -1rem -1rem;
+                padding: 1rem;
+                border-radius: 0 0 0.5rem 0.5rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.75rem 1rem;
+                border-radius: 0.25rem;
+                margin: 0.125rem 0;
+                transition: all 0.2s ease;
+            }
+            
+            .navbar-nav .nav-link:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                transform: translateX(4px);
+            }
+            
+            .dropdown-menu {
+                background-color: rgba(33, 37, 41, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .dropdown-item {
+                color: rgba(255, 255, 255, 0.9);
+            }
+            
+            .dropdown-item:hover,
+            .dropdown-item:focus {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+            
+            /* Mejorar botón registrarse en mobile */
+            .nav-item .btn {
+                margin: 0.5rem 0;
+                text-align: center;
+            }
+        }
+        
+        /* Navbar toggler mejorado */
+        .navbar-toggler {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-toggler:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+            outline: none;
+        }
+        
+        .navbar-toggler:not(.collapsed) {
+            border-color: rgba(255, 255, 255, 0.6);
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+        
+        /* Icono hamburguesa personalizado */
+        .navbar-toggler-icon {
+            background-image: none;
+            width: 24px;
+            height: 18px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .navbar-toggler-icon::before,
+        .navbar-toggler-icon::after,
+        .navbar-toggler-icon {
+            display: block;
+            content: '';
+            width: 24px;
+            height: 3px;
+            background-color: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-toggler-icon::before {
+            position: absolute;
+            top: -8px;
+            left: 0;
+        }
+        
+        .navbar-toggler-icon::after {
+            position: absolute;
+            top: 8px;
+            left: 0;
+        }
+        
+        /* Animación cuando está expandido */
+        .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+            background-color: transparent;
+            transform: rotate(45deg);
+        }
+        
+        .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::before {
+            transform: rotate(90deg);
+            top: 0;
+        }
+        
+        .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::after {
+            transform: rotate(90deg);
+            top: 0;
+        }
+
+        /* Ensure mobile menu is always accessible */
+        @media (max-width: 767.98px) {
+            .navbar-collapse.show {
+                display: block !important;
+            }
+            
+            .navbar-toggler {
+                display: block !important;
+                z-index: 1001;
+            }
+            
+            /* Make sure dropdown works in mobile */
+            .dropdown-menu.show {
+                display: block !important;
+                position: static !important;
+                float: none !important;
+                width: auto !important;
+                margin-top: 0 !important;
+                background-color: transparent !important;
+                border: 0 !important;
+                box-shadow: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -57,114 +206,129 @@
     <!-- Page wrapper start -->
     <div class="page-wrapper">
         <!-- Navbar integrada -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" role="navigation" aria-label="Main navigation">
             <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'inicio' %}">
-                    <img src="{% static 'img/logo.png' %}" alt="Meet & Gig" height="40" class="mr-2">
-                    Meet & Gig
+                <a class="navbar-brand" href="{% url 'inicio' %}" aria-label="Meet & Gig Homepage">
+                    <img src="{% static 'img/logo.png' %}" alt="Meet & Gig Logo" height="40" class="mr-2">
+                    <span class="d-none d-sm-inline">Meet & Gig</span>
+                    <span class="d-sm-none">M&G</span>
                 </a>
 
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'inicio' %}">Inicio</a>
+                            <a class="nav-link" href="{% url 'inicio' %}">
+                                <i class="fas fa-home mr-1" aria-hidden="true"></i>Inicio
+                            </a>
                         </li>
                         {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Eventos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'buscar_ofertas' %}">
-                                <i class="fas fa-briefcase me-2"></i>Ofertas de Trabajo
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'buscar_portafolios' %}">
-                                <i class="fas fa-users me-2"></i>Músicos
-                            </a>
-                        </li>
-                        {% if user.tipo_usuario == 'musico' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'ver_mi_portafolio' %}">
-                                <i class="fas fa-music me-2"></i>Mi Portafolio
-                            </a>
-                        </li>
-                        {% elif user.tipo_usuario == 'empleador' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'ver_mis_ofertas' %}">
-                                <i class="fas fa-briefcase me-2"></i>Mis Ofertas
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-calendar mr-1" aria-hidden="true"></i>Eventos
                             </a>
                         </li>
                         {% endif %}
-                        {% else %}
-                        <!-- Navegación para usuarios no autenticados -->
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'buscar_ofertas' %}">
-                                <i class="fas fa-briefcase me-2"></i>Ofertas de Trabajo
+                                <i class="fas fa-briefcase mr-1" aria-hidden="true"></i>
+                                <span class="d-lg-inline">Ofertas</span>
+                                <span class="d-none d-lg-inline"> de Trabajo</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'buscar_portafolios' %}">
-                                <i class="fas fa-users me-2"></i>Músicos
+                                <i class="fas fa-users mr-1" aria-hidden="true"></i>Músicos
                             </a>
                         </li>
+                        {% if user.is_authenticated %}
+                            {% if user.tipo_usuario == 'musico' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'ver_mi_portafolio' %}">
+                                    <i class="fas fa-music mr-1" aria-hidden="true"></i>Mi Portafolio
+                                </a>
+                            </li>
+                            {% elif user.tipo_usuario == 'empleador' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'ver_mis_ofertas' %}">
+                                    <i class="fas fa-briefcase mr-1" aria-hidden="true"></i>Mis Ofertas
+                                </a>
+                            </li>
+                            {% endif %}
                         {% endif %}
                     </ul>
 
                     <ul class="navbar-nav">
                         {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {{ user.username }}
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user-circle mr-1" aria-hidden="true"></i>
+                                <span class="d-none d-md-inline">{{ user.username }}</span>
+                                <span class="d-md-none">Perfil</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                 {% if user.tipo_usuario == 'musico' %}
                                     <a class="dropdown-item" href="{% url 'ver_mi_perfil' %}">
-                                        <i class="fas fa-user me-2"></i>Mi Perfil Personal
+                                        <i class="fas fa-user mr-2" aria-hidden="true"></i>Mi Perfil Personal
                                     </a>
                                     <a class="dropdown-item" href="{% url 'ver_mi_portafolio' %}">
-                                        <i class="fas fa-music me-2"></i>Mi Portafolio Profesional
+                                        <i class="fas fa-music mr-2" aria-hidden="true"></i>Mi Portafolio Profesional
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{% url 'editar_perfil_musico' %}">
-                                        <i class="fas fa-edit me-2"></i>Editar Perfil
+                                        <i class="fas fa-edit mr-2" aria-hidden="true"></i>Editar Perfil
                                     </a>
                                     <a class="dropdown-item" href="{% url 'editar_portafolio_musico' %}">
-                                        <i class="fas fa-cog me-2"></i>Editar Portafolio
+                                        <i class="fas fa-cog mr-2" aria-hidden="true"></i>Editar Portafolio
                                     </a>
                                 {% elif user.tipo_usuario == 'empleador' %}
                                     <a class="dropdown-item" href="{% url 'perfil_empleador' %}">
-                                        <i class="fas fa-user me-2"></i>Mi Perfil
+                                        <i class="fas fa-user mr-2" aria-hidden="true"></i>Mi Perfil
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{% url 'ver_mis_ofertas' %}">
-                                        <i class="fas fa-briefcase me-2"></i>Mis Ofertas Laborales
+                                        <i class="fas fa-briefcase mr-2" aria-hidden="true"></i>Mis Ofertas Laborales
                                     </a>
                                     <a class="dropdown-item" href="{% url 'crear_oferta_laboral' %}">
-                                        <i class="fas fa-plus me-2"></i>Crear Nueva Oferta
+                                        <i class="fas fa-plus mr-2" aria-hidden="true"></i>Crear Nueva Oferta
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{% url 'editar_perfil_empleador' %}">
-                                        <i class="fas fa-edit me-2"></i>Editar Perfil
+                                        <i class="fas fa-edit mr-2" aria-hidden="true"></i>Editar Perfil
                                     </a>
                                 {% else %}
-                                    <a class="dropdown-item" href="#">Mi Perfil</a>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-user mr-2" aria-hidden="true"></i>Mi Perfil
+                                    </a>
                                 {% endif %}
-                                <a class="dropdown-item" href="#">Configuración</a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-cog mr-2" aria-hidden="true"></i>Configuración
+                                </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>Cerrar Sesión
+                                </a>
                             </div>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="fas fa-sign-in-alt mr-1" aria-hidden="true"></i>
+                                <span class="d-none d-sm-inline">Iniciar Sesión</span>
+                                <span class="d-sm-none">Login</span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'registro' %}">Registrarse</a>
+                            <a class="nav-link btn btn-outline-primary ml-2 px-3" href="{% url 'registro' %}">
+                                <i class="fas fa-user-plus mr-1" aria-hidden="true"></i>
+                                <span class="d-none d-sm-inline">Registrarse</span>
+                                <span class="d-sm-none">Registro</span>
+                            </a>
                         </li>
                         {% endif %}
                     </ul>
@@ -216,6 +380,71 @@
     
     <!-- Custom Meet & Gig JavaScript -->
     <script src="{% static 'js/file-upload.js' %}"></script>
+    
+    <!-- Navbar Mobile Enhancement -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mejorar la experiencia del navbar mobile
+        const navbarToggler = document.querySelector('.navbar-toggler');
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+        
+        // Auto-cerrar navbar en mobile cuando se hace click en un enlace
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 991) {
+                    const navbarCollapse = document.querySelector('.navbar-collapse');
+                    if (navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                            toggle: false
+                        });
+                        bsCollapse.hide();
+                    }
+                }
+            });
+        });
+        
+        // Cerrar navbar al hacer click fuera en mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 991) {
+                const isClickInsideNavbar = navbarCollapse.contains(event.target) || 
+                                          navbarToggler.contains(event.target);
+                
+                if (!isClickInsideNavbar && navbarCollapse.classList.contains('show')) {
+                    const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                        toggle: false
+                    });
+                    bsCollapse.hide();
+                }
+            }
+        });
+        
+        // Smooth scroll para enlaces internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Highlight active page in navbar
+        const currentLocation = window.location.pathname;
+        const navLinks2 = document.querySelectorAll('.navbar-nav .nav-link');
+        
+        navLinks2.forEach(link => {
+            if (link.getAttribute('href') === currentLocation) {
+                link.classList.add('active');
+                link.setAttribute('aria-current', 'page');
+            }
+        });
+    });
+    </script>
 
     {% block extra_js %}
     <!-- Espacio para JavaScript adicional en templates que extiendan este -->

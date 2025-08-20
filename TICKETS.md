@@ -31,16 +31,16 @@
 
 ## 🟩 Sprint 3: Publicación y Ofertas Laborales
 
-| Ticket | Título                                 | Estado        | Descripción breve                                                                             |
-| ------ | -------------------------------------- | ------------- | --------------------------------------------------------------------------------------------- |
-| 🔥 3.1 | Crear oferta laboral                   | ✅ COMPLETADO | Formulario completo para empleadores con integración de catálogos, validaciones y navegación. |
-| 3.2    | Visualizar ofertas publicadas          | ✅ COMPLETADO | Listado público de ofertas con diseño responsivo y paginación.                                |
-| 🔥 3.3 | Filtrar ofertas por criterios          | ✅ COMPLETADO | Filtros múltiples por instrumentos, géneros, ubicación, presupuesto, fechas y ordenamiento.   |
-| 3.4    | Cerrar oferta laboral                  | ✅ COMPLETADO | Sistema completo de cierre/reapertura con validaciones y confirmaciones.                      |
-| 3.5    | Diseño de vista de ofertas             | 🔄 PENDIENTE  | UI responsive para navegación de ofertas.                                                     |
-| 🔥 3.6 | Postulación a una oferta laboral       | 🔄 PENDIENTE  | Permite a músicos postularse desde la vista de oferta.                                        |
-| 🔥 3.7 | Validaciones de postulaciones y cierre | 🔄 PENDIENTE  | Reglas para evitar duplicidad, control de cupos, cierre.                                      |
-| 🔥 3.8 | Invitación directa a músicos           | 🔄 PENDIENTE  | Empleadores pueden invitar músicos específicos desde portafolios a ofertas existentes.        |
+| Ticket | Título                                 | Estado        | Descripción breve                                                                                   |
+| ------ | -------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------- |
+| 🔥 3.1 | Crear oferta laboral                   | ✅ COMPLETADO | Formulario completo para empleadores con integración de catálogos, validaciones y navegación.       |
+| 3.2    | Visualizar ofertas publicadas          | ✅ COMPLETADO | Listado público de ofertas con diseño responsivo y paginación.                                      |
+| 🔥 3.3 | Filtrar ofertas por criterios          | ✅ COMPLETADO | Filtros múltiples por instrumentos, géneros, ubicación, presupuesto, fechas y ordenamiento.         |
+| 3.4    | Cerrar oferta laboral                  | ✅ COMPLETADO | Sistema completo de cierre/reapertura con validaciones y confirmaciones.                            |
+| 3.5    | Diseño de vista de ofertas             | ✅ COMPLETADO | UI responsive para navegación de ofertas - Mobile-first con offcanvas, acordeones y sincronización. |
+| 🔥 3.6 | Postulación a una oferta laboral       | 🔄 PENDIENTE  | Permite a músicos postularse desde la vista de oferta.                                              |
+| 🔥 3.7 | Validaciones de postulaciones y cierre | 🔄 PENDIENTE  | Reglas para evitar duplicidad, control de cupos, cierre.                                            |
+| 🔥 3.8 | Invitación directa a músicos           | 🔄 PENDIENTE  | Empleadores pueden invitar músicos específicos desde portafolios a ofertas existentes.              |
 
 ---
 
