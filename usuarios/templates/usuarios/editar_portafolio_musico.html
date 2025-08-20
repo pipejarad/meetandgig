@@ -336,6 +336,60 @@
                     </div>
                 </div>
 
+                <!-- Configuración de Privacidad -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-shield-alt me-2"></i>Configuración de Privacidad</h5>
+                        <small>Controla qué información se muestra en tu portafolio público</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    {{ form.show_email }}
+                                    <label class="form-check-label" for="{{ form.show_email.id_for_label }}">
+                                        <i class="fas fa-envelope me-2"></i>{{ form.show_email.label }}
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    {{ form.show_social_links }}
+                                    <label class="form-check-label" for="{{ form.show_social_links.id_for_label }}">
+                                        <i class="fas fa-share-alt me-2"></i>{{ form.show_social_links.label }}
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    {{ form.show_telefono }}
+                                    <label class="form-check-label" for="{{ form.show_telefono.id_for_label }}">
+                                        <i class="fas fa-phone me-2"></i>{{ form.show_telefono.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    {{ form.show_education }}
+                                    <label class="form-check-label" for="{{ form.show_education.id_for_label }}">
+                                        <i class="fas fa-graduation-cap me-2"></i>{{ form.show_education.label }}
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    {{ form.show_tarifa }}
+                                    <label class="form-check-label" for="{{ form.show_tarifa.id_for_label }}">
+                                        <i class="fas fa-dollar-sign me-2"></i>{{ form.show_tarifa.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Tip:</strong> Habilita "Mostrar enlaces sociales" para que aparezcan los enlaces a tus redes sociales y sitio web en tu portafolio público.
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Botones de acción -->
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-success btn-lg me-3">
