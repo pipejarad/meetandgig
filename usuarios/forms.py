@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetP
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from PIL import Image
-from .models import (Usuario, PerfilMusico, PerfilEmpleador, Portafolio,OfertaLaboral, OfertaInstrumento, OfertaGenero)
+from .models import (Usuario, PerfilMusico, PerfilEmpleador, Portafolio,OfertaLaboral, OfertaInstrumento, OfertaGenero, Postulacion)
 
 
 def validate_image_file(image):
@@ -746,3 +746,94 @@ class CrearOfertaLaboralForm(forms.ModelForm):
                 )
         
         return oferta
+
+
+class PostulacionForm(forms.ModelForm):
+    """Formulario para que músicos se postulen a ofertas laborales"""
+    
+    class Meta:
+        model = Postulacion
+        fields = ['mensaje_personalizado', 'tarifa_propuesta']
+        
+    mensaje_personalizado = forms.CharField(
+        max_length=1000,
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'Cuéntanos por qué eres el músico ideal para esta oferta... (opcional)',
+            'maxlength': 1000
+        }),
+        label='Mensaje para el empleador',
+        help_text='Opcional: Destaca tu experiencia relevante para esta oferta (máx. 1000 caracteres)'
+    )
+    
+    tarifa_propuesta = forms.IntegerField(
+        required=False,
+        min_value=1,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej: 150000',
+            'min': 1
+        }),
+        label='Tu tarifa propuesta (CLP)',
+        help_text='Opcional: Propón tu tarifa para esta oferta en pesos chilenos'
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.musico = kwargs.pop('musico', None)
+        self.oferta = kwargs.pop('oferta', None)
+        super().__init__(*args, **kwargs)
+        
+        # Validar que tenemos los datos necesarios
+        if not self.musico or not self.oferta:
+            raise ValueError("PostulacionForm requiere músico y oferta")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # Validación: El usuario debe ser músico
+        if self.musico.tipo_usuario != 'musico':
+            raise forms.ValidationError('Solo los músicos pueden postularse a ofertas laborales.')
+        
+        # Validación: El músico debe tener portafolio
+        if not hasattr(self.musico, 'portafolio'):
+            raise forms.ValidationError(
+                'Debes completar tu portafolio antes de postularte a ofertas laborales.'
+            )
+        
+        # Validación: La oferta debe estar publicada
+        if self.oferta.estado != 'publicada':
+            raise forms.ValidationError('Esta oferta no está disponible para postulaciones.')
+        
+        # Validación: La oferta debe estar vigente
+        if not self.oferta.esta_vigente():
+            raise forms.ValidationError('Esta oferta ya no acepta postulaciones.')
+        
+        # Validación: No debe existir postulación previa
+        if Postulacion.objects.filter(oferta_laboral=self.oferta, musico=self.musico).exists():
+            raise forms.ValidationError('Ya te has postulado a esta oferta anteriormente.')
+        
+        # Validación: Verificar cupos disponibles
+        postulaciones_aceptadas = Postulacion.objects.filter(
+            oferta_laboral=self.oferta,
+            estado='aceptada'
+        ).count()
+        
+        if postulaciones_aceptadas >= self.oferta.cupos_disponibles:
+            raise forms.ValidationError('Esta oferta ya no tiene cupos disponibles.')
+        
+        return cleaned_data
+
+    def save(self, commit=True):
+        postulacion = super().save(commit=False)
+        postulacion.oferta_laboral = self.oferta
+        postulacion.musico = self.musico
+        postulacion.portafolio = self.musico.portafolio
+        postulacion.tipo_postulacion = 'espontanea'
+        postulacion.estado = 'pendiente'
+        
+        if commit:
+            postulacion.save()
+        
+        return postulacion

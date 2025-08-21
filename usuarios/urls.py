@@ -41,4 +41,5 @@ urlpatterns = [
     path('ofertas/<slug:slug>/publicar/', views.publicar_oferta_view, name='publicar_oferta'),
     path('ofertas/<slug:slug>/cerrar/', views.cerrar_oferta_view, name='cerrar_oferta'),
     path('ofertas/<slug:slug>/reabrir/', views.reabrir_oferta_view, name='reabrir_oferta'),
+    path('ofertas/<slug:slug>/postular/', views.postular_oferta_view, name='postular_oferta'),
 ]

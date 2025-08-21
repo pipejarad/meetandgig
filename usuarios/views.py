@@ -17,9 +17,10 @@ from django.db.models import Q
 from django.utils import timezone
 from .forms import (
     RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, 
-    PerfilMusicoForm, PerfilEmpleadorForm, PortafolioForm, CrearOfertaLaboralForm
+    PerfilMusicoForm, PerfilEmpleadorForm, PortafolioForm, CrearOfertaLaboralForm,
+    PostulacionForm
 )
-from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio, OfertaLaboral
+from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio, OfertaLaboral, Postulacion
 
 
 def inicio(request):
@@ -832,18 +833,98 @@ def ver_mis_ofertas_view(request):
 def detalle_oferta_view(request, slug):
     """Vista de detalle de una oferta laboral"""
     oferta = get_object_or_404(OfertaLaboral, slug=slug)
+    postulacion_existente = None
+    puede_postularse = False
     
+    # Verificar permisos y estado para empleadores
     if request.user.tipo_usuario == 'empleador':
         if oferta.empleador != request.user.perfil_empleador:
             messages.error(request, 'No tienes permisos para ver esta oferta.')
             return redirect('ver_mis_ofertas')
     
+    # Para músicos, verificar si pueden postularse y si ya se postularon
+    elif request.user.tipo_usuario == 'musico':
+        # Verificar si ya se postuló
+        try:
+            postulacion_existente = Postulacion.objects.get(
+                oferta_laboral=oferta,
+                musico=request.user
+            )
+        except Postulacion.DoesNotExist:
+            # Verificar si puede postularse
+            puede_postularse = (
+                oferta.estado == 'publicada' and 
+                oferta.esta_vigente() and
+                hasattr(request.user, 'portafolio') and
+                Postulacion.objects.filter(
+                    oferta_laboral=oferta,
+                    estado='aceptada'
+                ).count() < oferta.cupos_disponibles
+            )
+    
     context = {
         'oferta': oferta,
-        'titulo_pagina': oferta.titulo
+        'titulo_pagina': oferta.titulo,
+        'postulacion_existente': postulacion_existente,
+        'puede_postularse': puede_postularse,
     }
     
     return render(request, 'usuarios/detalle_oferta.html', context)
+
+
+@login_required
+def postular_oferta_view(request, slug):
+    """Vista para que músicos se postulen a una oferta laboral"""
+    oferta = get_object_or_404(OfertaLaboral, slug=slug)
+    
+    # Verificar que sea músico
+    if request.user.tipo_usuario != 'musico':
+        messages.error(request, 'Solo los músicos pueden postularse a ofertas laborales.')
+        return redirect('detalle_oferta', slug=slug)
+    
+    # Verificar que tenga portafolio
+    if not hasattr(request.user, 'portafolio'):
+        messages.error(
+            request, 
+            'Debes completar tu portafolio antes de postularte a ofertas laborales.'
+        )
+        return redirect('crear_portafolio_musico')
+    
+    # Verificar si ya se postuló
+    if Postulacion.objects.filter(oferta_laboral=oferta, musico=request.user).exists():
+        messages.warning(request, 'Ya te has postulado a esta oferta anteriormente.')
+        return redirect('detalle_oferta', slug=slug)
+    
+    if request.method == 'POST':
+        form = PostulacionForm(
+            request.POST,
+            musico=request.user,
+            oferta=oferta
+        )
+        
+        if form.is_valid():
+            postulacion = form.save()
+            messages.success(
+                request,
+                f'¡Te has postulado exitosamente a "{oferta.titulo}"! '
+                f'El empleador revisará tu postulación y te contactará si eres seleccionado.'
+            )
+            return redirect('detalle_oferta', slug=slug)
+        else:
+            # Si hay errores, mostrarlos
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, error)
+    else:
+        form = PostulacionForm(musico=request.user, oferta=oferta)
+    
+    context = {
+        'form': form,
+        'oferta': oferta,
+        'titulo_pagina': f'Postularse a "{oferta.titulo}"'
+    }
+    
+    return render(request, 'usuarios/postular_oferta.html', context)
 
 
 @login_required

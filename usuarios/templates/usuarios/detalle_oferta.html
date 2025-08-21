@@ -8,9 +8,19 @@
     <div class="row">
         <!-- Botón Volver -->
         <div class="col-12 mb-3">
-            <a href="{% url 'ver_mis_ofertas' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Volver a Mis Ofertas
-            </a>
+            {% if user.tipo_usuario == 'empleador' %}
+                <a href="{% url 'ver_mis_ofertas' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Mis Ofertas
+                </a>
+            {% elif user.tipo_usuario == 'musico' %}
+                <a href="{% url 'buscar_ofertas' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Ofertas Disponibles
+                </a>
+            {% else %}
+                <a href="{% url 'inicio' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Inicio
+                </a>
+            {% endif %}
         </div>
 
         <!-- Información Principal -->
@@ -129,59 +139,182 @@
 
         <!-- Sidebar de Acciones -->
         <div class="col-lg-4">
-            <div class="card shadow">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">
-                        <i class="fas fa-cogs me-2"></i>Acciones
-                    </h5>
+            {% if user.tipo_usuario == 'empleador' %}
+                <!-- Acciones para Empleadores -->
+                <div class="card shadow">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>Acciones
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if oferta.estado == 'borrador' %}
+                            <div class="alert alert-info small">
+                                <i class="fas fa-info-circle me-2"></i>Esta oferta está en borrador. Publícala para que sea visible a los músicos.
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'publicar_oferta' oferta.slug %}" class="btn btn-success">
+                                    <i class="fas fa-share me-2"></i>Publicar Oferta
+                                </a>
+                                <a href="{% url 'editar_oferta' oferta.slug %}" class="btn btn-primary">
+                                    <i class="fas fa-edit me-2"></i>Editar
+                                </a>
+                            </div>
+                        {% elif oferta.estado == 'publicada' %}
+                            <div class="alert alert-success small">
+                                <i class="fas fa-check-circle me-2"></i>Esta oferta está publicada y visible para músicos.
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'cerrar_oferta' oferta.slug %}" class="btn btn-warning">
+                                    <i class="fas fa-lock me-2"></i>Cerrar Oferta
+                                </a>
+                                <a href="{% url 'editar_oferta' oferta.slug %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit me-2"></i>Editar
+                                </a>
+                            </div>
+                        {% elif oferta.estado == 'cerrada' %}
+                            <div class="alert alert-secondary small">
+                                <i class="fas fa-lock me-2"></i>Esta oferta está cerrada y no recibe más postulaciones.
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'reabrir_oferta' oferta.slug %}" class="btn btn-success">
+                                    <i class="fas fa-unlock me-2"></i>Reabrir Oferta
+                                </a>
+                                <small class="text-muted mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>Al reabrir, la oferta volverá a estar visible para músicos.
+                                </small>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="card-body">
-                    {% if oferta.estado == 'borrador' %}
-                        <div class="alert alert-info small">
-                            <i class="fas fa-info-circle me-2"></i>Esta oferta está en borrador. Publícala para que sea visible a los músicos.
-                        </div>
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'publicar_oferta' oferta.slug %}" class="btn btn-success">
-                                <i class="fas fa-share me-2"></i>Publicar Oferta
-                            </a>
-                            <a href="{% url 'editar_oferta' oferta.slug %}" class="btn btn-primary">
-                                <i class="fas fa-edit me-2"></i>Editar
-                            </a>
-                        </div>
-                    {% elif oferta.estado == 'publicada' %}
-                        <div class="alert alert-success small">
-                            <i class="fas fa-check-circle me-2"></i>Esta oferta está publicada y visible para músicos.
-                        </div>
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'cerrar_oferta' oferta.slug %}" class="btn btn-warning">
-                                <i class="fas fa-lock me-2"></i>Cerrar Oferta
-                            </a>
-                            <a href="{% url 'editar_oferta' oferta.slug %}" class="btn btn-outline-primary">
-                                <i class="fas fa-edit me-2"></i>Editar
-                            </a>
-                        </div>
-                    {% elif oferta.estado == 'cerrada' %}
-                        <div class="alert alert-secondary small">
-                            <i class="fas fa-lock me-2"></i>Esta oferta está cerrada y no recibe más postulaciones.
-                        </div>
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'reabrir_oferta' oferta.slug %}" class="btn btn-success">
-                                <i class="fas fa-unlock me-2"></i>Reabrir Oferta
-                            </a>
-                            <small class="text-muted mt-2">
-                                <i class="fas fa-info-circle me-1"></i>Al reabrir, la oferta volverá a estar visible para músicos.
-                            </small>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
 
-            <!-- Estadísticas -->
-            {% if oferta.estado == 'publicada' %}
+                <!-- Estadísticas para Empleadores -->
+                {% if oferta.estado == 'publicada' %}
+                    <div class="card shadow mt-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="border-end">
+                                        <h4 class="text-primary mb-0">{{ oferta.postulaciones.count }}</h4>
+                                        <small class="text-muted">Postulaciones</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <h4 class="text-success mb-0">{{ oferta.cupos_disponibles }}</h4>
+                                    <small class="text-muted">Cupos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+            {% elif user.tipo_usuario == 'musico' %}
+                <!-- Acciones para Músicos -->
+                <div class="card shadow">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-music me-2"></i>Postulación
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if postulacion_existente %}
+                            <!-- Ya se postuló -->
+                            <div class="alert alert-info">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Ya te postulaste a esta oferta</strong>
+                                <br>
+                                <small class="text-muted">
+                                    Estado: 
+                                    {% if postulacion_existente.estado == 'pendiente' %}
+                                        <span class="badge bg-warning text-dark">Pendiente</span>
+                                    {% elif postulacion_existente.estado == 'aceptada' %}
+                                        <span class="badge bg-success">Aceptada</span>
+                                    {% elif postulacion_existente.estado == 'rechazada' %}
+                                        <span class="badge bg-danger">Rechazada</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            
+                            {% if postulacion_existente.estado == 'aceptada' %}
+                                <div class="alert alert-success small">
+                                    <i class="fas fa-star me-2"></i>¡Felicitaciones! Has sido seleccionado para esta oferta.
+                                </div>
+                            {% elif postulacion_existente.estado == 'rechazada' %}
+                                <div class="alert alert-light small">
+                                    <i class="fas fa-info-circle me-2"></i>Tu postulación no fue seleccionada esta vez.
+                                </div>
+                            {% else %}
+                                <div class="alert alert-light small">
+                                    <i class="fas fa-clock me-2"></i>El empleador revisará tu postulación y te contactará si eres seleccionado.
+                                </div>
+                            {% endif %}
+
+                        {% elif puede_postularse %}
+                            <!-- Puede postularse -->
+                            <div class="alert alert-success small">
+                                <i class="fas fa-thumbs-up me-2"></i>Puedes postularte a esta oferta.
+                            </div>
+                            
+                            <div class="d-grid">
+                                <a href="{% url 'postular_oferta' oferta.slug %}" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Postularme
+                                </a>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Asegúrate de que tu portafolio esté actualizado antes de postularte.
+                                </small>
+                            </div>
+
+                        {% else %}
+                            <!-- No puede postularse -->
+                            <div class="alert alert-warning small">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No puedes postularte a esta oferta.
+                            </div>
+                            
+                            {% if not user.portafolio %}
+                                <div class="alert alert-info small">
+                                    <i class="fas fa-user-edit me-2"></i>
+                                    Necesitas completar tu portafolio para postularte.
+                                </div>
+                                <div class="d-grid">
+                                    <a href="{% url 'crear_portafolio_musico' %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-plus me-2"></i>Crear Portafolio
+                                    </a>
+                                </div>
+                            {% elif oferta.estado != 'publicada' %}
+                                <div class="alert alert-light small">
+                                    <i class="fas fa-eye-slash me-2"></i>
+                                    Esta oferta no está disponible para postulaciones.
+                                </div>
+                            {% elif not oferta.esta_vigente %}
+                                <div class="alert alert-light small">
+                                    <i class="fas fa-calendar-times me-2"></i>
+                                    Esta oferta ha expirado.
+                                </div>
+                            {% else %}
+                                <div class="alert alert-light small">
+                                    <i class="fas fa-users me-2"></i>
+                                    Esta oferta ya alcanzó el número máximo de postulaciones.
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Información adicional para músicos -->
                 <div class="card shadow mt-3">
                     <div class="card-header bg-light">
                         <h5 class="mb-0">
-                            <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                            <i class="fas fa-info-circle me-2"></i>Información
                         </h5>
                     </div>
                     <div class="card-body">
@@ -196,6 +329,40 @@
                                 <h4 class="text-success mb-0">{{ oferta.cupos_disponibles }}</h4>
                                 <small class="text-muted">Cupos</small>
                             </div>
+                        </div>
+                        
+                        {% if oferta.fecha_limite %}
+                            <hr class="my-3">
+                            <div class="text-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Cierra: {{ oferta.fecha_limite|date:"d/m/Y" }}
+                                </small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            {% else %}
+                <!-- Usuario no autenticado o sin tipo definido -->
+                <div class="card shadow">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sign-in-alt me-2"></i>Acceso
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Inicia sesión para interactuar con esta oferta.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'login' %}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                            </a>
+                            <a href="{% url 'registro' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-user-plus me-2"></i>Registrarse
+                            </a>
                         </div>
                     </div>
                 </div>

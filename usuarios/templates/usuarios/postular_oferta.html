@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <!-- Botón Volver -->
+        <div class="col-12 mb-3">
+            <a href="{% url 'detalle_oferta' oferta.slug %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver a la Oferta
+            </a>
+        </div>
+
+        <!-- Formulario de Postulación -->
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-paper-plane me-2"></i>Postularse a "{{ oferta.titulo }}"
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Información de la Oferta -->
+                    <div class="alert alert-info">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-briefcase me-1"></i>{{ oferta.titulo }}
+                                </h6>
+                                <p class="mb-1">
+                                    <i class="fas fa-building me-1"></i>{{ oferta.empleador.nombre_empresa }}
+                                </p>
+                                <p class="mb-0">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ oferta.ubicacion }}
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <p class="mb-1">
+                                    <i class="fas fa-users me-1"></i>{{ oferta.cupos_disponibles }} cupos
+                                </p>
+                                {% if oferta.fecha_limite %}
+                                    <p class="mb-0">
+                                        <i class="fas fa-calendar me-1"></i>Cierra: {{ oferta.fecha_limite|date:"d/m/Y" }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulario -->
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Mensaje introductorio -->
+                        <div class="mb-4">
+                            <h5 class="text-secondary border-bottom pb-2">Información de Postulación</h5>
+                            <p class="text-muted">
+                                Tu información de perfil y portafolio serán enviados automáticamente al empleador. 
+                                Puedes agregar un mensaje personalizado para destacar tu interés y experiencia relevante.
+                            </p>
+                        </div>
+
+                        <!-- Mensaje Personalizado -->
+                        <div class="mb-4">
+                            <label for="{{ form.mensaje_postulacion.id_for_label }}" class="form-label">
+                                <i class="fas fa-comment me-1"></i>Mensaje para el Empleador
+                                <span class="text-muted">(Opcional)</span>
+                            </label>
+                            <textarea 
+                                name="{{ form.mensaje_postulacion.name }}"
+                                id="{{ form.mensaje_postulacion.id_for_label }}"
+                                class="form-control"
+                                rows="4"
+                                placeholder="Cuéntale al empleador por qué eres el candidato ideal para esta oferta..."
+                            >{{ form.mensaje_postulacion.value|default_if_none:"" }}</textarea>
+                            <div class="form-text">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                Tip: Menciona tu experiencia relevante, disponibilidad y por qué te interesa esta oportunidad.
+                            </div>
+                        </div>
+
+                        <!-- Verificación de Información -->
+                        <div class="mb-4">
+                            <h6 class="text-secondary">
+                                <i class="fas fa-check-circle me-1"></i>Información que se enviará:
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-user text-primary me-2"></i>Nombre completo</li>
+                                        <li><i class="fas fa-envelope text-primary me-2"></i>Email de contacto</li>
+                                        <li><i class="fas fa-phone text-primary me-2"></i>Teléfono</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-folder text-primary me-2"></i>Portafolio completo</li>
+                                        <li><i class="fas fa-music text-primary me-2"></i>Instrumentos y géneros</li>
+                                        <li><i class="fas fa-star text-primary me-2"></i>Experiencia musical</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Términos y Condiciones -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terminos" name="terminos" required>
+                                <label class="form-check-label" for="terminos">
+                                    Confirmo que mi información de perfil está actualizada y autorizo 
+                                    el envío de mis datos al empleador para evaluación.
+                                </label>
+                                <div class="invalid-feedback">
+                                    Debes aceptar los términos para continuar.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detalle_oferta' oferta.slug %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Enviar Postulación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar con Información Adicional -->
+        <div class="col-lg-4">
+            <!-- Tu Portafolio -->
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Tu Portafolio
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if user.portafolio %}
+                        <div class="text-center mb-3">
+                            {% if user.portafolio.foto_perfil %}
+                                <img src="{{ user.portafolio.foto_perfil.url }}" 
+                                     alt="Foto de perfil" 
+                                     class="rounded-circle"
+                                     style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center text-white"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user fa-2x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <h6 class="text-center mb-2">{{ user.first_name }} {{ user.last_name }}</h6>
+                        <p class="text-center text-muted small mb-3">{{ user.portafolio.bio|truncatewords:15 }}</p>
+                        
+                        <!-- Instrumentos -->
+                        {% with instrumentos=user.portafolio.portafolio_instrumentos.all %}
+                            {% if instrumentos %}
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-2">Instrumentos:</small>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for pi in instrumentos %}
+                                            <span class="badge bg-primary small">{{ pi.instrumento.nombre }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+
+                        <div class="d-grid">
+                            <a href="{% url 'editar_portafolio_musico' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit me-1"></i>Actualizar Portafolio
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Consejos -->
+            <div class="card shadow mt-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Consejos para una Buena Postulación
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Asegúrate de que tu portafolio esté actualizado
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Menciona experiencia relevante al puesto
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Sé específico sobre tu disponibilidad
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Muestra profesionalismo y entusiasmo
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para validación del formulario -->
+<script>
+    // Validación de Bootstrap
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}
