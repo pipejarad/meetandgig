@@ -735,6 +735,36 @@ class OfertaLaboral(models.Model):
         """Retorna géneros preferidos ordenados por prioridad"""
         return self.oferta_generos.all().select_related('genero').order_by('prioridad')
 
+    def verificar_y_cerrar_si_completa(self):
+        """
+        Verifica si la oferta ha alcanzado el máximo de cupos aceptados
+        y la cierra automáticamente si es necesario.
+        """
+        from .models import Postulacion
+        
+        postulaciones_aceptadas = Postulacion.objects.filter(
+            oferta_laboral=self,
+            estado='aceptada'
+        ).count()
+        
+        if postulaciones_aceptadas >= self.cupos_disponibles and self.estado == 'publicada':
+            self.estado = 'cerrada'
+            self.save(update_fields=['estado'])
+            return True
+        
+        return False
+
+    def get_cupos_restantes(self):
+        """Retorna el número de cupos restantes disponibles"""
+        from .models import Postulacion
+        
+        postulaciones_aceptadas = Postulacion.objects.filter(
+            oferta_laboral=self,
+            estado='aceptada'
+        ).count()
+        
+        return max(0, self.cupos_disponibles - postulaciones_aceptadas)
+
 
 class Postulacion(models.Model):
     """Postulación de músico a oferta laboral"""
@@ -882,3 +912,59 @@ class OfertaGenero(models.Model):
 
     def __str__(self):
         return f"{self.oferta_laboral.titulo} - {self.genero.nombre}"
+
+
+class Notificacion(models.Model):
+    """Sistema básico de notificaciones para empleadores"""
+    
+    TIPO_CHOICES = [
+        ('postulacion_cancelada', 'Postulación cancelada'),
+        ('oferta_completada', 'Oferta completada'),
+    ]
+    
+    empleador = models.ForeignKey(
+        'PerfilEmpleador',
+        on_delete=models.CASCADE,
+        related_name='notificaciones',
+        verbose_name='Empleador'
+    )
+    tipo = models.CharField(
+        max_length=25,
+        choices=TIPO_CHOICES,
+        verbose_name='Tipo de notificación'
+    )
+    titulo = models.CharField(max_length=150, verbose_name='Título')
+    mensaje = models.TextField(verbose_name='Mensaje')
+    postulacion = models.ForeignKey(
+        'Postulacion',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notificaciones',
+        verbose_name='Postulación relacionada'
+    )
+    oferta_laboral = models.ForeignKey(
+        'OfertaLaboral',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notificaciones',
+        verbose_name='Oferta relacionada'
+    )
+    leida = models.BooleanField(default=False, verbose_name='Leída')
+    fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
+    fecha_lectura = models.DateTimeField(null=True, blank=True, verbose_name='Fecha de lectura')
+    
+    class Meta:
+        verbose_name = 'Notificación'
+        verbose_name_plural = 'Notificaciones'
+        ordering = ['-fecha_creacion']
+    
+    def __str__(self):
+        return f"{self.empleador.nombre_empresa} - {self.titulo}"
+    
+    def marcar_como_leida(self):
+        if not self.leida:
+            self.leida = True
+            self.fecha_lectura = timezone.now()
+            self.save()

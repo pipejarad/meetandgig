@@ -42,4 +42,14 @@ urlpatterns = [
     path('ofertas/<slug:slug>/cerrar/', views.cerrar_oferta_view, name='cerrar_oferta'),
     path('ofertas/<slug:slug>/reabrir/', views.reabrir_oferta_view, name='reabrir_oferta'),
     path('ofertas/<slug:slug>/postular/', views.postular_oferta_view, name='postular_oferta'),
+    path('ofertas/<slug:slug>/postulaciones/', views.gestionar_postulaciones_view, name='gestionar_postulaciones'),
+    path('ofertas/<slug:slug>/postulaciones/<int:postulacion_id>/', views.procesar_postulacion_view, name='procesar_postulacion'),
+    
+    # URLs de postulaciones para músicos (Ticket 3.7 FASE 3)
+    path('mis-postulaciones/', views.mis_postulaciones_view, name='mis_postulaciones'),
+    path('postulaciones/<int:postulacion_id>/cancelar/', views.cancelar_postulacion_view, name='cancelar_postulacion'),
+    
+    # URLs de notificaciones para empleadores (Ticket 3.7 FASE 4)
+    path('notificaciones/', views.notificaciones_empleador_view, name='notificaciones_empleador'),
+    path('notificaciones/<int:notificacion_id>/marcar-leida/', views.marcar_notificacion_leida_view, name='marcar_notificacion_leida'),
 ]

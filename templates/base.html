@@ -226,13 +226,6 @@
                                 <i class="fas fa-home mr-1" aria-hidden="true"></i>Inicio
                             </a>
                         </li>
-                        {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-calendar mr-1" aria-hidden="true"></i>Eventos
-                            </a>
-                        </li>
-                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'buscar_ofertas' %}">
                                 <i class="fas fa-briefcase mr-1" aria-hidden="true"></i>
@@ -252,10 +245,20 @@
                                     <i class="fas fa-music mr-1" aria-hidden="true"></i>Mi Portafolio
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'mis_postulaciones' %}">
+                                    <i class="fas fa-list-alt mr-1" aria-hidden="true"></i>Mis Postulaciones
+                                </a>
+                            </li>
                             {% elif user.tipo_usuario == 'empleador' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'ver_mis_ofertas' %}">
                                     <i class="fas fa-briefcase mr-1" aria-hidden="true"></i>Mis Ofertas
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'notificaciones_empleador' %}">
+                                    <i class="fas fa-bell mr-1" aria-hidden="true"></i>Notificaciones
                                 </a>
                             </li>
                             {% endif %}
@@ -280,6 +283,10 @@
                                         <i class="fas fa-music mr-2" aria-hidden="true"></i>Mi Portafolio Profesional
                                     </a>
                                     <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="{% url 'mis_postulaciones' %}">
+                                        <i class="fas fa-list-alt mr-2" aria-hidden="true"></i>Mis Postulaciones
+                                    </a>
+                                    <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{% url 'editar_perfil_musico' %}">
                                         <i class="fas fa-edit mr-2" aria-hidden="true"></i>Editar Perfil
                                     </a>
@@ -289,6 +296,10 @@
                                 {% elif user.tipo_usuario == 'empleador' %}
                                     <a class="dropdown-item" href="{% url 'perfil_empleador' %}">
                                         <i class="fas fa-user mr-2" aria-hidden="true"></i>Mi Perfil
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="{% url 'notificaciones_empleador' %}">
+                                        <i class="fas fa-bell mr-2" aria-hidden="true"></i>Notificaciones
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{% url 'ver_mis_ofertas' %}">

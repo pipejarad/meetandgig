@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} - Meet&Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Cancelar Postulación
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>¿Estás seguro que deseas cancelar esta postulación?</strong>
+                        <br>Esta acción no se puede deshacer.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="text-primary">{{ postulacion.oferta_laboral.titulo }}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-building me-1"></i>
+                            {{ postulacion.oferta_laboral.empleador.nombre_empresa }}
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            {{ postulacion.oferta_laboral.ubicacion.ciudad }}, {{ postulacion.oferta_laboral.ubicacion.region }}
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-calendar me-1"></i>
+                            Fecha de postulación: {{ postulacion.fecha_postulacion|date:"d/m/Y H:i" }}
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Estado actual: 
+                            {% if postulacion.estado == 'pendiente' %}
+                                <span class="badge bg-warning">Pendiente de revisión</span>
+                            {% elif postulacion.estado == 'en_revision' %}
+                                <span class="badge bg-info">En revisión</span>
+                            {% endif %}
+                        </p>
+                        
+                        {% if postulacion.mensaje %}
+                            <div class="mt-3">
+                                <h6>Tu mensaje de postulación:</h6>
+                                <div class="border-start border-primary ps-3 ms-2">
+                                    <p class="text-muted">{{ postulacion.mensaje }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-info-circle text-info mb-2" style="font-size: 2rem;"></i>
+                                    <h6 class="card-title">¿Qué sucede al cancelar?</h6>
+                                    <ul class="list-unstyled text-start small">
+                                        <li><i class="fas fa-check text-success me-1"></i> Tu postulación será marcada como cancelada</li>
+                                        <li><i class="fas fa-check text-success me-1"></i> El empleador será notificado</li>
+                                        <li><i class="fas fa-times text-danger me-1"></i> No podrás reactivar esta postulación</li>
+                                        <li><i class="fas fa-info text-info me-1"></i> Podrás postularte nuevamente si la oferta sigue abierta</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-lightbulb text-warning mb-2" style="font-size: 2rem;"></i>
+                                    <h6 class="card-title">Considera antes de cancelar</h6>
+                                    <ul class="list-unstyled text-start small">
+                                        <li><i class="fas fa-clock text-warning me-1"></i> El empleador podría estar revisando tu postulación</li>
+                                        <li><i class="fas fa-handshake text-info me-1"></i> Mantener postulaciones activas mejora tu reputación</li>
+                                        <li><i class="fas fa-envelope text-primary me-1"></i> Podrías contactar al empleador para aclarar dudas</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'mis_postulaciones' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver a Mis Postulaciones
+                        </a>
+                        
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" 
+                                    onclick="return confirm('¿Estás completamente seguro que deseas cancelar esta postulación?')">
+                                <i class="fas fa-times me-2"></i>Sí, Cancelar Postulación
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} - Meet&Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-primary mb-4">
+                <i class="fas fa-bell me-2"></i>Notificaciones
+            </h2>
+            
+            <!-- Estadísticas -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center border-primary">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{{ stats.total }}</h5>
+                            <p class="card-text small">Total</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center border-warning">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">{{ stats.no_leidas }}</h5>
+                            <p class="card-text small">No Leídas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center border-info">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">{{ stats.canceladas }}</h5>
+                            <p class="card-text small">Cancelaciones</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if notificaciones %}
+                <div class="row">
+                    {% for notificacion in notificaciones %}
+                    <div class="col-md-12 mb-3">
+                        <div class="card {% if not notificacion.leida %}border-warning{% endif %}">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-{% if notificacion.tipo == 'postulacion_cancelada' %}ban{% else %}info-circle{% endif %} me-2"></i>
+                                    {{ notificacion.titulo }}
+                                </h6>
+                                <div>
+                                    {% if not notificacion.leida %}
+                                        <span class="badge bg-warning me-2">Nueva</span>
+                                    {% endif %}
+                                    <small class="text-muted">{{ notificacion.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2">{{ notificacion.mensaje }}</p>
+                                
+                                {% if notificacion.postulacion %}
+                                    <div class="border-start border-primary ps-3 ms-2 mb-3">
+                                        <small class="text-muted">Músico:</small>
+                                        <p class="mb-1">
+                                            <strong>{{ notificacion.postulacion.musico.get_full_name }}</strong>
+                                            ({{ notificacion.postulacion.musico.email }})
+                                        </p>
+                                        {% if notificacion.postulacion.mensaje %}
+                                            <small class="text-muted">Mensaje original:</small>
+                                            <p class="small text-muted">{{ notificacion.postulacion.mensaje|truncatewords:15 }}</p>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        {% if notificacion.oferta_laboral %}
+                                            <a href="{% url 'detalle_oferta' notificacion.oferta_laboral.slug %}" 
+                                               class="btn btn-outline-primary btn-sm me-2">
+                                                <i class="fas fa-eye me-1"></i>Ver Oferta
+                                            </a>
+                                            <a href="{% url 'gestionar_postulaciones' notificacion.oferta_laboral.slug %}" 
+                                               class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-users me-1"></i>Ver Postulaciones
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        {% if not notificacion.leida %}
+                                            <a href="{% url 'marcar_notificacion_leida' notificacion.id %}" 
+                                               class="btn btn-success btn-sm">
+                                                <i class="fas fa-check me-1"></i>Marcar como Leída
+                                            </a>
+                                        {% else %}
+                                            <small class="text-success">
+                                                <i class="fas fa-check me-1"></i>Leída el {{ notificacion.fecha_lectura|date:"d/m/Y H:i" }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if stats.no_leidas > 0 %}
+                    <div class="text-center mt-4">
+                        <p class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Tienes {{ stats.no_leidas }} notificación{{ stats.no_leidas|pluralize:"es" }} sin leer.
+                        </p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash text-muted" style="font-size: 4rem;"></i>
+                    <h4 class="text-muted mt-3">No tienes notificaciones</h4>
+                    <p class="text-muted">
+                        Aquí aparecerán las notificaciones importantes sobre tus ofertas laborales.
+                    </p>
+                    <a href="{% url 'ver_mis_ofertas' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-briefcase me-2"></i>Ver Mis Ofertas
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

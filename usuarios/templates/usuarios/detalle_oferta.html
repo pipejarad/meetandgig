@@ -165,6 +165,9 @@
                                 <i class="fas fa-check-circle me-2"></i>Esta oferta está publicada y visible para músicos.
                             </div>
                             <div class="d-grid gap-2">
+                                <a href="{% url 'gestionar_postulaciones' oferta.slug %}" class="btn btn-info">
+                                    <i class="fas fa-users me-2"></i>Ver Postulaciones ({{ oferta.postulaciones.count }})
+                                </a>
                                 <a href="{% url 'cerrar_oferta' oferta.slug %}" class="btn btn-warning">
                                     <i class="fas fa-lock me-2"></i>Cerrar Oferta
                                 </a>
@@ -177,6 +180,9 @@
                                 <i class="fas fa-lock me-2"></i>Esta oferta está cerrada y no recibe más postulaciones.
                             </div>
                             <div class="d-grid gap-2">
+                                <a href="{% url 'gestionar_postulaciones' oferta.slug %}" class="btn btn-info">
+                                    <i class="fas fa-users me-2"></i>Ver Postulaciones ({{ oferta.postulaciones.count }})
+                                </a>
                                 <a href="{% url 'reabrir_oferta' oferta.slug %}" class="btn btn-success">
                                     <i class="fas fa-unlock me-2"></i>Reabrir Oferta
                                 </a>

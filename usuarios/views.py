@@ -20,7 +20,7 @@ from .forms import (
     PerfilMusicoForm, PerfilEmpleadorForm, PortafolioForm, CrearOfertaLaboralForm,
     PostulacionForm
 )
-from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio, OfertaLaboral, Postulacion
+from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio, OfertaLaboral, Postulacion, Notificacion
 
 
 def inicio(request):
@@ -346,6 +346,55 @@ def perfil_empleador_view(request):
         'usuario': request.user
     }
     return render(request, 'usuarios/perfil_empleador.html', context)
+
+
+@login_required
+def notificaciones_empleador_view(request):
+    """Vista para mostrar notificaciones del empleador"""
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden ver notificaciones.')
+        return redirect('inicio')
+    
+    try:
+        perfil_empleador = request.user.perfil_empleador
+    except PerfilEmpleador.DoesNotExist:
+        return redirect('crear_perfil_empleador')
+    
+    notificaciones = perfil_empleador.notificaciones.all().select_related(
+        'postulacion', 'oferta_laboral', 'postulacion__musico'
+    ).order_by('-fecha_creacion')
+    
+    stats = {
+        'total': notificaciones.count(),
+        'no_leidas': notificaciones.filter(leida=False).count(),
+        'canceladas': notificaciones.filter(tipo='postulacion_cancelada').count(),
+    }
+    
+    context = {
+        'notificaciones': notificaciones,
+        'stats': stats,
+        'titulo_pagina': 'Notificaciones'
+    }
+    
+    return render(request, 'usuarios/notificaciones_empleador.html', context)
+
+
+@login_required
+def marcar_notificacion_leida_view(request, notificacion_id):
+    """Vista para marcar una notificación como leída"""
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden gestionar notificaciones.')
+        return redirect('inicio')
+    
+    notificacion = get_object_or_404(
+        Notificacion, 
+        id=notificacion_id, 
+        empleador=request.user.perfil_empleador
+    )
+    
+    notificacion.marcar_como_leida()
+    
+    return redirect('notificaciones_empleador')
 
 
 # ================================================
@@ -1049,3 +1098,198 @@ def reabrir_oferta_view(request, slug):
         'oferta': oferta,
         'titulo_pagina': f'Reabrir: {oferta.titulo}'
     })
+
+
+@login_required
+def gestionar_postulaciones_view(request, slug):
+    """Vista para que empleadores vean y gestionen postulaciones de una oferta"""
+    oferta = get_object_or_404(OfertaLaboral, slug=slug)
+    
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden gestionar postulaciones.')
+        return redirect('inicio')
+    
+    if oferta.empleador != request.user.perfil_empleador:
+        messages.error(request, 'No tienes permisos para gestionar postulaciones de esta oferta.')
+        return redirect('ver_mis_ofertas')
+    
+    postulaciones = oferta.postulaciones.all().select_related(
+        'musico', 'portafolio', 'portafolio__ubicacion'
+    ).prefetch_related(
+        'portafolio__portafolio_instrumentos__instrumento',
+        'portafolio__portafolio_generos__genero'
+    ).order_by('-fecha_postulacion')
+    
+    # Estadísticas
+    stats = {
+        'total': postulaciones.count(),
+        'pendientes': postulaciones.filter(estado='pendiente').count(),
+        'aceptadas': postulaciones.filter(estado='aceptada').count(),
+        'rechazadas': postulaciones.filter(estado='rechazada').count(),
+        'en_revision': postulaciones.filter(estado='en_revision').count(),
+        'canceladas': postulaciones.filter(estado='cancelada').count(),
+    }
+    
+    context = {
+        'oferta': oferta,
+        'postulaciones': postulaciones,
+        'stats': stats,
+        'titulo_pagina': f'Postulaciones - {oferta.titulo}'
+    }
+    
+    return render(request, 'usuarios/gestionar_postulaciones.html', context)
+
+
+@login_required
+def procesar_postulacion_view(request, slug, postulacion_id):
+    """Vista para aceptar/rechazar una postulación específica"""
+    oferta = get_object_or_404(OfertaLaboral, slug=slug)
+    postulacion = get_object_or_404(Postulacion, id=postulacion_id, oferta_laboral=oferta)
+    
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden procesar postulaciones.')
+        return redirect('inicio')
+    
+    if oferta.empleador != request.user.perfil_empleador:
+        messages.error(request, 'No tienes permisos para procesar postulaciones de esta oferta.')
+        return redirect('ver_mis_ofertas')
+    
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('gestionar_postulaciones', slug=slug)
+    
+    accion = request.POST.get('accion')
+    notas = request.POST.get('notas', '').strip()
+    
+    if accion not in ['aceptar', 'rechazar', 'en_revision']:
+        messages.error(request, 'Acción no válida.')
+        return redirect('gestionar_postulaciones', slug=slug)
+    
+    # Validar que se puede aceptar (control de cupos)
+    if accion == 'aceptar':
+        postulaciones_aceptadas = Postulacion.objects.filter(
+            oferta_laboral=oferta,
+            estado='aceptada'
+        ).count()
+        
+        if postulaciones_aceptadas >= oferta.cupos_disponibles:
+            messages.error(
+                request,
+                f'No se puede aceptar más postulaciones. La oferta ya tiene {oferta.cupos_disponibles} cupos ocupados.'
+            )
+            return redirect('gestionar_postulaciones', slug=slug)
+    
+    # Procesar la acción
+    estado_anterior = postulacion.estado
+    
+    if accion == 'aceptar':
+        postulacion.estado = 'aceptada'
+        mensaje_exito = f'Postulación de {postulacion.musico.get_full_name()} aceptada exitosamente.'
+    elif accion == 'rechazar':
+        postulacion.estado = 'rechazada'
+        mensaje_exito = f'Postulación de {postulacion.musico.get_full_name()} rechazada.'
+    elif accion == 'en_revision':
+        postulacion.estado = 'en_revision'
+        mensaje_exito = f'Postulación de {postulacion.musico.get_full_name()} marcada como en revisión.'
+    
+    # Agregar notas del empleador
+    if notas:
+        postulacion.notas_empleador = notas
+    
+    postulacion.save()
+    
+    # Verificar si la oferta debe cerrarse automáticamente
+    if accion == 'aceptar':
+        postulaciones_aceptadas_nuevas = Postulacion.objects.filter(
+            oferta_laboral=oferta,
+            estado='aceptada'
+        ).count()
+        
+        if postulaciones_aceptadas_nuevas >= oferta.cupos_disponibles:
+            oferta.estado = 'cerrada'
+            oferta.save()
+            mensaje_exito += f' La oferta se ha cerrado automáticamente al completar {oferta.cupos_disponibles} cupos.'
+    
+    messages.success(request, mensaje_exito)
+    return redirect('gestionar_postulaciones', slug=slug)
+
+
+@login_required
+def mis_postulaciones_view(request):
+    """Vista para que el músico vea sus postulaciones"""
+    if request.user.tipo_usuario != 'musico':
+        messages.error(request, 'Solo los músicos pueden ver sus postulaciones.')
+        return redirect('inicio')
+    
+    # Obtener todas las postulaciones del músico
+    postulaciones = Postulacion.objects.filter(
+        musico=request.user
+    ).select_related(
+        'oferta_laboral', 
+        'oferta_laboral__empleador',
+        'oferta_laboral__ubicacion'
+    ).order_by('-fecha_postulacion')
+    
+    # Estadísticas
+    stats = {
+        'total': postulaciones.count(),
+        'pendientes': postulaciones.filter(estado='pendiente').count(),
+        'en_revision': postulaciones.filter(estado='en_revision').count(),
+        'aceptadas': postulaciones.filter(estado='aceptada').count(),
+        'rechazadas': postulaciones.filter(estado='rechazada').count(),
+        'canceladas': postulaciones.filter(estado='cancelada').count(),
+    }
+    
+    context = {
+        'postulaciones': postulaciones,
+        'stats': stats,
+        'titulo_pagina': 'Mis Postulaciones'
+    }
+    
+    return render(request, 'usuarios/mis_postulaciones.html', context)
+
+
+@login_required
+def cancelar_postulacion_view(request, postulacion_id):
+    """Vista para cancelar una postulación"""
+    if request.user.tipo_usuario != 'musico':
+        messages.error(request, 'Solo los músicos pueden cancelar postulaciones.')
+        return redirect('inicio')
+    
+    postulacion = get_object_or_404(Postulacion, id=postulacion_id, musico=request.user)
+    
+    # Verificar que la postulación se pueda cancelar
+    if postulacion.estado == 'cancelada':
+        messages.warning(request, 'Esta postulación ya está cancelada.')
+        return redirect('mis_postulaciones')
+    
+    if postulacion.estado == 'aceptada':
+        messages.error(
+            request, 
+            'No puedes cancelar una postulación que ya ha sido aceptada. '
+            'Contacta directamente al empleador si necesitas retirarte.'
+        )
+        return redirect('mis_postulaciones')
+    
+    if postulacion.estado == 'rechazada':
+        messages.warning(request, 'No puedes cancelar una postulación que ya ha sido rechazada.')
+        return redirect('mis_postulaciones')
+    
+    if request.method == 'POST':
+        # Cancelar la postulación
+        postulacion.estado = 'cancelada'
+        postulacion.fecha_actualizacion = timezone.now()
+        postulacion.save()
+        
+        messages.success(
+            request, 
+            f'Has cancelado tu postulación a "{postulacion.oferta_laboral.titulo}" exitosamente.'
+        )
+        return redirect('mis_postulaciones')
+    
+    context = {
+        'postulacion': postulacion,
+        'titulo_pagina': 'Cancelar Postulación'
+    }
+    
+    return render(request, 'usuarios/cancelar_postulacion.html', context)

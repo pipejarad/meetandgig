@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} - Meet&Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-primary mb-4">
+                <i class="fas fa-list-alt me-2"></i>Mis Postulaciones
+            </h2>
+            
+            <!-- Estadísticas -->
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <div class="card text-center border-primary">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{{ stats.total }}</h5>
+                            <p class="card-text small">Total</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center border-warning">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">{{ stats.pendientes }}</h5>
+                            <p class="card-text small">Pendientes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center border-info">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">{{ stats.en_revision }}</h5>
+                            <p class="card-text small">En Revisión</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center border-success">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">{{ stats.aceptadas }}</h5>
+                            <p class="card-text small">Aceptadas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center border-danger">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">{{ stats.rechazadas }}</h5>
+                            <p class="card-text small">Rechazadas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center border-secondary">
+                        <div class="card-body">
+                            <h5 class="card-title text-secondary">{{ stats.canceladas }}</h5>
+                            <p class="card-text small">Canceladas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if postulaciones %}
+                <div class="row">
+                    {% for postulacion in postulaciones %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="card-title mb-0">
+                                    <a href="{% url 'detalle_oferta' postulacion.oferta_laboral.slug %}" 
+                                       class="text-decoration-none">
+                                        {{ postulacion.oferta_laboral.titulo }}
+                                    </a>
+                                </h6>
+                                {% if postulacion.estado == 'pendiente' %}
+                                    <span class="badge bg-warning">Pendiente</span>
+                                {% elif postulacion.estado == 'en_revision' %}
+                                    <span class="badge bg-info">En Revisión</span>
+                                {% elif postulacion.estado == 'aceptada' %}
+                                    <span class="badge bg-success">Aceptada</span>
+                                {% elif postulacion.estado == 'rechazada' %}
+                                    <span class="badge bg-danger">Rechazada</span>
+                                {% elif postulacion.estado == 'cancelada' %}
+                                    <span class="badge bg-secondary">Cancelada</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-building me-1"></i>
+                                    {{ postulacion.oferta_laboral.empleador.nombre_empresa }}
+                                </p>
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    {{ postulacion.oferta_laboral.ubicacion.ciudad }}, {{ postulacion.oferta_laboral.ubicacion.region }}
+                                </p>
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Postulado: {{ postulacion.fecha_postulacion|date:"d/m/Y H:i" }}
+                                </p>
+                                {% if postulacion.fecha_actualizacion != postulacion.fecha_postulacion %}
+                                    <p class="text-muted small mb-2">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Actualizado: {{ postulacion.fecha_actualizacion|date:"d/m/Y H:i" }}
+                                    </p>
+                                {% endif %}
+                                
+                                {% if postulacion.mensaje %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">Mi mensaje:</small>
+                                        <p class="small border-start border-primary ps-2 ms-2">
+                                            {{ postulacion.mensaje|truncatewords:20 }}
+                                        </p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{% url 'detalle_oferta' postulacion.oferta_laboral.slug %}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Ver Oferta
+                                    </a>
+                                    
+                                    {% if postulacion.estado == 'pendiente' or postulacion.estado == 'en_revision' %}
+                                        <a href="{% url 'cancelar_postulacion' postulacion.id %}" 
+                                           class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-times me-1"></i>Cancelar
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-list-alt text-muted" style="font-size: 4rem;"></i>
+                    <h4 class="text-muted mt-3">No tienes postulaciones aún</h4>
+                    <p class="text-muted">
+                        Explora las ofertas disponibles y postúlate a las que más te interesen.
+                    </p>
+                    <a href="{% url 'buscar_ofertas' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-search me-2"></i>Buscar Ofertas
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
