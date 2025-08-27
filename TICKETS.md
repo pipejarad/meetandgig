@@ -40,7 +40,7 @@
 | 3.5    | Diseño de vista de ofertas             | ✅ COMPLETADO | UI responsive para navegación de ofertas - Mobile-first con offcanvas, acordeones y sincronización.                                              |
 | 🔥 3.6 | Postulación a una oferta laboral       | ✅ COMPLETADO | Sistema completo de postulaciones: formulario con validaciones, sidebar dinámico, estados visuales y experiencia optimizada por tipo de usuario. |
 | 🔥 3.7 | Validaciones de postulaciones y cierre | ✅ COMPLETADO | Sistema completo de validaciones, gestión de postulaciones, cancelación y notificaciones automáticas.                                            |
-| 🔥 3.8 | Invitación directa a músicos           | 🔄 PENDIENTE  | Empleadores pueden invitar músicos específicos desde portafolios a ofertas existentes.                                                           |
+| 🔥 3.8 | Invitación directa a músicos           | ✅ COMPLETADO | Sistema completo de invitaciones directas con dashboard para músicos, gestión para empleadores y notificaciones automáticas.                     |
 
 ---
 

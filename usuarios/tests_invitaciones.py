@@ -1,6 +1,12 @@
 """
-Tests para el modelo Invitacion y funcionalidades de invitación directa
-Ticket 3.8 - FASE 1: Modelo de Invitación
+Tests para el modelo Invitacion y funcionalidades de invitación dir        # Crear portafolio
+        self.portafolio = Portafolio.objects.create(
+            usuario=self.musico_user,
+            titulo='Portafolio Test',
+            descripcion='Descripción del portafolio',
+            nivel_experiencia=self.nivel,
+            ubicacion=self.ubicacion
+        )cket 3.8 - FASE 1: Modelo de Invitación
 """
 from django.test import TestCase
 from django.utils import timezone
@@ -18,22 +24,25 @@ class InvitacionModelTest(TestCase):
     
     def setUp(self):
         """Configuración inicial para los tests"""
-        # Crear catálogos básicos usando get_or_create para evitar duplicados
+        # Crear catálogos básicos con valores únicos para tests
         self.instrumento, _ = Instrumento.objects.get_or_create(
-            nombre='Guitarra Test',
+            nombre='Guitarra Test Invitaciones',
             defaults={'categoria': 'Cuerda'}
         )
         self.genero, _ = Genero.objects.get_or_create(
-            nombre='Rock Test',
+            nombre='Rock Test Invitaciones',
             defaults={}
         )
+        # Usar orden único para evitar conflictos
+        import random
+        orden_unico = random.randint(1000, 9999)
         self.nivel, _ = NivelExperiencia.objects.get_or_create(
-            nombre='Intermedio Test',
-            defaults={'orden': 2}
+            nombre=f'Intermedio Test {orden_unico}',
+            defaults={'orden': orden_unico}
         )
         self.ubicacion, _ = Ubicacion.objects.get_or_create(
-            nombre='Santiago Centro Test',
-            defaults={'tipo': 'comuna', 'region': 'Región Metropolitana'}
+            nombre='Santiago Centro Test Invitaciones',
+            defaults={'region': 'Región Metropolitana'}
         )
         
         # Crear usuarios
@@ -54,10 +63,9 @@ class InvitacionModelTest(TestCase):
         # Crear perfiles
         self.empleador = PerfilEmpleador.objects.create(
             usuario=self.empleador_user,
-            nombre_empresa='Test Company',
-            rut_empresa='12345678-9',
+            nombre_organizacion='Test Company',
             telefono='+56912345678',
-            ubicacion=self.ubicacion
+            ubicacion=self.ubicacion.nombre
         )
         
         self.musico = PerfilMusico.objects.create(
@@ -69,9 +77,9 @@ class InvitacionModelTest(TestCase):
         
         # Crear portafolio
         self.portafolio = Portafolio.objects.create(
-            musico=self.musico,
-            titulo='Portafolio Test',
-            descripcion='Descripción del portafolio',
+            usuario=self.musico_user,
+            slug='portafolio-test',
+            biografia='Biografía del músico test',
             nivel_experiencia=self.nivel,
             ubicacion=self.ubicacion
         )
@@ -79,14 +87,16 @@ class InvitacionModelTest(TestCase):
         # Crear oferta laboral
         self.oferta = OfertaLaboral.objects.create(
             empleador=self.empleador,
+            slug='guitarrista-concierto-test',
             titulo='Guitarrista para concierto',
             descripcion='Buscamos guitarrista experimentado',
             tipo_contrato='evento_unico',
-            salario_minimo=100000,
-            salario_maximo=200000,
-            fecha_evento='2024-12-31',
+            presupuesto_minimo=100000,
+            presupuesto_maximo=200000,
+            fecha_evento=timezone.now() + timezone.timedelta(days=30),
             ubicacion=self.ubicacion,
-            numero_musicos_requeridos=1,
+            nivel_experiencia_minimo=self.nivel,
+            cupos_disponibles=1,
             estado='publicada'
         )
     

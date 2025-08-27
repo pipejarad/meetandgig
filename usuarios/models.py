@@ -997,7 +997,7 @@ class Invitacion(models.Model):
         return (
             self.estado == 'pendiente' and 
             not self.ha_expirado() and
-            self.oferta_laboral.esta_activa() and
+            self.oferta_laboral.esta_vigente() and
             self.oferta_laboral.get_cupos_restantes() > 0
         )
     
@@ -1177,7 +1177,7 @@ class Notificacion(models.Model):
         ordering = ['-fecha_creacion']
     
     def __str__(self):
-        return f"{self.empleador.nombre_empresa} - {self.titulo}"
+        return f"{self.empleador.nombre_organizacion} - {self.titulo}"
     
     def marcar_como_leida(self):
         if not self.leida:
