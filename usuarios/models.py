@@ -867,6 +867,211 @@ class Postulacion(models.Model):
         return self.estado in ['pendiente', 'en_revision']
 
 
+class Invitacion(models.Model):
+    """Invitación directa de empleador a músico para oferta laboral"""
+    
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente de respuesta'),
+        ('aceptada', 'Aceptada (crea postulación)'),
+        ('rechazada', 'Rechazada por el músico'),
+        ('expirada', 'Expirada sin respuesta'),
+        ('cancelada', 'Cancelada por el empleador'),
+    ]
+    
+    # RELACIONES PRINCIPALES
+    oferta_laboral = models.ForeignKey(
+        OfertaLaboral,
+        on_delete=models.CASCADE,
+        related_name='invitaciones',
+        verbose_name='Oferta laboral'
+    )
+    musico = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='invitaciones_recibidas',
+        verbose_name='Músico invitado',
+        limit_choices_to={'tipo_usuario': 'musico'}
+    )
+    empleador = models.ForeignKey(
+        'PerfilEmpleador',
+        on_delete=models.CASCADE,
+        related_name='invitaciones_enviadas',
+        verbose_name='Empleador que invita'
+    )
+    portafolio = models.ForeignKey(
+        Portafolio,
+        on_delete=models.CASCADE,
+        related_name='invitaciones',
+        verbose_name='Portafolio que motivó la invitación'
+    )
+    
+    # ESTADO Y CONTROL
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='pendiente',
+        verbose_name='Estado de la invitación'
+    )
+    
+    # CONTENIDO DE LA INVITACIÓN
+    mensaje_invitacion = models.TextField(
+        max_length=1000,
+        verbose_name='Mensaje de invitación',
+        help_text='Mensaje personalizado del empleador al músico (máx. 1000 caracteres)'
+    )
+    tarifa_ofrecida = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Tarifa ofrecida (CLP)',
+        help_text='Tarifa propuesta por el empleador en pesos chilenos'
+    )
+    
+    # METADATOS TEMPORALES
+    fecha_invitacion = models.DateTimeField(
+        default=timezone.now,
+        verbose_name='Fecha de invitación'
+    )
+    fecha_expiracion = models.DateTimeField(
+        verbose_name='Fecha de expiración',
+        help_text='Fecha límite para que el músico responda'
+    )
+    fecha_respuesta = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha de respuesta del músico'
+    )
+    
+    # RELACIÓN CON POSTULACIÓN (SI SE ACEPTA)
+    postulacion_creada = models.OneToOneField(
+        Postulacion,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='invitacion_origen',
+        verbose_name='Postulación creada'
+    )
+    
+    # METADATOS ADICIONALES
+    mensaje_respuesta = models.TextField(
+        max_length=500,
+        blank=True,
+        verbose_name='Mensaje de respuesta del músico',
+        help_text='Mensaje opcional del músico al responder (máx. 500 caracteres)'
+    )
+    
+    class Meta:
+        verbose_name = 'Invitación'
+        verbose_name_plural = 'Invitaciones'
+        unique_together = [('oferta_laboral', 'musico')]
+        ordering = ['-fecha_invitacion']
+        indexes = [
+            models.Index(fields=['estado', 'fecha_expiracion']),
+            models.Index(fields=['musico', 'estado']),
+            models.Index(fields=['empleador', 'estado']),
+        ]
+    
+    def __str__(self):
+        return f"Invitación: {self.empleador.nombre_empresa} → {self.musico.get_full_name()} para {self.oferta_laboral.titulo}"
+    
+    def save(self, *args, **kwargs):
+        # Auto-configurar fecha de expiración (7 días por defecto)
+        if not self.fecha_expiracion:
+            self.fecha_expiracion = self.fecha_invitacion + timezone.timedelta(days=7)
+        
+        # Registrar fecha de respuesta
+        if self.estado in ['aceptada', 'rechazada'] and not self.fecha_respuesta:
+            self.fecha_respuesta = timezone.now()
+            
+        super().save(*args, **kwargs)
+    
+    def esta_pendiente(self):
+        """Verifica si la invitación está pendiente de respuesta"""
+        return self.estado == 'pendiente'
+    
+    def ha_expirado(self):
+        """Verifica si la invitación ha expirado"""
+        return timezone.now() > self.fecha_expiracion and self.estado == 'pendiente'
+    
+    def puede_ser_aceptada(self):
+        """Verifica si la invitación puede ser aceptada"""
+        return (
+            self.estado == 'pendiente' and 
+            not self.ha_expirado() and
+            self.oferta_laboral.esta_activa() and
+            self.oferta_laboral.get_cupos_restantes() > 0
+        )
+    
+    def puede_ser_rechazada(self):
+        """Verifica si la invitación puede ser rechazada"""
+        return self.estado == 'pendiente' and not self.ha_expirado()
+    
+    def puede_ser_cancelada(self):
+        """Verifica si la invitación puede ser cancelada por el empleador"""
+        return self.estado == 'pendiente'
+    
+    def dias_restantes(self):
+        """Calcula los días restantes para responder"""
+        if self.estado != 'pendiente':
+            return 0
+        delta = self.fecha_expiracion - timezone.now()
+        return max(0, delta.days)
+    
+    def aceptar(self, mensaje_respuesta='', tarifa_propuesta=None):
+        """
+        Acepta la invitación y crea una postulación automáticamente
+        """
+        if not self.puede_ser_aceptada():
+            raise ValueError("La invitación no puede ser aceptada en su estado actual")
+        
+        # Crear postulación automáticamente
+        postulacion = Postulacion.objects.create(
+            oferta_laboral=self.oferta_laboral,
+            musico=self.musico,
+            portafolio=self.portafolio,
+            tipo_postulacion='invitacion',
+            estado='pendiente',
+            mensaje_personalizado=mensaje_respuesta,
+            tarifa_propuesta=tarifa_propuesta or self.tarifa_ofrecida
+        )
+        
+        # Actualizar invitación
+        self.estado = 'aceptada'
+        self.mensaje_respuesta = mensaje_respuesta
+        self.postulacion_creada = postulacion
+        self.save()
+        
+        return postulacion
+    
+    def rechazar(self, mensaje_respuesta=''):
+        """
+        Rechaza la invitación
+        """
+        if not self.puede_ser_rechazada():
+            raise ValueError("La invitación no puede ser rechazada en su estado actual")
+        
+        self.estado = 'rechazada'
+        self.mensaje_respuesta = mensaje_respuesta
+        self.save()
+    
+    def cancelar(self):
+        """
+        Cancela la invitación (solo por empleador)
+        """
+        if not self.puede_ser_cancelada():
+            raise ValueError("La invitación no puede ser cancelada en su estado actual")
+        
+        self.estado = 'cancelada'
+        self.save()
+    
+    def marcar_como_expirada(self):
+        """
+        Marca la invitación como expirada
+        """
+        if self.estado == 'pendiente' and self.ha_expirado():
+            self.estado = 'expirada'
+            self.save()
+
+
 # TABLAS INTERMEDIAS PARA OFERTAS LABORALES
 class OfertaInstrumento(models.Model):
     """Instrumentos requeridos para una oferta laboral"""
@@ -920,6 +1125,9 @@ class Notificacion(models.Model):
     TIPO_CHOICES = [
         ('postulacion_cancelada', 'Postulación cancelada'),
         ('oferta_completada', 'Oferta completada'),
+        ('invitacion_aceptada', 'Invitación aceptada'),
+        ('invitacion_rechazada', 'Invitación rechazada'),
+        ('invitacion_expirada', 'Invitación expirada'),
     ]
     
     empleador = models.ForeignKey(
@@ -950,6 +1158,14 @@ class Notificacion(models.Model):
         blank=True,
         related_name='notificaciones',
         verbose_name='Oferta relacionada'
+    )
+    invitacion = models.ForeignKey(
+        'Invitacion',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notificaciones',
+        verbose_name='Invitación relacionada'
     )
     leida = models.BooleanField(default=False, verbose_name='Leída')
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')

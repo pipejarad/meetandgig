@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Cancelar Invitación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Información de la invitación -->
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">¿Estás seguro?</h6>
+                        <p class="mb-0">
+                            Estás a punto de cancelar la invitación enviada a 
+                            <strong>{{ invitacion.musico.get_full_name }}</strong> 
+                            para la oferta <strong>{{ invitacion.oferta_laboral.titulo }}</strong>.
+                        </p>
+                    </div>
+
+                    <!-- Detalles de la invitación -->
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-center">
+                            {% if invitacion.musico.foto_perfil %}
+                                <img src="{{ invitacion.musico.foto_perfil.url }}" 
+                                     alt="Foto de {{ invitacion.musico.get_full_name }}" 
+                                     class="rounded-circle img-fluid" 
+                                     style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user text-white fa-2x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h6 class="mb-1">{{ invitacion.musico.get_full_name }}</h6>
+                            <p class="text-muted mb-1">{{ invitacion.portafolio.titulo }}</p>
+                            <p class="text-muted mb-1">
+                                <strong>Oferta:</strong> {{ invitacion.oferta_laboral.titulo }}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <strong>Enviada:</strong> {{ invitacion.fecha_invitacion|date:"d/m/Y H:i" }}
+                            </p>
+                            <p class="text-muted mb-0">
+                                <strong>Expira:</strong> {{ invitacion.fecha_expiracion|date:"d/m/Y H:i" }}
+                                ({{ invitacion.dias_restantes }} días restantes)
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje original -->
+                    {% if invitacion.mensaje_invitacion %}
+                        <div class="mb-3">
+                            <h6>Tu mensaje de invitación:</h6>
+                            <div class="alert alert-light small">
+                                {{ invitacion.mensaje_invitacion|linebreaks }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Tarifa ofrecida -->
+                    {% if invitacion.tarifa_ofrecida %}
+                        <div class="mb-3">
+                            <h6>Tarifa ofrecida:</h6>
+                            <p class="text-success">
+                                <i class="fas fa-dollar-sign"></i>
+                                {{ invitacion.tarifa_ofrecida|floatformat:0 }} CLP
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Información sobre cancelación -->
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Información sobre la cancelación:
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>El músico <strong>no</strong> recibirá una notificación sobre la cancelación.</li>
+                            <li>No podrás revertir esta acción una vez confirmada.</li>
+                            <li>Podrás enviar una nueva invitación en el futuro si lo deseas.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Formulario de confirmación -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'mis_invitaciones_enviadas' %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Volver
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelar Invitación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

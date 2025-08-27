@@ -250,6 +250,11 @@
                                     <i class="fas fa-list-alt mr-1" aria-hidden="true"></i>Mis Postulaciones
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'mis_invitaciones_recibidas' %}">
+                                    <i class="fas fa-envelope mr-1" aria-hidden="true"></i>Invitaciones
+                                </a>
+                            </li>
                             {% elif user.tipo_usuario == 'empleador' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'ver_mis_ofertas' %}">
@@ -286,6 +291,9 @@
                                     <a class="dropdown-item" href="{% url 'mis_postulaciones' %}">
                                         <i class="fas fa-list-alt mr-2" aria-hidden="true"></i>Mis Postulaciones
                                     </a>
+                                    <a class="dropdown-item" href="{% url 'mis_invitaciones_recibidas' %}">
+                                        <i class="fas fa-envelope mr-2" aria-hidden="true"></i>Invitaciones Recibidas
+                                    </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{% url 'editar_perfil_musico' %}">
                                         <i class="fas fa-edit mr-2" aria-hidden="true"></i>Editar Perfil
@@ -304,6 +312,9 @@
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{% url 'ver_mis_ofertas' %}">
                                         <i class="fas fa-briefcase mr-2" aria-hidden="true"></i>Mis Ofertas Laborales
+                                    </a>
+                                    <a class="dropdown-item" href="{% url 'mis_invitaciones_enviadas' %}">
+                                        <i class="fas fa-paper-plane mr-2" aria-hidden="true"></i>Mis Invitaciones
                                     </a>
                                     <a class="dropdown-item" href="{% url 'crear_oferta_laboral' %}">
                                         <i class="fas fa-plus mr-2" aria-hidden="true"></i>Crear Nueva Oferta

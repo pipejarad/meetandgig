@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            {% if portafolio.usuario.foto_perfil %}
+                                <img src="{{ portafolio.usuario.foto_perfil.url }}" 
+                                     alt="Foto de {{ portafolio.usuario.get_full_name }}" 
+                                     class="rounded-circle img-fluid" 
+                                     style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user text-white fa-2x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-10">
+                            <h4 class="mb-1">{{ portafolio.usuario.get_full_name }}</h4>
+                            <h6 class="text-muted mb-2">{{ portafolio.titulo }}</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-0">
+                                        <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                        {{ portafolio.ubicacion|default:"Ubicación no especificada" }}
+                                    </p>
+                                </div>
+                                {% if portafolio.tarifa_base %}
+                                <div class="col-md-6">
+                                    <p class="mb-0">
+                                        <i class="fas fa-dollar-sign text-success me-1"></i>
+                                        <strong>Tarifa base: ${{ portafolio.tarifa_base|floatformat:0 }} CLP</strong>
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Invitación -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>
+                        Enviar Invitación Directa
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Selección de Oferta -->
+                        <div class="mb-3">
+                            <label for="oferta_laboral" class="form-label">
+                                <strong>Seleccionar Oferta Laboral</strong>
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select name="oferta_laboral" id="oferta_laboral" class="form-select" required>
+                                <option value="">Selecciona una oferta...</option>
+                                {% for oferta in ofertas_activas %}
+                                    <option value="{{ oferta.id }}">
+                                        {{ oferta.titulo }} - {{ oferta.get_tipo_contrato_display }}
+                                        {% if oferta.salario_minimo and oferta.salario_maximo %}
+                                            ({{ oferta.salario_minimo|floatformat:0 }} - {{ oferta.salario_maximo|floatformat:0 }} CLP)
+                                        {% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Selecciona la oferta laboral para la cual quieres invitar al músico.</div>
+                        </div>
+
+                        <!-- Mensaje de Invitación -->
+                        <div class="mb-3">
+                            <label for="mensaje_invitacion" class="form-label">
+                                <strong>Mensaje de Invitación</strong>
+                                <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="mensaje_invitacion" 
+                                      id="mensaje_invitacion" 
+                                      class="form-control" 
+                                      rows="5" 
+                                      maxlength="1000" 
+                                      required
+                                      placeholder="Escribe un mensaje personalizado explicando por qué quieres invitar a este músico..."></textarea>
+                            <div class="form-text">
+                                Máximo 1000 caracteres. Sé específico sobre por qué estás interesado en este músico.
+                            </div>
+                        </div>
+
+                        <!-- Tarifa Ofrecida (Opcional) -->
+                        <div class="mb-4">
+                            <label for="tarifa_ofrecida" class="form-label">
+                                <strong>Tarifa Ofrecida</strong>
+                                <span class="text-muted">(opcional)</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" 
+                                       name="tarifa_ofrecida" 
+                                       id="tarifa_ofrecida" 
+                                       class="form-control"
+                                       min="{% if portafolio.tarifa_base %}{{ portafolio.tarifa_base }}{% else %}1{% endif %}"
+                                       step="1000"
+                                       {% if portafolio.tarifa_base %}
+                                       placeholder="{{ portafolio.tarifa_base }}"
+                                       {% else %}
+                                       placeholder="150000"
+                                       {% endif %}>
+                                <span class="input-group-text">CLP</span>
+                            </div>
+                            <div class="form-text">
+                                {% if portafolio.tarifa_base %}
+                                    Tarifa mínima: <strong>${{ portafolio.tarifa_base|floatformat:0 }} CLP</strong> (tarifa base del músico).
+                                    Puedes ofrecer esta cantidad o más.
+                                {% else %}
+                                    Tarifa que ofreces para esta colaboración. Si no especificas, el músico puede proponer su tarifa.
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'portafolio_publico' slug=portafolio.slug %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Volver al Portafolio
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>
+                                Enviar Invitación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Información Adicional -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-info-circle text-info me-1"></i>
+                        Información sobre las Invitaciones
+                    </h6>
+                    <ul class="mb-0 small text-muted">
+                        <li>El músico tendrá <strong>7 días</strong> para responder a tu invitación.</li>
+                        <li>Si acepta, se creará automáticamente una postulación que podrás gestionar normalmente.</li>
+                        <li>Recibirás una notificación cuando el músico responda a tu invitación.</li>
+                        <li>Solo puedes enviar una invitación por músico por oferta laboral.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Contador de caracteres para el mensaje
+    const textarea = document.getElementById('mensaje_invitacion');
+    const maxLength = 1000;
+    
+    // Crear elemento contador
+    const counter = document.createElement('div');
+    counter.className = 'form-text text-end';
+    counter.id = 'char-counter';
+    textarea.parentNode.appendChild(counter);
+    
+    function updateCounter() {
+        const remaining = maxLength - textarea.value.length;
+        counter.textContent = `${textarea.value.length}/${maxLength} caracteres`;
+        
+        if (remaining < 100) {
+            counter.className = 'form-text text-end text-warning';
+        } else if (remaining < 50) {
+            counter.className = 'form-text text-end text-danger';
+        } else {
+            counter.className = 'form-text text-end text-muted';
+        }
+    }
+    
+    textarea.addEventListener('input', updateCounter);
+    updateCounter(); // Inicial
+});
+</script>
+{% endblock %}

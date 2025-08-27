@@ -20,7 +20,7 @@ from .forms import (
     PerfilMusicoForm, PerfilEmpleadorForm, PortafolioForm, CrearOfertaLaboralForm,
     PostulacionForm
 )
-from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio, OfertaLaboral, Postulacion, Notificacion
+from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio, OfertaLaboral, Postulacion, Notificacion, Invitacion
 
 
 def inicio(request):
@@ -1293,3 +1293,341 @@ def cancelar_postulacion_view(request, postulacion_id):
     }
     
     return render(request, 'usuarios/cancelar_postulacion.html', context)
+
+
+# VISTAS PARA INVITACIONES DIRECTAS (Ticket 3.8 - FASE 2)
+
+@login_required
+def enviar_invitacion_view(request, portafolio_slug):
+    """Vista para que empleadores envíen invitaciones directas a músicos"""
+    portafolio = get_object_or_404(Portafolio, slug=portafolio_slug)
+    
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden enviar invitaciones.')
+        return redirect('inicio')
+    
+    try:
+        perfil_empleador = request.user.perfil_empleador
+    except PerfilEmpleador.DoesNotExist:
+        messages.error(request, 'Debes completar tu perfil de empleador primero.')
+        return redirect('crear_perfil_empleador')
+    
+    # Obtener ofertas activas del empleador
+    ofertas_activas = perfil_empleador.ofertas_laborales.filter(
+        estado='publicada'
+    ).order_by('-fecha_creacion')
+    
+    if not ofertas_activas.exists():
+        messages.error(request, 'No tienes ofertas laborales activas para enviar invitaciones.')
+        return redirect('ver_mis_ofertas')
+    
+    if request.method == 'POST':
+        oferta_id = request.POST.get('oferta_laboral')
+        mensaje_invitacion = request.POST.get('mensaje_invitacion', '').strip()
+        tarifa_ofrecida = request.POST.get('tarifa_ofrecida')
+        
+        # Validaciones
+        if not oferta_id:
+            messages.error(request, 'Debes seleccionar una oferta laboral.')
+            return redirect('enviar_invitacion', portafolio_slug=portafolio_slug)
+        
+        try:
+            oferta = ofertas_activas.get(id=oferta_id)
+        except OfertaLaboral.DoesNotExist:
+            messages.error(request, 'La oferta seleccionada no es válida.')
+            return redirect('enviar_invitacion', portafolio_slug=portafolio_slug)
+        
+        if not mensaje_invitacion:
+            messages.error(request, 'El mensaje de invitación es obligatorio.')
+            return redirect('enviar_invitacion', portafolio_slug=portafolio_slug)
+        
+        # Validar tarifa si se proporcionó
+        tarifa_ofrecida_int = None
+        if tarifa_ofrecida:
+            try:
+                tarifa_ofrecida_int = int(tarifa_ofrecida)
+                if tarifa_ofrecida_int <= 0:
+                    raise ValueError("La tarifa debe ser mayor a 0")
+                
+                # Validar que la tarifa ofrecida sea al menos igual a la tarifa base del músico
+                if portafolio.tarifa_base and tarifa_ofrecida_int < portafolio.tarifa_base:
+                    messages.error(
+                        request, 
+                        f'La tarifa ofrecida debe ser al menos {portafolio.tarifa_base:,} CLP '
+                        f'(tarifa base del músico). Has ofrecido {tarifa_ofrecida_int:,} CLP.'
+                    )
+                    return redirect('enviar_invitacion', portafolio_slug=portafolio_slug)
+                    
+            except (ValueError, TypeError):
+                messages.error(request, 'La tarifa ofrecida debe ser un número válido mayor a 0.')
+                return redirect('enviar_invitacion', portafolio_slug=portafolio_slug)
+        
+        # Verificar que no exista ya una invitación pendiente
+        invitacion_existente = Invitacion.objects.filter(
+            oferta_laboral=oferta,
+            musico=portafolio.usuario,
+            estado='pendiente'
+        ).first()
+        
+        if invitacion_existente:
+            messages.warning(request, f'Ya tienes una invitación pendiente para {portafolio.usuario.get_full_name()} en esta oferta.')
+            return redirect('enviar_invitacion', portafolio_slug=portafolio_slug)
+        
+        # Verificar que no exista una postulación ya
+        postulacion_existente = Postulacion.objects.filter(
+            oferta_laboral=oferta,
+            musico=portafolio.usuario
+        ).first()
+        
+        if postulacion_existente:
+            messages.warning(request, f'{portafolio.usuario.get_full_name()} ya se ha postulado a esta oferta.')
+            return redirect('enviar_invitacion', portafolio_slug=portafolio_slug)
+        
+        # Verificar que la oferta tenga cupos disponibles
+        if oferta.get_cupos_restantes() <= 0:
+            messages.error(request, 'Esta oferta ya no tiene cupos disponibles.')
+            return redirect('enviar_invitacion', portafolio_slug=portafolio_slug)
+        
+        # Crear la invitación
+        try:
+            invitacion = Invitacion.objects.create(
+                oferta_laboral=oferta,
+                musico=portafolio.usuario,
+                empleador=perfil_empleador,
+                portafolio=portafolio,
+                mensaje_invitacion=mensaje_invitacion,
+                tarifa_ofrecida=tarifa_ofrecida_int
+            )
+            
+            messages.success(
+                request, 
+                f'Invitación enviada exitosamente a {portafolio.usuario.get_full_name()} para la oferta "{oferta.titulo}".'
+            )
+            return redirect('portafolio_publico', slug=portafolio_slug)
+            
+        except Exception as e:
+            messages.error(request, 'Ocurrió un error al enviar la invitación. Inténtalo nuevamente.')
+            return redirect('enviar_invitacion', portafolio_slug=portafolio_slug)
+    
+    # GET request - mostrar formulario
+    context = {
+        'portafolio': portafolio,
+        'ofertas_activas': ofertas_activas,
+        'titulo_pagina': f'Invitar a {portafolio.usuario.get_full_name()}'
+    }
+    
+    return render(request, 'usuarios/enviar_invitacion.html', context)
+
+
+@login_required
+def mis_invitaciones_enviadas_view(request):
+    """Vista para que empleadores vean las invitaciones que han enviado"""
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden ver esta página.')
+        return redirect('inicio')
+    
+    try:
+        perfil_empleador = request.user.perfil_empleador
+    except PerfilEmpleador.DoesNotExist:
+        messages.error(request, 'Debes completar tu perfil de empleador primero.')
+        return redirect('crear_perfil_empleador')
+    
+    # Filtros
+    estado_filtro = request.GET.get('estado', '')
+    oferta_filtro = request.GET.get('oferta', '')
+    
+    invitaciones = perfil_empleador.invitaciones_enviadas.all().select_related(
+        'musico', 'oferta_laboral', 'portafolio'
+    ).order_by('-fecha_invitacion')
+    
+    if estado_filtro:
+        invitaciones = invitaciones.filter(estado=estado_filtro)
+    
+    if oferta_filtro:
+        try:
+            oferta_id = int(oferta_filtro)
+            invitaciones = invitaciones.filter(oferta_laboral_id=oferta_id)
+        except (ValueError, TypeError):
+            pass
+    
+    # Estadísticas
+    stats = {
+        'total': invitaciones.count(),
+        'pendientes': invitaciones.filter(estado='pendiente').count(),
+        'aceptadas': invitaciones.filter(estado='aceptada').count(),
+        'rechazadas': invitaciones.filter(estado='rechazada').count(),
+        'expiradas': invitaciones.filter(estado='expirada').count(),
+        'canceladas': invitaciones.filter(estado='cancelada').count(),
+    }
+    
+    # Ofertas para el filtro
+    ofertas_para_filtro = perfil_empleador.ofertas_laborales.filter(
+        estado='publicada'
+    ).order_by('-fecha_creacion')
+    
+    context = {
+        'invitaciones': invitaciones,
+        'stats': stats,
+        'ofertas_para_filtro': ofertas_para_filtro,
+        'estado_filtro': estado_filtro,
+        'oferta_filtro': oferta_filtro,
+        'titulo_pagina': 'Mis Invitaciones Enviadas'
+    }
+    
+    return render(request, 'usuarios/mis_invitaciones_enviadas.html', context)
+
+
+@login_required
+def cancelar_invitacion_view(request, invitacion_id):
+    """Vista para que empleadores cancelen invitaciones pendientes"""
+    invitacion = get_object_or_404(Invitacion, id=invitacion_id)
+    
+    if request.user.tipo_usuario != 'empleador':
+        messages.error(request, 'Solo los empleadores pueden cancelar invitaciones.')
+        return redirect('inicio')
+    
+    if invitacion.empleador != request.user.perfil_empleador:
+        messages.error(request, 'No tienes permisos para cancelar esta invitación.')
+        return redirect('mis_invitaciones_enviadas')
+    
+    if not invitacion.puede_ser_cancelada():
+        messages.error(request, 'Esta invitación ya no puede ser cancelada.')
+        return redirect('mis_invitaciones_enviadas')
+    
+    if request.method == 'POST':
+        try:
+            invitacion.cancelar()
+            messages.success(
+                request, 
+                f'Invitación a {invitacion.musico.get_full_name()} cancelada exitosamente.'
+            )
+        except Exception as e:
+            messages.error(request, 'Ocurrió un error al cancelar la invitación.')
+        
+        return redirect('mis_invitaciones_enviadas')
+    
+    context = {
+        'invitacion': invitacion,
+        'titulo_pagina': 'Cancelar Invitación'
+    }
+    
+    return render(request, 'usuarios/cancelar_invitacion.html', context)
+
+
+# ===========================================
+# TICKET 3.8 - FASE 3: Dashboard para músicos
+# ===========================================
+
+@login_required
+def mis_invitaciones_recibidas_view(request):
+    """Vista para que los músicos vean sus invitaciones recibidas"""
+    
+    # Verificar que el usuario sea músico
+    if not hasattr(request.user, 'portafolio'):
+        messages.error(request, 'Solo los músicos pueden acceder a esta sección.')
+        return redirect('ver_mi_perfil')
+    
+    # Obtener todas las invitaciones recibidas por este músico
+    invitaciones = Invitacion.objects.filter(
+        musico=request.user
+    ).select_related(
+        'empleador', 
+        'oferta_laboral',
+        'postulacion_creada'
+    ).order_by('-fecha_invitacion')
+    
+    # Separar por estado para mejor organización
+    invitaciones_pendientes = invitaciones.filter(estado='pendiente')
+    invitaciones_aceptadas = invitaciones.filter(estado='aceptada')
+    invitaciones_rechazadas = invitaciones.filter(estado='rechazada')
+    invitaciones_canceladas = invitaciones.filter(estado='cancelada')
+    
+    # Estadísticas para el dashboard
+    stats = {
+        'total': invitaciones.count(),
+        'pendientes': invitaciones_pendientes.count(),
+        'aceptadas': invitaciones_aceptadas.count(),
+        'rechazadas': invitaciones_rechazadas.count(),
+        'canceladas': invitaciones_canceladas.count(),
+    }
+    
+    context = {
+        'invitaciones_pendientes': invitaciones_pendientes,
+        'invitaciones_aceptadas': invitaciones_aceptadas,
+        'invitaciones_rechazadas': invitaciones_rechazadas,
+        'invitaciones_canceladas': invitaciones_canceladas,
+        'stats': stats,
+        'titulo_pagina': 'Mis Invitaciones Recibidas',
+        'descripcion_pagina': 'Gestiona las invitaciones que has recibido de empleadores'
+    }
+    
+    return render(request, 'usuarios/mis_invitaciones_recibidas.html', context)
+
+
+@login_required
+def responder_invitacion_view(request, invitacion_id):
+    """Vista para que los músicos respondan a invitaciones (aceptar/rechazar)"""
+    
+    # Verificar que el usuario sea músico
+    if not hasattr(request.user, 'portafolio'):
+        messages.error(request, 'Solo los músicos pueden responder invitaciones.')
+        return redirect('ver_mi_perfil')
+    
+    # Obtener la invitación
+    invitacion = get_object_or_404(
+        Invitacion, 
+        id=invitacion_id,
+        musico=request.user
+    )
+    
+    # Verificar que la invitación esté pendiente
+    if invitacion.estado != 'pendiente':
+        messages.error(request, 'Esta invitación ya ha sido respondida.')
+        return redirect('mis_invitaciones_recibidas')
+    
+    # Verificar que la oferta laboral esté activa
+    if invitacion.oferta_laboral.estado != 'publicada':
+        messages.error(request, 'Esta oferta laboral ya no está disponible.')
+        return redirect('mis_invitaciones_recibidas')
+    
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+        mensaje_respuesta = request.POST.get('mensaje_respuesta', '').strip()
+        
+        try:
+            if accion == 'aceptar':
+                # Aceptar la invitación (crea automáticamente una postulación)
+                postulacion = invitacion.aceptar(mensaje_respuesta)
+                
+                messages.success(
+                    request,
+                    f'¡Invitación aceptada! Se ha creado tu postulación para "{invitacion.oferta_laboral.titulo}".'
+                )
+                
+                # Redirigir al detalle de la oferta para ver la postulación creada
+                return redirect('detalle_oferta', slug=invitacion.oferta_laboral.slug)
+                
+            elif accion == 'rechazar':
+                # Rechazar la invitación
+                invitacion.rechazar(mensaje_respuesta)
+                
+                messages.success(
+                    request,
+                    f'Invitación rechazada. El empleador ha sido notificado.'
+                )
+                
+                return redirect('mis_invitaciones_recibidas')
+                
+            else:
+                messages.error(request, 'Acción no válida.')
+                
+        except Exception as e:
+            messages.error(request, f'Error al procesar la respuesta: {str(e)}')
+    
+    context = {
+        'invitacion': invitacion,
+        'titulo_pagina': f'Responder Invitación - {invitacion.oferta_laboral.titulo}',
+        'descripcion_pagina': f'Invitación de {invitacion.empleador.usuario.get_full_name()}'
+    }
+    
+    return render(request, 'usuarios/responder_invitacion.html', context)

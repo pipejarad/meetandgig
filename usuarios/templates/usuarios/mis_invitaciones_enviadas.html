@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-paper-plane text-primary me-2"></i>
+            Mis Invitaciones Enviadas
+        </h2>
+        <a href="{% url 'buscar_portafolios' %}" class="btn btn-outline-primary">
+            <i class="fas fa-search me-1"></i>
+            Buscar Músicos
+        </a>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card text-center bg-light">
+                <div class="card-body py-3">
+                    <h4 class="text-primary mb-1">{{ stats.total }}</h4>
+                    <small class="text-muted">Total</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-warning text-white">
+                <div class="card-body py-3">
+                    <h4 class="mb-1">{{ stats.pendientes }}</h4>
+                    <small>Pendientes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body py-3">
+                    <h4 class="mb-1">{{ stats.aceptadas }}</h4>
+                    <small>Aceptadas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-danger text-white">
+                <div class="card-body py-3">
+                    <h4 class="mb-1">{{ stats.rechazadas }}</h4>
+                    <small>Rechazadas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-secondary text-white">
+                <div class="card-body py-3">
+                    <h4 class="mb-1">{{ stats.expiradas }}</h4>
+                    <small>Expiradas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-dark text-white">
+                <div class="card-body py-3">
+                    <h4 class="mb-1">{{ stats.canceladas }}</h4>
+                    <small>Canceladas</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select name="estado" id="estado" class="form-select">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>Pendientes</option>
+                        <option value="aceptada" {% if estado_filtro == 'aceptada' %}selected{% endif %}>Aceptadas</option>
+                        <option value="rechazada" {% if estado_filtro == 'rechazada' %}selected{% endif %}>Rechazadas</option>
+                        <option value="expirada" {% if estado_filtro == 'expirada' %}selected{% endif %}>Expiradas</option>
+                        <option value="cancelada" {% if estado_filtro == 'cancelada' %}selected{% endif %}>Canceladas</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="oferta" class="form-label">Oferta Laboral</label>
+                    <select name="oferta" id="oferta" class="form-select">
+                        <option value="">Todas las ofertas</option>
+                        {% for oferta in ofertas_para_filtro %}
+                            <option value="{{ oferta.id }}" {% if oferta_filtro == oferta.id|stringformat:"s" %}selected{% endif %}>
+                                {{ oferta.titulo }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-1"></i>
+                        Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Invitaciones -->
+    {% if invitaciones %}
+        {% for invitacion in invitaciones %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <!-- Foto del músico -->
+                        <div class="col-md-1 text-center">
+                            {% if invitacion.musico.foto_perfil %}
+                                <img src="{{ invitacion.musico.foto_perfil.url }}" 
+                                     alt="Foto de {{ invitacion.musico.get_full_name }}" 
+                                     class="rounded-circle img-fluid" 
+                                     style="width: 50px; height: 50px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Información principal -->
+                        <div class="col-md-5">
+                            <h6 class="mb-1">
+                                <a href="{% url 'portafolio_publico' slug=invitacion.portafolio.slug %}" 
+                                   class="text-decoration-none">
+                                    {{ invitacion.musico.get_full_name }}
+                                </a>
+                            </h6>
+                            <p class="text-muted mb-1 small">{{ invitacion.portafolio.titulo }}</p>
+                            <p class="text-muted mb-0 small">
+                                <strong>Oferta:</strong> 
+                                <a href="{% url 'detalle_oferta' slug=invitacion.oferta_laboral.slug %}" 
+                                   class="text-decoration-none">
+                                    {{ invitacion.oferta_laboral.titulo }}
+                                </a>
+                            </p>
+                        </div>
+
+                        <!-- Estado y fecha -->
+                        <div class="col-md-3">
+                            {% if invitacion.estado == 'pendiente' %}
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                <br><small class="text-muted">{{ invitacion.dias_restantes }} días restantes</small>
+                            {% elif invitacion.estado == 'aceptada' %}
+                                <span class="badge bg-success">Aceptada</span>
+                                <br><small class="text-muted">{{ invitacion.fecha_respuesta|date:"d/m/Y" }}</small>
+                            {% elif invitacion.estado == 'rechazada' %}
+                                <span class="badge bg-danger">Rechazada</span>
+                                <br><small class="text-muted">{{ invitacion.fecha_respuesta|date:"d/m/Y" }}</small>
+                            {% elif invitacion.estado == 'expirada' %}
+                                <span class="badge bg-secondary">Expirada</span>
+                                <br><small class="text-muted">{{ invitacion.fecha_expiracion|date:"d/m/Y" }}</small>
+                            {% elif invitacion.estado == 'cancelada' %}
+                                <span class="badge bg-dark">Cancelada</span>
+                            {% endif %}
+                            <br><small class="text-muted">Enviada: {{ invitacion.fecha_invitacion|date:"d/m/Y" }}</small>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="col-md-3 text-end">
+                            {% if invitacion.tarifa_ofrecida %}
+                                <small class="text-success d-block">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    {{ invitacion.tarifa_ofrecida|floatformat:0 }} CLP
+                                </small>
+                            {% endif %}
+                            
+                            {% if invitacion.estado == 'pendiente' %}
+                                <a href="{% url 'cancelar_invitacion' invitacion_id=invitacion.id %}" 
+                                   class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-times me-1"></i>
+                                    Cancelar
+                                </a>
+                            {% elif invitacion.estado == 'aceptada' and invitacion.postulacion_creada %}
+                                <a href="{% url 'gestionar_postulaciones' slug=invitacion.oferta_laboral.slug %}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>
+                                    Ver Postulación
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Mensaje de la invitación (expandible) -->
+                    {% if invitacion.mensaje_invitacion %}
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-secondary" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#mensaje-{{ invitacion.id }}" 
+                                    aria-expanded="false">
+                                <i class="fas fa-envelope me-1"></i>
+                                Ver mensaje
+                            </button>
+                            <div class="collapse mt-2" id="mensaje-{{ invitacion.id }}">
+                                <div class="alert alert-light small">
+                                    <strong>Tu mensaje:</strong><br>
+                                    {{ invitacion.mensaje_invitacion|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Respuesta del músico -->
+                    {% if invitacion.mensaje_respuesta %}
+                        <div class="mt-2">
+                            <div class="alert alert-info small">
+                                <strong>Respuesta del músico:</strong><br>
+                                {{ invitacion.mensaje_respuesta|linebreaks }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-paper-plane fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No has enviado invitaciones aún</h4>
+            <p class="text-muted">Busca músicos y envía tu primera invitación directa.</p>
+            <a href="{% url 'buscar_portafolios' %}" class="btn btn-primary">
+                <i class="fas fa-search me-1"></i>
+                Buscar Músicos
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

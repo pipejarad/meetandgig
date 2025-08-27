@@ -3,7 +3,8 @@ from .models import (
     Usuario, PerfilEmpleador, PerfilMusico, Portafolio, 
     Instrumento, Genero, NivelExperiencia, Ubicacion,
     PortafolioInstrumento, PortafolioGenero, Multimedia, Testimonio,
-    OfertaLaboral, Postulacion, OfertaInstrumento, OfertaGenero
+    OfertaLaboral, Postulacion, OfertaInstrumento, OfertaGenero,
+    Invitacion, Notificacion
 )
 
 
@@ -304,3 +305,84 @@ class PostulacionAdmin(admin.ModelAdmin):
 # Registrar modelos de ofertas
 admin.site.register(OfertaInstrumento)
 admin.site.register(OfertaGenero)
+
+
+# ADMIN PARA INVITACIONES (Ticket 3.8)
+@admin.register(Invitacion)
+class InvitacionAdmin(admin.ModelAdmin):
+    list_display = (
+        'empleador', 'musico', 'oferta_laboral', 'estado', 
+        'fecha_invitacion', 'fecha_expiracion', 'dias_restantes'
+    )
+    list_filter = (
+        'estado', 'fecha_invitacion', 'empleador', 'oferta_laboral__tipo_contrato'
+    )
+    search_fields = (
+        'musico__username', 'musico__email', 'empleador__nombre_empresa',
+        'oferta_laboral__titulo', 'mensaje_invitacion'
+    )
+    readonly_fields = (
+        'fecha_invitacion', 'fecha_respuesta', 'postulacion_creada'
+    )
+    
+    fieldsets = (
+        ('Información Principal', {
+            'fields': ('oferta_laboral', 'empleador', 'musico', 'portafolio')
+        }),
+        ('Contenido de la Invitación', {
+            'fields': ('mensaje_invitacion', 'tarifa_ofrecida')
+        }),
+        ('Estado y Control', {
+            'fields': ('estado', 'fecha_expiracion')
+        }),
+        ('Respuesta del Músico', {
+            'fields': ('fecha_respuesta', 'mensaje_respuesta'),
+            'classes': ('collapse',)
+        }),
+        ('Metadatos', {
+            'fields': ('fecha_invitacion', 'postulacion_creada'),
+            'classes': ('collapse',)
+        })
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'musico', 'empleador', 'oferta_laboral', 'portafolio', 'postulacion_creada'
+        )
+    
+    def dias_restantes(self, obj):
+        """Calcula días restantes para responder"""
+        return obj.dias_restantes()
+    dias_restantes.short_description = 'Días restantes'
+
+
+# ADMIN PARA NOTIFICACIONES
+@admin.register(Notificacion)
+class NotificacionAdmin(admin.ModelAdmin):
+    list_display = (
+        'empleador', 'tipo', 'titulo', 'leida', 'fecha_creacion'
+    )
+    list_filter = (
+        'tipo', 'leida', 'fecha_creacion'
+    )
+    search_fields = (
+        'empleador__nombre_empresa', 'titulo', 'mensaje'
+    )
+    readonly_fields = ('fecha_creacion', 'fecha_lectura')
+    
+    fieldsets = (
+        ('Información Principal', {
+            'fields': ('empleador', 'tipo', 'titulo', 'mensaje')
+        }),
+        ('Relaciones', {
+            'fields': ('postulacion', 'oferta_laboral', 'invitacion'),
+            'classes': ('collapse',)
+        }),
+        ('Estado', {
+            'fields': ('leida', 'fecha_lectura')
+        }),
+        ('Metadatos', {
+            'fields': ('fecha_creacion',),
+            'classes': ('collapse',)
+        })
+    )

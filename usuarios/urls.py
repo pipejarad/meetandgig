@@ -21,6 +21,7 @@ urlpatterns = [
     
     # URL unificada del portafolio (público + privado)
     path('portafolio/<slug:slug>/', views.PortafolioUnificadoView.as_view(), name='ver_portafolio'),
+    path('portafolio/<slug:slug>/', views.PortafolioUnificadoView.as_view(), name='portafolio_publico'),
     
     # URLs del perfil público
     path('perfil/<str:username>/', views.ver_perfil_musico, name='ver_perfil_musico'),
@@ -52,4 +53,13 @@ urlpatterns = [
     # URLs de notificaciones para empleadores (Ticket 3.7 FASE 4)
     path('notificaciones/', views.notificaciones_empleador_view, name='notificaciones_empleador'),
     path('notificaciones/<int:notificacion_id>/marcar-leida/', views.marcar_notificacion_leida_view, name='marcar_notificacion_leida'),
+    
+    # URLs de invitaciones directas (Ticket 3.8 FASE 2)
+    path('invitar/<slug:portafolio_slug>/', views.enviar_invitacion_view, name='enviar_invitacion'),
+    path('mis-invitaciones/', views.mis_invitaciones_enviadas_view, name='mis_invitaciones_enviadas'),
+    path('invitaciones/<int:invitacion_id>/cancelar/', views.cancelar_invitacion_view, name='cancelar_invitacion'),
+    
+    # URLs de invitaciones para músicos (Ticket 3.8 FASE 3)
+    path('invitaciones-recibidas/', views.mis_invitaciones_recibidas_view, name='mis_invitaciones_recibidas'),
+    path('invitaciones/<int:invitacion_id>/responder/', views.responder_invitacion_view, name='responder_invitacion'),
 ]

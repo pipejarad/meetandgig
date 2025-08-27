@@ -1,0 +1,522 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }}{% endblock %}
+
+{% block meta_description %}{{ descripcion_pagina }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .invitation-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .invitation-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        text-align: center;
+    }
+    
+    .invitation-body {
+        padding: 30px;
+    }
+    
+    .offer-details {
+        background-color: #f8f9fc;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .detail-row {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    
+    .detail-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 5px;
+    }
+    
+    .detail-value {
+        color: #3c4142;
+    }
+    
+    .tarifa-highlight {
+        background: linear-gradient(135deg, #1cc88a 0%, #17a2b8 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .tarifa-amount {
+        font-size: 2rem;
+        font-weight: bold;
+        display: block;
+    }
+    
+    .tarifa-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .comparison-card {
+        background-color: #e7f3ff;
+        border: 1px solid #b8daff;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .response-section {
+        background-color: #f8f9fc;
+        border-radius: 10px;
+        padding: 25px;
+        margin-top: 30px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 25px;
+    }
+    
+    .btn-accept {
+        background: linear-gradient(135deg, #1cc88a 0%, #36b9cc 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-accept:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(28, 200, 138, 0.3);
+        color: white;
+    }
+    
+    .btn-reject {
+        background: linear-gradient(135deg, #e74a3b 0%, #c0392b 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-reject:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(231, 74, 59, 0.3);
+        color: white;
+    }
+    
+    .btn-cancel {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #d1d3e2;
+        padding: 12px 15px;
+    }
+    
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .employer-info {
+        background-color: #fff;
+        border: 1px solid #e3e6f0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .employer-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'mis_invitaciones_recibidas' %}">Mis Invitaciones</a>
+            </li>
+            <li class="breadcrumb-item active">Responder Invitación</li>
+        </ol>
+    </nav>
+    
+    <!-- Tarjeta de invitación -->
+    <div class="invitation-card">
+        <div class="invitation-header">
+            <h2 class="mb-2">{{ invitacion.oferta_laboral.titulo }}</h2>
+            <p class="mb-0 opacity-75">{{ descripcion_pagina }}</p>
+        </div>
+        
+        <div class="invitation-body">
+            <!-- Información del empleador -->
+            <div class="employer-info">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="employer-avatar">
+                            {{ invitacion.empleador.first_name.0 }}{{ invitacion.empleador.last_name.0 }}
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h5 class="mb-1">{{ invitacion.empleador.usuario.get_full_name }}</h5>
+                        {% if invitacion.empleador.nombre_empresa %}
+                            <p class="mb-0 text-muted">{{ invitacion.empleador.nombre_empresa }}</p>
+                        {% endif %}
+                        {% if invitacion.empleador.usuario.email %}
+                            <small class="text-muted">{{ invitacion.empleador.usuario.email }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-auto">
+                        <small class="text-muted">
+                            Enviada el {{ invitacion.fecha_invitacion|date:"d/m/Y \a \l\a\s H:i" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detalles de la oferta -->
+            <div class="offer-details">
+                <h4 class="mb-3">
+                    <i class="fas fa-briefcase text-primary"></i>
+                    Detalles de la Oferta
+                </h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="detail-row">
+                            <div class="detail-label">
+                                <i class="fas fa-calendar-alt"></i> Fecha del Evento
+                            </div>
+                            <div class="detail-value">
+                                {{ invitacion.oferta_laboral.fecha|date:"l, d \d\e F \d\e Y" }}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <div class="detail-label">
+                                <i class="fas fa-clock"></i> Hora
+                            </div>
+                            <div class="detail-value">
+                                {% if invitacion.oferta_laboral.hora_inicio %}
+                                    {{ invitacion.oferta_laboral.hora_inicio|time:"H:i" }}
+                                    {% if invitacion.oferta_laboral.hora_fin %}
+                                        - {{ invitacion.oferta_laboral.hora_fin|time:"H:i" }}
+                                    {% endif %}
+                                {% else %}
+                                    Por definir
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <div class="detail-label">
+                                <i class="fas fa-map-marker-alt"></i> Ubicación
+                            </div>
+                            <div class="detail-value">
+                                {{ invitacion.oferta_laboral.ubicacion }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="detail-row">
+                            <div class="detail-label">
+                                <i class="fas fa-music"></i> Tipo de Música
+                            </div>
+                            <div class="detail-value">
+                                {% for genero in invitacion.oferta_laboral.generos_musicales.all %}
+                                    <span class="badge badge-secondary">{{ genero.nombre }}</span>
+                                {% empty %}
+                                    No especificado
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <div class="detail-label">
+                                <i class="fas fa-users"></i> Duración
+                            </div>
+                            <div class="detail-value">
+                                {% if invitacion.oferta_laboral.duracion %}
+                                    {{ invitacion.oferta_laboral.duracion }} horas
+                                {% else %}
+                                    Por definir
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <div class="detail-label">
+                                <i class="fas fa-info-circle"></i> Tipo de Evento
+                            </div>
+                            <div class="detail-value">
+                                {{ invitacion.oferta_laboral.get_tipo_evento_display|default:"No especificado" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if invitacion.oferta_laboral.descripcion %}
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fas fa-align-left"></i> Descripción del Evento
+                        </div>
+                        <div class="detail-value">
+                            {{ invitacion.oferta_laboral.descripcion|linebreaks }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Mensaje del empleador -->
+            {% if invitacion.mensaje_invitacion %}
+                <div class="offer-details">
+                    <h4 class="mb-3">
+                        <i class="fas fa-comment text-info"></i>
+                        Mensaje Personal del Empleador
+                    </h4>
+                    <p class="mb-0">{{ invitacion.mensaje_invitacion|linebreaks }}</p>
+                </div>
+            {% endif %}
+            
+            <!-- Comparación de tarifas -->
+            <div class="tarifa-highlight">
+                <div class="row text-center">
+                    <div class="col-md-6">
+                        <span class="tarifa-amount">${{ invitacion.tarifa_ofrecida|floatformat:0 }}</span>
+                        <span class="tarifa-label">Tarifa Ofrecida</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="tarifa-amount">${{ user.portafolio.tarifa_base|floatformat:0 }}</span>
+                        <span class="tarifa-label">Tu Tarifa Base</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if invitacion.tarifa_ofrecida >= user.portafolio.tarifa_base %}
+                <div class="comparison-card">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle text-success fa-2x"></i>
+                        </div>
+                        <div class="col">
+                            <strong class="text-success">¡Excelente oferta!</strong><br>
+                            <small class="text-muted">
+                                La tarifa ofrecida es 
+                                {% if invitacion.tarifa_ofrecida > user.portafolio.tarifa_base %}
+                                    ${{ invitacion.tarifa_ofrecida|floatformat:0|add:"-"|add:user.portafolio.tarifa_base|floatformat:0 }} superior
+                                {% else %}
+                                    igual
+                                {% endif %}
+                                a tu tarifa base.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="comparison-card" style="background-color: #fff3cd; border-color: #ffeaa7;">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle text-warning fa-2x"></i>
+                        </div>
+                        <div class="col">
+                            <strong class="text-warning">Tarifa por debajo de tu base</strong><br>
+                            <small class="text-muted">
+                                La oferta es ${{ user.portafolio.tarifa_base|floatformat:0|add:"-"|add:invitacion.tarifa_ofrecida|floatformat:0 }} menor que tu tarifa base.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Sección de respuesta -->
+    <div class="response-section">
+        <h3 class="text-center mb-4">
+            <i class="fas fa-reply"></i>
+            ¿Cómo deseas responder a esta invitación?
+        </h3>
+        
+        <form method="post" id="responseForm">
+            {% csrf_token %}
+            
+            <!-- Campo para mensaje de respuesta -->
+            <div class="form-group">
+                <label for="mensaje_respuesta">
+                    <i class="fas fa-comment"></i>
+                    Mensaje de respuesta (opcional)
+                </label>
+                <textarea 
+                    name="mensaje_respuesta" 
+                    id="mensaje_respuesta"
+                    class="form-control" 
+                    rows="4" 
+                    placeholder="Escribe un mensaje para el empleador..."
+                ></textarea>
+                <small class="form-text text-muted">
+                    Este mensaje será enviado al empleador junto con tu respuesta.
+                </small>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <button type="submit" name="accion" value="aceptar" class="btn btn-accept">
+                    <i class="fas fa-check"></i>
+                    Aceptar Invitación
+                </button>
+                
+                <button type="submit" name="accion" value="rechazar" class="btn btn-reject">
+                    <i class="fas fa-times"></i>
+                    Rechazar Invitación
+                </button>
+                
+                <a href="{% url 'mis_invitaciones_recibidas' %}" class="btn btn-cancel">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Información adicional -->
+    <div class="mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Si aceptas
+                                </div>
+                                <div class="text-xs mb-0 text-gray-800">
+                                    Se creará automáticamente una postulación a esta oferta con la tarifa acordada.
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                    Si rechazas
+                                </div>
+                                <div class="text-xs mb-0 text-gray-800">
+                                    El empleador será notificado y no podrás cambiar tu decisión posteriormente.
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('responseForm');
+    const acceptBtn = form.querySelector('button[value="aceptar"]');
+    const rejectBtn = form.querySelector('button[value="rechazar"]');
+    
+    // Confirmación para aceptar
+    acceptBtn.addEventListener('click', function(e) {
+        if (!confirm('¿Estás seguro de que deseas aceptar esta invitación? Se creará automáticamente una postulación.')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Confirmación para rechazar
+    rejectBtn.addEventListener('click', function(e) {
+        if (!confirm('¿Estás seguro de que deseas rechazar esta invitación? Esta acción no se puede deshacer.')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Prevenir doble envío
+    form.addEventListener('submit', function() {
+        acceptBtn.disabled = true;
+        rejectBtn.disabled = true;
+        acceptBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+        rejectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    });
+});
+</script>
+{% endblock %}
