@@ -330,11 +330,31 @@ class Portafolio(models.Model):
     )
     
     # FLAGS DE VISIBILIDAD
-    show_email = models.BooleanField(default=False, verbose_name='Mostrar email')
-    show_social_links = models.BooleanField(default=True, verbose_name='Mostrar enlaces sociales')
-    show_education = models.BooleanField(default=True, verbose_name='Mostrar formación')
-    show_tarifa = models.BooleanField(default=True, verbose_name='Mostrar tarifa')
-    show_telefono = models.BooleanField(default=False, verbose_name='Mostrar teléfono')
+    show_email = models.BooleanField(
+        default=False, 
+        verbose_name='Mostrar email público',
+        help_text='Permite que visitantes vean tu email en el portafolio público'
+    )
+    show_social_links = models.BooleanField(
+        default=True, 
+        verbose_name='Mostrar enlaces sociales',
+        help_text='Muestra tus redes sociales y sitio web'
+    )
+    show_education = models.BooleanField(
+        default=True, 
+        verbose_name='Mostrar formación musical',
+        help_text='Muestra tu formación y estudios musicales'
+    )
+    show_tarifa = models.BooleanField(
+        default=True, 
+        verbose_name='Mostrar tarifa base',
+        help_text='Permite que se vea tu tarifa en el portafolio'
+    )
+    show_telefono = models.BooleanField(
+        default=False, 
+        verbose_name='Mostrar teléfono público',
+        help_text='Permite que visitantes vean tu teléfono en el portafolio público'
+    )
     
     # METADATOS
     fecha_creacion = models.DateTimeField(default=timezone.now)
@@ -532,12 +552,35 @@ class Multimedia(models.Model):
 
 
 class Testimonio(models.Model):
-    """Testimonios y referencias en el portafolio"""
+    """Testimonios y referencias laborales en el portafolio"""
+    
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente de aprobación'),
+        ('aprobado', 'Aprobado y visible'),
+        ('rechazado', 'Rechazado'),
+        ('directo', 'Agregado directamente'),  # Para testimonios legacy
+    ]
+    
+    TIPO_CHOICES = [
+        ('referencia_laboral', 'Referencia laboral'),
+        ('testimonio_cliente', 'Testimonio de cliente'),
+        ('recomendacion_general', 'Recomendación general'),
+    ]
+    
+    # INFORMACIÓN BÁSICA
     portafolio = models.ForeignKey(
         Portafolio, 
         on_delete=models.CASCADE, 
         related_name='testimonios'
     )
+    tipo = models.CharField(
+        max_length=30,
+        choices=TIPO_CHOICES,
+        default='testimonio_cliente',
+        verbose_name='Tipo de testimonio'
+    )
+    
+    # INFORMACIÓN DEL AUTOR
     autor_nombre = models.CharField(max_length=100, verbose_name='Nombre del autor')
     autor_usuario = models.ForeignKey(
         Usuario, 
@@ -547,7 +590,80 @@ class Testimonio(models.Model):
         verbose_name='Usuario autor (opcional)',
         help_text='Si el testimonio es de un usuario registrado'
     )
-    texto = models.TextField(max_length=500, verbose_name='Testimonio')
+    autor_email = models.EmailField(
+        blank=True,
+        verbose_name='Email del autor',
+        help_text='Para solicitudes de referencia'
+    )
+    autor_cargo = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='Cargo/Posición del autor'
+    )
+    autor_organizacion = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name='Organización/Empresa'
+    )
+    
+    # CONTENIDO
+    texto = models.TextField(max_length=500, verbose_name='Testimonio/Referencia')
+    
+    # INFORMACIÓN DE LA RELACIÓN LABORAL (para referencias)
+    proyecto_evento = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='Proyecto/Evento',
+        help_text='Nombre del proyecto, evento o colaboración'
+    )
+    fecha_inicio_colaboracion = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha inicio colaboración'
+    )
+    fecha_fin_colaboracion = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha fin colaboración'
+    )
+    duracion_colaboracion = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='Duración de la colaboración',
+        help_text='Ej: 3 meses, 1 año, evento único'
+    )
+    
+    # SISTEMA DE SOLICITUD Y APROBACIÓN
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='directo',
+        verbose_name='Estado'
+    )
+    token_solicitud = models.CharField(
+        max_length=64,
+        blank=True,
+        verbose_name='Token de solicitud',
+        help_text='Token único para links de aprobación'
+    )
+    fecha_solicitud = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha de solicitud'
+    )
+    fecha_respuesta = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha de respuesta'
+    )
+    mensaje_solicitud = models.TextField(
+        max_length=300,
+        blank=True,
+        verbose_name='Mensaje de solicitud',
+        help_text='Mensaje personalizado del músico al solicitar la referencia'
+    )
+    
+    # METADATOS
     fecha_publicacion = models.DateTimeField(default=timezone.now, verbose_name='Fecha de publicación')
     verificado = models.BooleanField(default=False, verbose_name='Verificado')
     activo = models.BooleanField(default=True, verbose_name='Activo')
@@ -556,9 +672,48 @@ class Testimonio(models.Model):
         verbose_name = 'Testimonio'
         verbose_name_plural = 'Testimonios'
         ordering = ['-fecha_publicacion']
+        indexes = [
+            models.Index(fields=['estado']),
+            models.Index(fields=['token_solicitud']),
+            models.Index(fields=['tipo']),
+        ]
 
     def __str__(self):
         return f"Testimonio de {self.autor_nombre} para {self.portafolio.usuario.username}"
+    
+    def save(self, *args, **kwargs):
+        """Generar token automáticamente si es una solicitud"""
+        if self.estado == 'pendiente' and not self.token_solicitud:
+            import secrets
+            self.token_solicitud = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)
+    
+    def esta_pendiente(self):
+        """Verifica si el testimonio está pendiente de aprobación"""
+        return self.estado == 'pendiente'
+    
+    def esta_visible(self):
+        """Verifica si el testimonio es visible en el portafolio público"""
+        return self.estado in ['aprobado', 'directo'] and self.activo
+    
+    def get_duracion_display(self):
+        """Retorna la duración formateada de la colaboración"""
+        if self.duracion_colaboracion:
+            return self.duracion_colaboracion
+        elif self.fecha_inicio_colaboracion and self.fecha_fin_colaboracion:
+            return f"Del {self.fecha_inicio_colaboracion.strftime('%m/%Y')} al {self.fecha_fin_colaboracion.strftime('%m/%Y')}"
+        elif self.fecha_inicio_colaboracion:
+            return f"Desde {self.fecha_inicio_colaboracion.strftime('%m/%Y')}"
+        return ""
+    
+    def get_autor_completo(self):
+        """Retorna el nombre y cargo del autor formateado"""
+        partes = [self.autor_nombre]
+        if self.autor_cargo:
+            partes.append(self.autor_cargo)
+        if self.autor_organizacion:
+            partes.append(f"({self.autor_organizacion})")
+        return " - ".join(partes)
 
 
 # SISTEMA DE OFERTAS LABORALES (Sprint 3)

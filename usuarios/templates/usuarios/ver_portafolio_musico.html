@@ -244,7 +244,7 @@
                     </div>
                 </div>
                 <div class="col-auto">
-                    <div class="text-end">
+                    <div class="text-right">
                         <div class="availability-status {% if portafolio.disponible_para_gigs %}available{% else %}unavailable{% endif %}">
                             {% if portafolio.disponible_para_gigs %}
                                 <i class="icon-check"></i> Disponible
@@ -253,10 +253,10 @@
                             {% endif %}
                         </div>
                         <div class="mt-2">
-                            <a href="{% url 'editar_portafolio_musico' %}" class="btn btn-light btn-sm me-2">
+                            <a href="{% url 'editar_portafolio_musico' %}" class="btn btn-light btn-sm mr-2">
                                 <i class="icon-edit"></i> Editar Portafolio
                             </a>
-                            <a href="{% url 'portafolio_publico' slug=portafolio.slug %}" class="btn btn-success btn-sm me-2" target="_blank">
+                            <a href="{% url 'portafolio_publico' slug=portafolio.slug %}" class="btn btn-success btn-sm mr-2" target="_blank">
                                 <i class="icon-eye"></i> Ver Público
                             </a>
                             <a href="{% url 'ver_mi_perfil' %}" class="btn btn-outline-light btn-sm">
@@ -335,7 +335,7 @@
                                     {{ portafolio.nivel_experiencia.nombre }}
                                 </span>
                                 {% if portafolio.años_experiencia %}
-                                    <span class="text-muted ms-2">
+                                    <span class="text-muted ml-2">
                                         ({{ portafolio.años_experiencia }} año{{ portafolio.años_experiencia|pluralize }} de experiencia)
                                     </span>
                                 {% endif %}
@@ -448,7 +448,7 @@
                     <h3>Aún no has creado tu portafolio</h3>
                     <p>Crea tu portafolio profesional para mostrar tu talento musical y ser encontrado por empleadores.</p>
                     <a href="{% url 'crear_portafolio_musico' %}" class="btn btn-success btn-lg mt-3">
-                        <i class="icon-plus me-2"></i>Crear Mi Portafolio
+                        <i class="icon-plus mr-2"></i>Crear Mi Portafolio
                     </a>
                 </div>
             </div>

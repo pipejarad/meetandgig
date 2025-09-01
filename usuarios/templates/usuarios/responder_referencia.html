@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-star mr-2"></i>{{ titulo_pagina }}
+                    </h4>
+                    <p class="mb-0 mt-2">{{ descripcion_pagina }}</p>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Información del músico -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            {% if musico.foto_perfil %}
+                                <img src="{{ musico.foto_perfil.url }}" 
+                                     alt="{{ musico.get_full_name }}" 
+                                     class="rounded-circle img-fluid"
+                                     style="width: 100px; height: 100px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user fa-2x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h5>{{ musico.get_full_name }}</h5>
+                            {% if portafolio.titulo_profesional %}
+                                <p class="text-muted mb-2">{{ portafolio.titulo_profesional }}</p>
+                            {% endif %}
+                            {% if portafolio.biografia %}
+                                <p class="small">{{ portafolio.biografia|truncatewords:30 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Información de la solicitud -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle mr-2"></i>Detalles de la solicitud
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Tipo:</strong> {{ testimonio.get_tipo_display }}<br>
+                                    {% if testimonio.proyecto_evento %}
+                                        <strong>Proyecto/Evento:</strong> {{ testimonio.proyecto_evento }}<br>
+                                    {% endif %}
+                                    {% if testimonio.get_duracion_display %}
+                                        <strong>Duración:</strong> {{ testimonio.get_duracion_display }}<br>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Solicitado el:</strong> {{ testimonio.fecha_solicitud|date:"d M Y" }}<br>
+                                    <strong>Para:</strong> {{ testimonio.autor_nombre }}<br>
+                                    {% if testimonio.autor_cargo %}
+                                        <strong>Cargo:</strong> {{ testimonio.autor_cargo }}<br>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if testimonio.mensaje_solicitud %}
+                                <hr>
+                                <strong>Mensaje del músico:</strong>
+                                <p class="text-muted mt-2">{{ testimonio.mensaje_solicitud }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Formulario de respuesta -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-pen me-2"></i>Tu referencia
+                            </h6>
+                            {{ form.texto.label_tag }}
+                            {{ form.texto }}
+                            <div class="form-text">{{ form.texto.help_text }}</div>
+                            {% if form.texto.errors %}
+                                <div class="text-danger small">{{ form.texto.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.verificado }}
+                                {{ form.verificado.label_tag }}
+                                <div class="form-text">{{ form.verificado.help_text }}</div>
+                            </div>
+                            {% if form.verificado.errors %}
+                                <div class="text-danger small">{{ form.verificado.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Errores generales -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Información de privacidad -->
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-shield-alt me-2"></i>Información importante
+                            </h6>
+                            <ul class="mb-0">
+                                <li>Tu referencia será visible en el portafolio público del músico</li>
+                                <li>No compartiremos tu información de contacto sin tu permiso</li>
+                                <li>Puedes contactar a <strong>soporte@meetandgig.com</strong> si tienes dudas</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" name="action" value="rechazar" 
+                                    class="btn btn-outline-secondary"
+                                    onclick="return confirm('¿Estás seguro de que quieres declinar esta solicitud?')">
+                                <i class="fas fa-times me-2"></i>Declinar
+                            </button>
+                            <button type="submit" name="action" value="aprobar" 
+                                    class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Enviar Referencia
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -498,6 +498,167 @@
             </div>
             {% endif %}
 
+            <!-- Información de Contacto -->
+            {% if user.is_authenticated and user.tipo_usuario == 'empleador' and not es_propietario %}
+                <!-- Para empleadores: siempre mostrar contacto disponible -->
+                {% if portafolio.usuario.email or portafolio.usuario.telefono %}
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="fas fa-address-book"></i> Información de Contacto
+                        <small class="text-muted">(Solo empleadores)</small>
+                    </div>
+                    <div class="card-body">
+                        {% if portafolio.usuario.email %}
+                        <div class="mb-3">
+                            <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
+                            <a href="mailto:{{ portafolio.usuario.email }}" class="text-decoration-none">
+                                {{ portafolio.usuario.email }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if portafolio.usuario.telefono %}
+                        <div class="mb-2">
+                            <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
+                            <a href="tel:{{ portafolio.usuario.telefono }}" class="text-decoration-none">
+                                {{ portafolio.usuario.telefono }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="alert alert-info mt-3 mb-0">
+                            <small>
+                                <i class="fas fa-info-circle me-1"></i>
+                                Contacta directamente o 
+                                <a href="{% url 'enviar_invitacion' portafolio_slug=portafolio.slug %}" class="alert-link">
+                                    envía una invitación formal
+                                </a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <!-- Para público general: solo mostrar si está habilitado -->
+                {% if portafolio.show_email or portafolio.show_telefono %}
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="fas fa-address-book"></i> Contacto
+                    </div>
+                    <div class="card-body">
+                        {% if portafolio.show_email and portafolio.usuario.email %}
+                        <div class="mb-3">
+                            <strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>
+                            <a href="mailto:{{ portafolio.usuario.email }}" class="text-decoration-none">
+                                {{ portafolio.usuario.email }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if portafolio.show_telefono and portafolio.usuario.telefono %}
+                        <div class="mb-2">
+                            <strong><i class="fas fa-phone me-2"></i>Teléfono:</strong><br>
+                            <a href="tel:{{ portafolio.usuario.telefono }}" class="text-decoration-none">
+                                {{ portafolio.usuario.telefono }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if not user.is_authenticated %}
+                        <div class="alert alert-success mt-3 mb-0">
+                            <small>
+                                <i class="fas fa-user-plus me-1"></i>
+                                <a href="{% url 'registro' %}" class="alert-link">Regístrate como empleador</a> 
+                                para más opciones de contacto
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- Referencias y Testimonios -->
+            {% with referencias_visibles=portafolio.testimonios.all|dictsort:"fecha_publicacion" %}
+                {% if referencias_visibles %}
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="fas fa-star"></i> Referencias y Testimonios
+                        <span class="badge badge-primary ml-2">{{ referencias_visibles|length }}</span>
+                    </div>
+                    <div class="card-body">
+                        {% for testimonio in referencias_visibles %}
+                            {% if testimonio.esta_visible %}
+                            <div class="testimonio-item mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-1">{{ testimonio.get_autor_completo }}</h6>
+                                        {% if testimonio.proyecto_evento %}
+                                            <small class="text-primary">
+                                                <i class="fas fa-briefcase me-1"></i>{{ testimonio.proyecto_evento }}
+                                            </small>
+                                        {% endif %}
+                                        {% if testimonio.get_duracion_display %}
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-calendar me-1"></i>{{ testimonio.get_duracion_display }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-{% if testimonio.tipo == 'referencia_laboral' %}success{% elif testimonio.tipo == 'testimonio_cliente' %}info{% else %}secondary{% endif %} text-uppercase small">
+                                            {{ testimonio.get_tipo_display }}
+                                        </span>
+                                        {% if testimonio.verificado %}
+                                            <span class="badge badge-warning text-dark d-block mt-1">
+                                                <i class="fas fa-check-circle me-1"></i>Verificado
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <blockquote class="mb-0">
+                                    <p class="mb-0">"{{ testimonio.texto }}"</p>
+                                </blockquote>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Acciones para el propietario -->
+            {% if es_propietario %}
+            <div class="card info-card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-cog"></i> Gestionar Mi Portafolio
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <a href="{% url 'gestionar_referencias' %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-star me-1"></i>Gestionar Referencias
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'solicitar_referencia' portafolio.id %}" class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-plus me-1"></i>Solicitar Referencia
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'editar_portafolio_musico' %}" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="fas fa-edit me-1"></i>Editar Portafolio
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'agregar_testimonio_directo' %}" class="btn btn-outline-info btn-sm w-100">
+                                <i class="fas fa-comment me-1"></i>Agregar Testimonio
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Call to action para visitantes -->
             {% if not es_propietario %}
             <div class="card info-card">

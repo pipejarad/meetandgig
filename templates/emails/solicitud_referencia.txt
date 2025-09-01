@@ -1,0 +1,32 @@
+SOLICITUD DE REFERENCIA LABORAL - MEET & GIG
+===========================================
+
+Hola {{ testimonio.autor_nombre }},
+
+{{ musico.get_full_name }} te ha solicitado una referencia laboral para su portafolio en Meet & Gig.
+
+DETALLES DE LA COLABORACIÓN:
+- Músico: {{ musico.get_full_name }}
+{% if testimonio.proyecto_evento %}- Proyecto/Evento: {{ testimonio.proyecto_evento }}
+{% endif %}{% if testimonio.get_duracion_display %}- Duración: {{ testimonio.get_duracion_display }}
+{% endif %}- Tipo: {{ testimonio.get_tipo_display }}
+
+{% if testimonio.mensaje_solicitud %}MENSAJE DEL MÚSICO:
+"{{ testimonio.mensaje_solicitud }}"
+
+{% endif %}Para responder a esta solicitud, visita el siguiente enlace:
+{{ url_respuesta }}
+
+¿QUÉ ES UNA REFERENCIA LABORAL?
+Una referencia laboral es una recomendación escrita sobre la experiencia de trabajo con {{ musico.get_full_name }}. Tu referencia ayudará a {{ musico.first_name }} a conseguir nuevas oportunidades laborales.
+
+TU REFERENCIA SERÁ:
+✅ Visible en el portafolio público del músico
+✅ Asociada a tu nombre y cargo  
+❌ NO mostrará tu información de contacto
+
+IMPORTANTE: Este enlace es seguro y solo tú puedes usarlo. Si no reconoces esta solicitud, simplemente ignora este email.
+
+---
+Meet & Gig - Conectando músicos y empleadores
+Soporte: soporte@meetandgig.com

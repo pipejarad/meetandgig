@@ -18,9 +18,9 @@ from django.utils import timezone
 from .forms import (
     RegistroForm, LoginForm, RecuperarPasswordForm, CambiarPasswordForm, 
     PerfilMusicoForm, PerfilEmpleadorForm, PortafolioForm, CrearOfertaLaboralForm,
-    PostulacionForm
+    PostulacionForm, SolicitudReferenciaForm, ResponderReferenciaForm, TestimonioDirectoForm
 )
-from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio, OfertaLaboral, Postulacion, Notificacion, Invitacion
+from .models import Usuario, PerfilMusico, PerfilEmpleador, Portafolio, OfertaLaboral, Postulacion, Notificacion, Invitacion, Testimonio
 
 
 def inicio(request):
@@ -638,6 +638,12 @@ class PortafolioUnificadoView(DetailView):
             self.request.user.is_authenticated and 
             self.request.user == portafolio.usuario
         )
+        
+        # Incluir referencias visibles (solo aprobadas y directas)
+        context['referencias_visibles'] = portafolio.testimonios.filter(
+            estado__in=['aprobado', 'directo'],
+            activo=True
+        ).order_by('-fecha_publicacion')
         
         # SEO data
         nombre_completo = portafolio.usuario.get_full_name() or portafolio.usuario.username
@@ -1631,3 +1637,222 @@ def responder_invitacion_view(request, invitacion_id):
     }
     
     return render(request, 'usuarios/responder_invitacion.html', context)
+
+
+# SISTEMA DE REFERENCIAS LABORALES (Sprint 4)
+
+@login_required
+def solicitar_referencia(request, portafolio_id):
+    """Vista para que músicos soliciten referencias laborales"""
+    portafolio = get_object_or_404(Portafolio, id=portafolio_id)
+    
+    # Solo el propietario del portafolio puede solicitar referencias
+    if request.user != portafolio.usuario:
+        raise PermissionDenied("No tienes permisos para solicitar referencias para este portafolio.")
+    
+    if request.method == 'POST':
+        form = SolicitudReferenciaForm(request.POST, portafolio=portafolio)
+        if form.is_valid():
+            testimonio = form.save()
+            
+            # Enviar email de solicitud
+            try:
+                enviar_email_solicitud_referencia(testimonio)
+                messages.success(
+                    request, 
+                    f'Solicitud de referencia enviada a {testimonio.autor_nombre} ({testimonio.autor_email}). '
+                    'Te notificaremos cuando respondan.'
+                )
+            except Exception as e:
+                # La solicitud se guardó pero falló el email
+                if settings.DEBUG:
+                    # En desarrollo, mostrar el error específico
+                    messages.error(
+                        request,
+                        f'Solicitud guardada, pero no se pudo enviar el email. Error: {str(e)}'
+                    )
+                else:
+                    # En producción, mensaje genérico
+                    messages.warning(
+                        request,
+                        'Solicitud guardada, pero no se pudo enviar el email. '
+                        'Podrás contactar manualmente al empleador.'
+                    )
+            
+            return redirect('portafolio_publico', slug=portafolio.slug)
+    else:
+        form = SolicitudReferenciaForm(portafolio=portafolio)
+    
+    context = {
+        'form': form,
+        'portafolio': portafolio,
+        'titulo_pagina': 'Solicitar Referencia Laboral',
+        'descripcion_pagina': f'Solicita una referencia para tu portafolio'
+    }
+    
+    return render(request, 'usuarios/solicitar_referencia.html', context)
+
+
+def responder_referencia(request, token):
+    """Vista para que empleadores respondan solicitudes de referencia"""
+    testimonio = get_object_or_404(Testimonio, token_solicitud=token, estado='pendiente')
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'aprobar':
+            form = ResponderReferenciaForm(request.POST, instance=testimonio)
+            if form.is_valid():
+                form.save()
+                
+                # TODO: Crear notificación para el músico cuando tengamos modelo apropiado
+                # Notificacion.objects.create(
+                #     usuario_destino=testimonio.portafolio.usuario,
+                #     tipo='referencia_aprobada',
+                #     titulo='Referencia aprobada',
+                #     mensaje=f'{testimonio.autor_nombre} ha enviado tu referencia laboral.',
+                #     leida=False
+                # )
+                
+                messages.success(request, 'Referencia enviada exitosamente. ¡Gracias!')
+                return render(request, 'usuarios/referencia_enviada.html', {
+                    'testimonio': testimonio,
+                    'accion': 'aprobada'
+                })
+        
+        elif action == 'rechazar':
+            testimonio.estado = 'rechazado'
+            testimonio.fecha_respuesta = timezone.now()
+            testimonio.save()
+            
+            # TODO: Crear notificación para el músico cuando tengamos modelo apropiado
+            # Notificacion.objects.create(
+            #     usuario_destino=testimonio.portafolio.usuario,
+            #     tipo='referencia_rechazada',
+            #     titulo='Solicitud de referencia declinada',
+            #     mensaje=f'{testimonio.autor_nombre} ha declinado proporcionar la referencia solicitada.',
+            #     leida=False
+            # )
+            
+            messages.info(request, 'Solicitud de referencia declinada.')
+            return render(request, 'usuarios/referencia_enviada.html', {
+                'testimonio': testimonio,
+                'accion': 'rechazada'
+            })
+    else:
+        form = ResponderReferenciaForm(instance=testimonio)
+    
+    context = {
+        'form': form,
+        'testimonio': testimonio,
+        'musico': testimonio.portafolio.usuario,
+        'portafolio': testimonio.portafolio,
+        'titulo_pagina': f'Referencia para {testimonio.portafolio.usuario.get_full_name()}',
+        'descripcion_pagina': 'Proporciona una referencia laboral'
+    }
+    
+    return render(request, 'usuarios/responder_referencia.html', context)
+
+
+@login_required
+def gestionar_referencias(request):
+    """Vista para que músicos gestionen sus referencias"""
+    if request.user.tipo_usuario != 'musico':
+        raise PermissionDenied("Solo los músicos pueden acceder a esta página.")
+    
+    try:
+        portafolio = request.user.portafolio
+    except Portafolio.DoesNotExist:
+        messages.warning(request, 'Debes completar tu portafolio antes de gestionar referencias.')
+        return redirect('editar_portafolio_musico')
+    
+    # Obtener todas las referencias
+    referencias_pendientes = Testimonio.objects.filter(
+        portafolio=portafolio,
+        estado='pendiente'
+    ).order_by('-fecha_solicitud')
+    
+    referencias_aprobadas = Testimonio.objects.filter(
+        portafolio=portafolio,
+        estado='aprobado'
+    ).order_by('-fecha_respuesta')
+    
+    referencias_rechazadas = Testimonio.objects.filter(
+        portafolio=portafolio,
+        estado='rechazado'
+    ).order_by('-fecha_respuesta')
+    
+    testimonios_directos = Testimonio.objects.filter(
+        portafolio=portafolio,
+        estado='directo'
+    ).order_by('-fecha_publicacion')
+    
+    context = {
+        'portafolio': portafolio,
+        'referencias_pendientes': referencias_pendientes,
+        'referencias_aprobadas': referencias_aprobadas,
+        'referencias_rechazadas': referencias_rechazadas,
+        'testimonios_directos': testimonios_directos,
+        'titulo_pagina': 'Gestionar Referencias',
+        'descripcion_pagina': 'Administra tus referencias laborales y testimonios'
+    }
+    
+    return render(request, 'usuarios/gestionar_referencias.html', context)
+
+
+@login_required
+def agregar_testimonio_directo(request):
+    """Vista para agregar testimonios directamente (sin solicitud)"""
+    if request.user.tipo_usuario != 'musico':
+        raise PermissionDenied("Solo los músicos pueden agregar testimonios.")
+    
+    try:
+        portafolio = request.user.portafolio
+    except Portafolio.DoesNotExist:
+        messages.warning(request, 'Debes completar tu portafolio antes de agregar testimonios.')
+        return redirect('editar_portafolio_musico')
+    
+    if request.method == 'POST':
+        form = TestimonioDirectoForm(request.POST, portafolio=portafolio)
+        if form.is_valid():
+            testimonio = form.save()
+            messages.success(request, 'Testimonio agregado exitosamente.')
+            return redirect('gestionar_referencias')
+    else:
+        form = TestimonioDirectoForm(portafolio=portafolio)
+    
+    context = {
+        'form': form,
+        'portafolio': portafolio,
+        'titulo_pagina': 'Agregar Testimonio',
+        'descripcion_pagina': 'Agrega un testimonio directo a tu portafolio'
+    }
+    
+    return render(request, 'usuarios/agregar_testimonio.html', context)
+
+
+def enviar_email_solicitud_referencia(testimonio):
+    """Función auxiliar para enviar email de solicitud de referencia"""
+    subject = f'Solicitud de referencia laboral de {testimonio.portafolio.usuario.get_full_name()}'
+    
+    # URL segura para responder
+    url_respuesta = f"{settings.SITE_URL}/referencias/responder/{testimonio.token_solicitud}/"
+    
+    context = {
+        'testimonio': testimonio,
+        'musico': testimonio.portafolio.usuario,
+        'portafolio': testimonio.portafolio,
+        'url_respuesta': url_respuesta,
+    }
+    
+    html_message = render_to_string('emails/solicitud_referencia.html', context)
+    plain_message = render_to_string('emails/solicitud_referencia.txt', context)
+    
+    send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[testimonio.autor_email],
+        html_message=html_message,
+        fail_silently=False
+    )

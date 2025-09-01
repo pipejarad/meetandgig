@@ -62,4 +62,10 @@ urlpatterns = [
     # URLs de invitaciones para músicos (Ticket 3.8 FASE 3)
     path('invitaciones-recibidas/', views.mis_invitaciones_recibidas_view, name='mis_invitaciones_recibidas'),
     path('invitaciones/<int:invitacion_id>/responder/', views.responder_invitacion_view, name='responder_invitacion'),
+    
+    # URLs de referencias laborales (Ticket 4.1)
+    path('referencias/solicitar/<int:portafolio_id>/', views.solicitar_referencia, name='solicitar_referencia'),
+    path('referencias/responder/<str:token>/', views.responder_referencia, name='responder_referencia'),
+    path('referencias/gestionar/', views.gestionar_referencias, name='gestionar_referencias'),
+    path('referencias/agregar-testimonio/', views.agregar_testimonio_directo, name='agregar_testimonio_directo'),
 ]

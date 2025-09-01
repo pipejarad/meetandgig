@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>{{ titulo_pagina }}</h2>
+                    <p class="text-muted">{{ descripcion_pagina }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'solicitar_referencia' portafolio.id %}" 
+                       class="btn btn-primary mr-2">
+                        <i class="fas fa-plus mr-2"></i>Solicitar Referencia
+                    </a>
+                    <a href="{% url 'agregar_testimonio_directo' %}" 
+                       class="btn btn-outline-primary">
+                        <i class="fas fa-edit mr-2"></i>Agregar Testimonio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabs de navegación -->
+    <ul class="nav nav-tabs" id="referenciasTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pendientes-tab" data-toggle="tab" 
+                    data-target="#pendientes" type="button" role="tab">
+                Pendientes 
+                {% if referencias_pendientes %}
+                    <span class="badge badge-warning ml-1">{{ referencias_pendientes|length }}</span>
+                {% endif %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="aprobadas-tab" data-toggle="tab" 
+                    data-target="#aprobadas" type="button" role="tab">
+                Referencias Aprobadas 
+                {% if referencias_aprobadas %}
+                    <span class="badge badge-success ml-1">{{ referencias_aprobadas|length }}</span>
+                {% endif %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="testimonios-tab" data-toggle="tab" 
+                    data-target="#testimonios" type="button" role="tab">
+                Testimonios Directos
+                {% if testimonios_directos %}
+                    <span class="badge badge-info ml-1">{{ testimonios_directos|length }}</span>
+                {% endif %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="rechazadas-tab" data-toggle="tab" 
+                    data-target="#rechazadas" type="button" role="tab">
+                Rechazadas
+                {% if referencias_rechazadas %}
+                    <span class="badge badge-danger ml-1">{{ referencias_rechazadas|length }}</span>
+                {% endif %}
+            </button>
+        </li>
+    </ul>
+    
+    <!-- Contenido de las tabs -->
+    <div class="tab-content" id="referenciasTabContent">
+        <!-- Referencias Pendientes -->
+        <div class="tab-pane fade show active" id="pendientes" role="tabpanel">
+            <div class="mt-4">
+                {% if referencias_pendientes %}
+                    {% for referencia in referencias_pendientes %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6 class="card-title">
+                                            {{ referencia.autor_nombre }}
+                                            {% if referencia.autor_cargo %}
+                                                - {{ referencia.autor_cargo }}
+                                            {% endif %}
+                                        </h6>
+                                        {% if referencia.autor_organizacion %}
+                                            <p class="text-muted small mb-1">{{ referencia.autor_organizacion }}</p>
+                                        {% endif %}
+                                        {% if referencia.proyecto_evento %}
+                                            <p class="text-primary small mb-1">
+                                                <i class="fas fa-briefcase mr-1"></i>{{ referencia.proyecto_evento }}
+                                            </p>
+                                        {% endif %}
+                                        {% if referencia.mensaje_solicitud %}
+                                            <p class="small text-muted">{{ referencia.mensaje_solicitud|truncatewords:20 }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <small class="text-muted">
+                                            Solicitada: {{ referencia.fecha_solicitud|date:"d M Y" }}
+                                        </small>
+                                        <br>
+                                        <span class="badge badge-warning">Pendiente</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No tienes solicitudes de referencias pendientes.</p>
+                        <a href="{% url 'solicitar_referencia' portafolio.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus mr-2"></i>Solicitar tu primera referencia
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Referencias Aprobadas -->
+        <div class="tab-pane fade" id="aprobadas" role="tabpanel">
+            <div class="mt-4">
+                {% if referencias_aprobadas %}
+                    {% for referencia in referencias_aprobadas %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6 class="card-title">
+                                            {{ referencia.autor_nombre }}
+                                            {% if referencia.autor_cargo %}
+                                                - {{ referencia.autor_cargo }}
+                                            {% endif %}
+                                        </h6>
+                                        {% if referencia.autor_organizacion %}
+                                            <p class="text-muted small mb-1">{{ referencia.autor_organizacion }}</p>
+                                        {% endif %}
+                                        {% if referencia.proyecto_evento %}
+                                            <p class="text-primary small mb-1">
+                                                <i class="fas fa-briefcase mr-1"></i>{{ referencia.proyecto_evento }}
+                                            </p>
+                                        {% endif %}
+                                        {% if referencia.texto_referencia %}
+                                            <p class="small">{{ referencia.texto_referencia|truncatewords:30 }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <small class="text-muted">
+                                            Aprobada: {{ referencia.fecha_respuesta|date:"d M Y" }}
+                                        </small>
+                                        <br>
+                                        <span class="badge badge-success">Visible en portafolio</span>
+                                        {% if referencia.verificada %}
+                                            <br><span class="badge badge-info mt-1">Verificada</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No tienes referencias aprobadas aún.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Testimonios Directos -->
+        <div class="tab-pane fade" id="testimonios" role="tabpanel">
+            <div class="mt-4">
+                {% if testimonios_directos %}
+                    {% for testimonio in testimonios_directos %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6 class="card-title">
+                                            {{ testimonio.autor_nombre }}
+                                            {% if testimonio.autor_cargo %}
+                                                - {{ testimonio.autor_cargo }}
+                                            {% endif %}
+                                        </h6>
+                                        {% if testimonio.autor_organizacion %}
+                                            <p class="text-muted small mb-1">{{ testimonio.autor_organizacion }}</p>
+                                        {% endif %}
+                                        {% if testimonio.texto_referencia %}
+                                            <p class="small">{{ testimonio.texto_referencia|truncatewords:30 }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <small class="text-muted">
+                                            Agregado: {{ testimonio.fecha_creacion|date:"d M Y" }}
+                                        </small>
+                                        <br>
+                                        <span class="badge badge-info">Testimonio directo</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-comment fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No tienes testimonios directos agregados.</p>
+                        <a href="{% url 'agregar_testimonio_directo' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit mr-2"></i>Agregar testimonio directo
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Referencias Rechazadas -->
+        <div class="tab-pane fade" id="rechazadas" role="tabpanel">
+            <div class="mt-4">
+                {% if referencias_rechazadas %}
+                    {% for referencia in referencias_rechazadas %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6 class="card-title">
+                                            {{ referencia.autor_nombre }}
+                                            {% if referencia.autor_cargo %}
+                                                - {{ referencia.autor_cargo }}
+                                            {% endif %}
+                                        </h6>
+                                        {% if referencia.autor_organizacion %}
+                                            <p class="text-muted small mb-1">{{ referencia.autor_organizacion }}</p>
+                                        {% endif %}
+                                        {% if referencia.proyecto_evento %}
+                                            <p class="text-primary small mb-0">
+                                                <i class="fas fa-briefcase mr-1"></i>{{ referencia.proyecto_evento }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <small class="text-muted">
+                                            Rechazada: {{ referencia.fecha_respuesta|date:"d M Y" }}
+                                        </small>
+                                        <br>
+                                        <span class="badge badge-danger">Rechazada</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-times-circle fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No tienes referencias rechazadas.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Activar funcionalidad de tabs de Bootstrap 4
+    $('#referenciasTab button[data-toggle="tab"]').on('click', function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+    
+    // Opcional: Manejar eventos de cambio de tab
+    $('#referenciasTab button[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var activeTab = e.target; // pestaña activada
+        var previousTab = e.relatedTarget; // pestaña anterior
+        console.log('Tab cambiado a:', activeTab.id);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-comment me-2"></i>{{ titulo_pagina }}
+                    </h4>
+                    <p class="mb-0 mt-2">{{ descripcion_pagina }}</p>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Información sobre testimonios directos -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-lightbulb me-2"></i>¿Qué es un testimonio directo?
+                        </h6>
+                        <p class="mb-0">
+                            Los testimonios directos te permiten agregar recomendaciones que ya tienes 
+                            de colaboraciones pasadas, sin necesidad de solicitar una nueva referencia por email.
+                        </p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Información del autor -->
+                            <div class="col-md-6">
+                                <h6 class="text-info mb-3">
+                                    <i class="fas fa-user me-2"></i>Información del autor
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    {{ form.autor_nombre.label_tag }}
+                                    {{ form.autor_nombre }}
+                                    {% if form.autor_nombre.errors %}
+                                        <div class="text-danger small">{{ form.autor_nombre.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.autor_cargo.label_tag }}
+                                    {{ form.autor_cargo }}
+                                    {% if form.autor_cargo.errors %}
+                                        <div class="text-danger small">{{ form.autor_cargo.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.autor_organizacion.label_tag }}
+                                    {{ form.autor_organizacion }}
+                                    {% if form.autor_organizacion.errors %}
+                                        <div class="text-danger small">{{ form.autor_organizacion.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Información de la colaboración -->
+                            <div class="col-md-6">
+                                <h6 class="text-info mb-3">
+                                    <i class="fas fa-briefcase me-2"></i>Información de la colaboración
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    {{ form.tipo.label_tag }}
+                                    {{ form.tipo }}
+                                    {% if form.tipo.errors %}
+                                        <div class="text-danger small">{{ form.tipo.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.proyecto_evento.label_tag }}
+                                    {{ form.proyecto_evento }}
+                                    {% if form.proyecto_evento.errors %}
+                                        <div class="text-danger small">{{ form.proyecto_evento.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.fecha_inicio_colaboracion.label_tag }}
+                                            {{ form.fecha_inicio_colaboracion }}
+                                            {% if form.fecha_inicio_colaboracion.errors %}
+                                                <div class="text-danger small">{{ form.fecha_inicio_colaboracion.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.fecha_fin_colaboracion.label_tag }}
+                                            {{ form.fecha_fin_colaboracion }}
+                                            {% if form.fecha_fin_colaboracion.errors %}
+                                                <div class="text-danger small">{{ form.fecha_fin_colaboracion.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.duracion_colaboracion.label_tag }}
+                                    {{ form.duracion_colaboracion }}
+                                    {% if form.duracion_colaboracion.errors %}
+                                        <div class="text-danger small">{{ form.duracion_colaboracion.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contenido del testimonio -->
+                        <div class="mb-4">
+                            <h6 class="text-info mb-3">
+                                <i class="fas fa-quote-left me-2"></i>Contenido del testimonio
+                            </h6>
+                            {{ form.texto.label_tag }}
+                            {{ form.texto }}
+                            {% if form.texto.errors %}
+                                <div class="text-danger small">{{ form.texto.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Errores generales -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Información importante -->
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Importante
+                            </h6>
+                            <ul class="mb-0">
+                                <li>Solo agrega testimonios reales de colaboraciones pasadas</li>
+                                <li>Asegúrate de tener permiso del autor para publicar su testimonio</li>
+                                <li>Los testimonios falsos pueden resultar en la suspensión de tu cuenta</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'gestionar_referencias' %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-save me-2"></i>Agregar Testimonio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

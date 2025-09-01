@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetP
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from PIL import Image
-from .models import (Usuario, PerfilMusico, PerfilEmpleador, Portafolio,OfertaLaboral, OfertaInstrumento, OfertaGenero, Postulacion)
+from .models import (Usuario, PerfilMusico, PerfilEmpleador, Portafolio,OfertaLaboral, OfertaInstrumento, OfertaGenero, Postulacion, Testimonio)
 
 
 def validate_image_file(image):
@@ -837,3 +837,233 @@ class PostulacionForm(forms.ModelForm):
             postulacion.save()
         
         return postulacion
+
+
+# SISTEMA DE REFERENCIAS LABORALES (Sprint 4)
+
+class SolicitudReferenciaForm(forms.ModelForm):
+    """Formulario para que músicos soliciten referencias laborales"""
+    
+    class Meta:
+        model = Testimonio
+        fields = [
+            'tipo', 'autor_nombre', 'autor_email', 'autor_cargo', 
+            'autor_organizacion', 'proyecto_evento', 'fecha_inicio_colaboracion',
+            'fecha_fin_colaboracion', 'duracion_colaboracion', 'mensaje_solicitud'
+        ]
+        
+        widgets = {
+            'tipo': forms.Select(
+                attrs={
+                    'class': 'form-select',
+                },
+                choices=[
+                    ('referencia_laboral', 'Referencia laboral'),
+                    ('testimonio_cliente', 'Testimonio de cliente'),
+                ]
+            ),
+            'autor_nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: María González'
+            }),
+            'autor_email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'maria@empresa.com'
+            }),
+            'autor_cargo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: Directora de Eventos'
+            }),
+            'autor_organizacion': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: Eventos Musicales SpA'
+            }),
+            'proyecto_evento': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: Concierto de Año Nuevo 2024'
+            }),
+            'fecha_inicio_colaboracion': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'fecha_fin_colaboracion': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'duracion_colaboracion': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 3 meses, 1 año, evento único'
+            }),
+            'mensaje_solicitud': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Mensaje personalizado para el empleador...'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.portafolio = kwargs.pop('portafolio', None)
+        super().__init__(*args, **kwargs)
+        
+        # Campos requeridos para referencias laborales
+        self.fields['autor_email'].required = True
+        self.fields['autor_nombre'].required = True
+        self.fields['proyecto_evento'].required = True
+        
+        # Ayudas contextuales
+        self.fields['autor_email'].help_text = 'Email válido para enviar la solicitud de referencia'
+        self.fields['mensaje_solicitud'].help_text = 'Explica brevemente tu relación laboral y por qué solicitas esta referencia'
+    
+    def clean_autor_email(self):
+        """Validar que el email sea válido"""
+        email = self.cleaned_data.get('autor_email')
+        if email:
+            # Verificar que no sea el mismo email del músico
+            if self.portafolio and email.lower() == self.portafolio.usuario.email.lower():
+                raise ValidationError("No puedes solicitar una referencia a ti mismo.")
+        return email
+    
+    def clean(self):
+        """Validaciones cruzadas"""
+        cleaned_data = super().clean()
+        fecha_inicio = cleaned_data.get('fecha_inicio_colaboracion')
+        fecha_fin = cleaned_data.get('fecha_fin_colaboracion')
+        
+        # Validar fechas lógicas
+        if fecha_inicio and fecha_fin:
+            if fecha_inicio > fecha_fin:
+                raise ValidationError("La fecha de inicio debe ser anterior a la fecha de fin.")
+            
+            # No permitir fechas muy futuras
+            if fecha_inicio > timezone.now().date():
+                raise ValidationError("La fecha de inicio no puede ser futura.")
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        """Guardar con configuración automática para solicitud"""
+        testimonio = super().save(commit=False)
+        testimonio.portafolio = self.portafolio
+        testimonio.estado = 'pendiente'
+        testimonio.fecha_solicitud = timezone.now()
+        
+        if commit:
+            testimonio.save()
+        
+        return testimonio
+
+
+class ResponderReferenciaForm(forms.ModelForm):
+    """Formulario para que empleadores respondan solicitudes de referencia"""
+    
+    class Meta:
+        model = Testimonio
+        fields = ['texto', 'verificado']
+        
+        widgets = {
+            'texto': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 6,
+                'placeholder': 'Escribe tu referencia sobre el trabajo realizado por este músico...'
+            }),
+            'verificado': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['texto'].required = True
+        self.fields['texto'].help_text = 'Escribe una referencia honesta sobre el trabajo del músico'
+        self.fields['verificado'].help_text = 'Confirmo que esta referencia es veraz'
+        self.fields['verificado'].label = 'Confirmo que esta referencia es veraz'
+    
+    def clean_texto(self):
+        """Validar contenido del testimonio"""
+        texto = self.cleaned_data.get('texto')
+        if texto:
+            if len(texto.strip()) < 50:
+                raise ValidationError("La referencia debe tener al menos 50 caracteres.")
+            if len(texto.strip()) > 500:
+                raise ValidationError("La referencia no puede exceder 500 caracteres.")
+        return texto
+    
+    def save(self, commit=True):
+        """Guardar con estado aprobado"""
+        testimonio = super().save(commit=False)
+        testimonio.estado = 'aprobado'
+        testimonio.fecha_respuesta = timezone.now()
+        
+        if commit:
+            testimonio.save()
+        
+        return testimonio
+
+
+class TestimonioDirectoForm(forms.ModelForm):
+    """Formulario para agregar testimonios directamente (sin solicitud)"""
+    
+    class Meta:
+        model = Testimonio
+        fields = [
+            'tipo', 'autor_nombre', 'autor_cargo', 'autor_organizacion',
+            'texto', 'proyecto_evento', 'fecha_inicio_colaboracion',
+            'fecha_fin_colaboracion', 'duracion_colaboracion'
+        ]
+        
+        widgets = {
+            'tipo': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'autor_nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre del autor'
+            }),
+            'autor_cargo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Cargo/Posición'
+            }),
+            'autor_organizacion': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Empresa/Organización'
+            }),
+            'texto': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Testimonio...'
+            }),
+            'proyecto_evento': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Proyecto o evento'
+            }),
+            'fecha_inicio_colaboracion': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'fecha_fin_colaboracion': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'duracion_colaboracion': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Duración de la colaboración'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.portafolio = kwargs.pop('portafolio', None)
+        super().__init__(*args, **kwargs)
+        
+        self.fields['autor_nombre'].required = True
+        self.fields['texto'].required = True
+    
+    def save(self, commit=True):
+        """Guardar como testimonio directo"""
+        testimonio = super().save(commit=False)
+        testimonio.portafolio = self.portafolio
+        testimonio.estado = 'directo'
+        
+        if commit:
+            testimonio.save()
+        
+        return testimonio

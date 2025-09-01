@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Referencia - Meet & Gig</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #007bff; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { background: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }
+        .btn { display: inline-block; padding: 12px 25px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
+        .btn-decline { background: #6c757d; }
+        .info-box { background: white; padding: 15px; border-left: 4px solid #007bff; margin: 15px 0; }
+        .text-center { text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Meet & Gig</h1>
+            <h2>Solicitud de Referencia Laboral</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hola <strong>{{ testimonio.autor_nombre }}</strong>,</p>
+            
+            <p>
+                <strong>{{ musico.get_full_name }}</strong> te ha solicitado una referencia laboral 
+                para su portafolio en Meet & Gig.
+            </p>
+            
+            <div class="info-box">
+                <h3>Detalles de la colaboración:</h3>
+                <ul>
+                    <li><strong>Músico:</strong> {{ musico.get_full_name }}</li>
+                    {% if testimonio.proyecto_evento %}
+                        <li><strong>Proyecto/Evento:</strong> {{ testimonio.proyecto_evento }}</li>
+                    {% endif %}
+                    {% if testimonio.get_duracion_display %}
+                        <li><strong>Duración:</strong> {{ testimonio.get_duracion_display }}</li>
+                    {% endif %}
+                    <li><strong>Tipo:</strong> {{ testimonio.get_tipo_display }}</li>
+                </ul>
+            </div>
+            
+            {% if testimonio.mensaje_solicitud %}
+                <div class="info-box">
+                    <h3>Mensaje del músico:</h3>
+                    <p><em>"{{ testimonio.mensaje_solicitud }}"</em></p>
+                </div>
+            {% endif %}
+            
+            <div class="text-center">
+                <h3>¿Qué quieres hacer?</h3>
+                <a href="{{ url_respuesta }}" class="btn">
+                    ✅ Escribir Referencia
+                </a>
+                <a href="{{ url_respuesta }}" class="btn btn-decline">
+                    ❌ Declinar Solicitud
+                </a>
+            </div>
+            
+            <hr>
+            
+            <h3>¿Qué es una referencia laboral?</h3>
+            <p>
+                Una referencia laboral es una recomendación escrita sobre la experiencia de trabajo 
+                con {{ musico.get_full_name }}. Tu referencia ayudará a {{ musico.first_name }} a 
+                conseguir nuevas oportunidades laborales demostrando su profesionalismo y calidad de trabajo.
+            </p>
+            
+            <p><strong>Tu referencia será:</strong></p>
+            <ul>
+                <li>✅ Visible en el portafolio público del músico</li>
+                <li>✅ Asociada a tu nombre y cargo</li>
+                <li>❌ NO mostrará tu información de contacto</li>
+            </ul>
+            
+            <div class="info-box">
+                <p><strong>Importante:</strong> Este enlace es seguro y solo tú puedes usarlo. 
+                Si no reconoces esta solicitud, simplemente ignora este email.</p>
+            </div>
+            
+            <hr>
+            
+            <p class="text-center">
+                <small>
+                    Este email fue enviado por Meet & Gig<br>
+                    Si tienes preguntas, contáctanos en: soporte@meetandgig.com
+                </small>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

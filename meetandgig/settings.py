@@ -150,6 +150,9 @@ EMAIL_PORT = 1025
 EMAIL_USE_TLS = False
 DEFAULT_FROM_EMAIL = 'noreply@meetandgig.com'
 
+# Site URL for email links
+SITE_URL = 'http://127.0.0.1:8000'
+
 # Authentication URLs
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'inicio'

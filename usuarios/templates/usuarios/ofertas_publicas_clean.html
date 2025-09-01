@@ -1,0 +1,688 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ofertas de Trabajo - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="bg-hero text-white p-4 rounded-3 mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-2">🎵 Ofertas de Trabajo</h1>
+                <p class="mb-0">Encuentra oportunidades musicales que se ajusten a tu talento</p>
+            </div>
+            <div class="col-md-4 text-md-right">
+                <span class="badge badge-light text-primary">{{ ofertas.count }} ofertas disponibles</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Botón de Filtros Mobile -->
+        <div class="col-12 d-lg-none mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <button class="btn btn-primary" type="button" data-toggle="collapse" 
+                        data-target="#filtrosMobileCollapse" aria-expanded="false" aria-controls="filtrosMobileCollapse">
+                    <i class="fas fa-filter mr-2"></i>Filtros
+                    <span class="badge badge-light text-primary ml-2" id="filtrosActivosCount" style="display: none;">0</span>
+                </button>
+                <!-- Indicadores de filtros activos en mobile -->
+                <div id="filtrosActivosIndicator" class="text-muted small" style="display: none;">
+                    <i class="fas fa-filter mr-1"></i><span id="filtrosActivosTexto"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Filtros Mobile (Collapse) -->
+        <div class="col-12 d-lg-none mb-4">
+            <div class="collapse" id="filtrosMobileCollapse">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-filter mr-2"></i>Filtros de Búsqueda
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" action="{% url 'buscar_ofertas' %}" id="filtrosMobileForm">
+                            <!-- Búsqueda general -->
+                            <div class="mb-3">
+                                <label for="q_mobile" class="form-label font-weight-bold">
+                                    <i class="fas fa-search mr-2 text-primary"></i>Búsqueda General
+                                </label>
+                                <input type="text" class="form-control" id="q_mobile" name="q" 
+                                       value="{{ request.GET.q }}" placeholder="Buscar por título...">
+                            </div>
+
+                            <!-- Instrumentos -->
+                            <div class="mb-3">
+                                <label for="instrumentos_mobile" class="form-label font-weight-bold">
+                                    <i class="fas fa-guitar mr-2 text-primary"></i>Instrumentos
+                                </label>
+                                <select class="form-control" id="instrumentos_mobile" name="instrumentos" multiple size="4">
+                                    {% for instrumento in instrumentos %}
+                                    <option value="{{ instrumento.id }}" 
+                                            {% if instrumento.id|stringformat:"s" in request.GET.instrumentos %}selected{% endif %}>
+                                        {{ instrumento.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="fas fa-info-circle mr-1"></i>Toca para seleccionar múltiples
+                                </small>
+                            </div>
+
+                            <!-- Géneros -->
+                            <div class="mb-3">
+                                <label for="generos_mobile" class="form-label font-weight-bold">
+                                    <i class="fas fa-music mr-2 text-primary"></i>Géneros
+                                </label>
+                                <select class="form-control" id="generos_mobile" name="generos" multiple size="4">
+                                    {% for genero in generos %}
+                                    <option value="{{ genero.id }}" 
+                                            {% if genero.id|stringformat:"s" in request.GET.generos %}selected{% endif %}>
+                                        {{ genero.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Ubicación -->
+                            <div class="mb-3">
+                                <label for="ubicacion_mobile" class="form-label font-weight-bold">
+                                    <i class="fas fa-map-marker-alt mr-2 text-primary"></i>Ubicación
+                                </label>
+                                <select class="form-control" id="ubicacion_mobile" name="ubicacion">
+                                    <option value="">Todas las regiones</option>
+                                    {% for ubicacion in ubicaciones %}
+                                    <option value="{{ ubicacion.id }}" 
+                                            {% if ubicacion.id|stringformat:"s" == request.GET.ubicacion %}selected{% endif %}>
+                                        {{ ubicacion.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Experiencia -->
+                            <div class="mb-3">
+                                <label for="experiencia_mobile" class="form-label font-weight-bold">
+                                    <i class="fas fa-star mr-2 text-primary"></i>Experiencia Mínima
+                                </label>
+                                <select class="form-control" id="experiencia_mobile" name="experiencia">
+                                    <option value="">Cualquier nivel</option>
+                                    {% for nivel in niveles %}
+                                    <option value="{{ nivel.id }}" 
+                                            {% if nivel.id|stringformat:"s" == request.GET.experiencia %}selected{% endif %}>
+                                        {{ nivel.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Presupuesto -->
+                            <div class="mb-3">
+                                <label for="presupuesto_min_mobile" class="form-label font-weight-bold">
+                                    <i class="fas fa-dollar-sign mr-2 text-success"></i>Presupuesto Mínimo
+                                </label>
+                                <select class="form-control" id="presupuesto_min_mobile" name="presupuesto_min">
+                                    <option value="">Sin mínimo</option>
+                                    <option value="50000" {% if request.GET.presupuesto_min == '50000' %}selected{% endif %}>
+                                        $50.000+
+                                    </option>
+                                    <option value="100000" {% if request.GET.presupuesto_min == '100000' %}selected{% endif %}>
+                                        $100.000+
+                                    </option>
+                                    <option value="200000" {% if request.GET.presupuesto_min == '200000' %}selected{% endif %}>
+                                        $200.000+
+                                    </option>
+                                    <option value="500000" {% if request.GET.presupuesto_min == '500000' %}selected{% endif %}>
+                                        $500.000+
+                                    </option>
+                                    <option value="1000000" {% if request.GET.presupuesto_min == '1000000' %}selected{% endif %}>
+                                        $1.000.000+
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Presupuesto Máximo -->
+                            <div class="mb-3">
+                                <label for="presupuesto_max_mobile" class="form-label font-weight-bold">
+                                    <i class="fas fa-dollar-sign mr-2 text-success"></i>Presupuesto Máximo
+                                </label>
+                                <select class="form-control" id="presupuesto_max_mobile" name="presupuesto_max">
+                                    <option value="">Sin máximo</option>
+                                    <option value="100000" {% if request.GET.presupuesto_max == '100000' %}selected{% endif %}>
+                                        Hasta $100.000
+                                    </option>
+                                    <option value="200000" {% if request.GET.presupuesto_max == '200000' %}selected{% endif %}>
+                                        Hasta $200.000
+                                    </option>
+                                    <option value="500000" {% if request.GET.presupuesto_max == '500000' %}selected{% endif %}>
+                                        Hasta $500.000
+                                    </option>
+                                    <option value="1000000" {% if request.GET.presupuesto_max == '1000000' %}selected{% endif %}>
+                                        Hasta $1.000.000
+                                    </option>
+                                    <option value="2000000" {% if request.GET.presupuesto_max == '2000000' %}selected{% endif %}>
+                                        Hasta $2.000.000
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Fecha del Evento -->
+                            <div class="mb-3">
+                                <label class="form-label font-weight-bold">
+                                    <i class="fas fa-calendar-alt mr-2 text-primary"></i>Fecha del Evento
+                                </label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="date" class="form-control form-control-sm" 
+                                               id="fecha_evento_desde_mobile" name="fecha_evento_desde"
+                                               value="{{ request.GET.fecha_evento_desde }}">
+                                        <small class="text-muted">Desde</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="date" class="form-control form-control-sm" 
+                                               id="fecha_evento_hasta_mobile" name="fecha_evento_hasta"
+                                               value="{{ request.GET.fecha_evento_hasta }}">
+                                        <small class="text-muted">Hasta</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fecha de Publicación -->
+                            <div class="mb-3">
+                                <label for="fecha_publicacion_desde_mobile" class="form-label font-weight-bold">
+                                    <i class="fas fa-clock mr-2 text-primary"></i>Publicado Desde
+                                </label>
+                                <input type="date" class="form-control" 
+                                       id="fecha_publicacion_desde_mobile" name="fecha_publicacion_desde"
+                                       value="{{ request.GET.fecha_publicacion_desde }}">
+                            </div>
+
+                            <!-- Ordenamiento -->
+                            <div class="mb-3">
+                                <label for="orden_mobile" class="form-label font-weight-bold">
+                                    <i class="fas fa-sort mr-2 text-primary"></i>Ordenar por
+                                </label>
+                                <select class="form-control" id="orden_mobile" name="orden">
+                                    <option value="fecha_desc" {% if request.GET.orden == 'fecha_desc' or not request.GET.orden %}selected{% endif %}>
+                                        Más recientes
+                                    </option>
+                                    <option value="fecha_asc" {% if request.GET.orden == 'fecha_asc' %}selected{% endif %}>
+                                        Más antiguos
+                                    </option>
+                                    <option value="evento_desc" {% if request.GET.orden == 'evento_desc' %}selected{% endif %}>
+                                        Evento más próximo
+                                    </option>
+                                    <option value="evento_asc" {% if request.GET.orden == 'evento_asc' %}selected{% endif %}>
+                                        Evento más lejano
+                                    </option>
+                                    <option value="presupuesto_desc" {% if request.GET.orden == 'presupuesto_desc' %}selected{% endif %}>
+                                        Mayor presupuesto
+                                    </option>
+                                    <option value="presupuesto_asc" {% if request.GET.orden == 'presupuesto_asc' %}selected{% endif %}>
+                                        Menor presupuesto
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fas fa-search mr-2"></i>Buscar
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <a href="{% url 'buscar_ofertas' %}" class="btn btn-outline-secondary btn-block">
+                                        <i class="fas fa-times mr-2"></i>Limpiar
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar de Filtros Desktop -->
+        <div class="col-lg-3 col-md-4 mb-4 d-none d-lg-block">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-filter mr-2"></i>Filtros de Búsqueda</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{% url 'buscar_ofertas' %}">
+                        <!-- Búsqueda general -->
+                        <div class="mb-3">
+                            <label for="q" class="form-label font-weight-bold">
+                                <i class="fas fa-search mr-2 text-primary"></i>Búsqueda General
+                            </label>
+                            <input type="text" class="form-control" id="q" name="q" 
+                                   value="{{ request.GET.q }}" placeholder="Buscar por título...">
+                        </div>
+
+                        <!-- Instrumentos -->
+                        <div class="mb-3">
+                            <label for="instrumentos" class="form-label font-weight-bold">
+                                <i class="fas fa-guitar mr-2 text-primary"></i>Instrumentos
+                            </label>
+                            <select class="form-control" id="instrumentos" name="instrumentos" multiple size="4">
+                                {% for instrumento in instrumentos %}
+                                <option value="{{ instrumento.id }}" 
+                                        {% if instrumento.id|stringformat:"s" in request.GET.instrumentos %}selected{% endif %}>
+                                    {{ instrumento.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle mr-1"></i><span class="d-none d-lg-inline">Ctrl + clic para múltiples</span><span class="d-lg-none">Toca para seleccionar múltiples</span>
+                            </small>
+                        </div>
+
+                        <!-- Géneros -->
+                        <div class="mb-3">
+                            <label for="generos" class="form-label font-weight-bold">
+                                <i class="fas fa-music mr-2 text-primary"></i>Géneros
+                            </label>
+                            <select class="form-control" id="generos" name="generos" multiple size="4">
+                                {% for genero in generos %}
+                                <option value="{{ genero.id }}" 
+                                        {% if genero.id|stringformat:"s" in request.GET.generos %}selected{% endif %}>
+                                    {{ genero.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle mr-1"></i>Selecciona géneros de interés
+                            </small>
+                        </div>
+
+                        <!-- Ubicación -->
+                        <div class="mb-3">
+                            <label for="ubicacion" class="form-label font-weight-bold">
+                                <i class="fas fa-map-marker-alt mr-2 text-primary"></i>Ubicación
+                            </label>
+                            <select class="form-control" id="ubicacion" name="ubicacion">
+                                <option value="">Todas las regiones</option>
+                                {% for ubicacion in ubicaciones %}
+                                <option value="{{ ubicacion.id }}" 
+                                        {% if ubicacion.id|stringformat:"s" == request.GET.ubicacion %}selected{% endif %}>
+                                    {{ ubicacion.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Experiencia -->
+                        <div class="mb-3">
+                            <label for="experiencia" class="form-label font-weight-bold">
+                                <i class="fas fa-star mr-2 text-primary"></i>Experiencia Mínima
+                            </label>
+                            <select class="form-control" id="experiencia" name="experiencia">
+                                <option value="">Cualquier nivel</option>
+                                {% for nivel in niveles %}
+                                <option value="{{ nivel.id }}" 
+                                        {% if nivel.id|stringformat:"s" == request.GET.experiencia %}selected{% endif %}>
+                                    {{ nivel.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Presupuesto -->
+                        <div class="mb-3">
+                            <label for="presupuesto_min" class="form-label font-weight-bold">
+                                <i class="fas fa-dollar-sign mr-2 text-success"></i>Presupuesto Mínimo
+                            </label>
+                            <select class="form-control" id="presupuesto_min" name="presupuesto_min">
+                                <option value="">Sin mínimo</option>
+                                <option value="50000" {% if request.GET.presupuesto_min == '50000' %}selected{% endif %}>
+                                    $50.000+
+                                </option>
+                                <option value="100000" {% if request.GET.presupuesto_min == '100000' %}selected{% endif %}>
+                                    $100.000+
+                                </option>
+                                <option value="200000" {% if request.GET.presupuesto_min == '200000' %}selected{% endif %}>
+                                    $200.000+
+                                </option>
+                                <option value="500000" {% if request.GET.presupuesto_min == '500000' %}selected{% endif %}>
+                                    $500.000+
+                                </option>
+                                <option value="1000000" {% if request.GET.presupuesto_min == '1000000' %}selected{% endif %}>
+                                    $1.000.000+
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Presupuesto Máximo -->
+                        <div class="mb-3">
+                            <label for="presupuesto_max" class="form-label font-weight-bold">
+                                <i class="fas fa-dollar-sign mr-2 text-success"></i>Presupuesto Máximo
+                            </label>
+                            <select class="form-control" id="presupuesto_max" name="presupuesto_max">
+                                <option value="">Sin máximo</option>
+                                <option value="100000" {% if request.GET.presupuesto_max == '100000' %}selected{% endif %}>
+                                    Hasta $100.000
+                                </option>
+                                <option value="200000" {% if request.GET.presupuesto_max == '200000' %}selected{% endif %}>
+                                    Hasta $200.000
+                                </option>
+                                <option value="500000" {% if request.GET.presupuesto_max == '500000' %}selected{% endif %}>
+                                    Hasta $500.000
+                                </option>
+                                <option value="1000000" {% if request.GET.presupuesto_max == '1000000' %}selected{% endif %}>
+                                    Hasta $1.000.000
+                                </option>
+                                <option value="2000000" {% if request.GET.presupuesto_max == '2000000' %}selected{% endif %}>
+                                    Hasta $2.000.000
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Fecha del Evento -->
+                        <div class="mb-3">
+                            <label class="form-label font-weight-bold">
+                                <i class="fas fa-calendar-alt mr-2 text-primary"></i>Fecha del Evento
+                            </label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="date" class="form-control form-control-sm" 
+                                           id="fecha_evento_desde" name="fecha_evento_desde"
+                                           value="{{ request.GET.fecha_evento_desde }}"
+                                           placeholder="Desde">
+                                    <small class="text-muted">Desde</small>
+                                </div>
+                                <div class="col-6">
+                                    <input type="date" class="form-control form-control-sm" 
+                                           id="fecha_evento_hasta" name="fecha_evento_hasta"
+                                           value="{{ request.GET.fecha_evento_hasta }}"
+                                           placeholder="Hasta">
+                                    <small class="text-muted">Hasta</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fecha de Publicación -->
+                        <div class="mb-3">
+                            <label for="fecha_publicacion_desde" class="form-label font-weight-bold">
+                                <i class="fas fa-clock mr-2 text-primary"></i>Publicado Desde
+                            </label>
+                            <input type="date" class="form-control" 
+                                   id="fecha_publicacion_desde" name="fecha_publicacion_desde"
+                                   value="{{ request.GET.fecha_publicacion_desde }}">
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle mr-1"></i>Ofertas publicadas desde esta fecha
+                            </small>
+                        </div>
+
+                        <!-- Ordenamiento -->
+                        <div class="mb-3">
+                            <label for="orden" class="form-label font-weight-bold">
+                                <i class="fas fa-sort mr-2 text-primary"></i>Ordenar por
+                            </label>
+                            <select class="form-control" id="orden" name="orden">
+                                <option value="fecha_desc" {% if request.GET.orden == 'fecha_desc' or not request.GET.orden %}selected{% endif %}>
+                                    Más recientes
+                                </option>
+                                <option value="fecha_asc" {% if request.GET.orden == 'fecha_asc' %}selected{% endif %}>
+                                    Más antiguos
+                                </option>
+                                <option value="evento_desc" {% if request.GET.orden == 'evento_desc' %}selected{% endif %}>
+                                    Evento más próximo
+                                </option>
+                                <option value="evento_asc" {% if request.GET.orden == 'evento_asc' %}selected{% endif %}>
+                                    Evento más lejano
+                                </option>
+                                <option value="presupuesto_desc" {% if request.GET.orden == 'presupuesto_desc' %}selected{% endif %}>
+                                    Mayor presupuesto
+                                </option>
+                                <option value="presupuesto_asc" {% if request.GET.orden == 'presupuesto_asc' %}selected{% endif %}>
+                                    Menor presupuesto
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search mr-2"></i>Buscar Ofertas
+                            </button>
+                            <a href="{% url 'buscar_ofertas' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times mr-2"></i>Limpiar Filtros
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Ofertas -->
+        <div class="col-lg-9 col-md-8">
+            <!-- Ordenamiento -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Ofertas Disponibles</h4>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" 
+                            data-toggle="dropdown">
+                        <i class="fas fa-sort mr-2"></i>Ordenar
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="?{% for key, value in request.GET.items %}{% if key != 'orden' %}{{ key }}={{ value }}&{% endif %}{% endfor %}orden=fecha_desc">
+                            Más recientes
+                        </a>
+                        <a class="dropdown-item" href="?{% for key, value in request.GET.items %}{% if key != 'orden' %}{{ key }}={{ value }}&{% endif %}{% endfor %}orden=presupuesto_desc">
+                            Mayor presupuesto
+                        </a>
+                        <a class="dropdown-item" href="?{% for key, value in request.GET.items %}{% if key != 'orden' %}{{ key }}={{ value }}&{% endif %}{% endfor %}orden=presupuesto_asc">
+                            Menor presupuesto
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            {% if ofertas %}
+                <div class="row">
+                    {% for oferta in ofertas %}
+                        <div class="col-lg-6 col-md-12 mb-4">
+                            {% include 'usuarios/components/oferta_card.html' with oferta=oferta %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginación -->
+                {% if ofertas.has_other_pages %}
+                <nav aria-label="Paginación de ofertas">
+                    <ul class="pagination justify-content-center">
+                        {% if ofertas.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ ofertas.previous_page_number }}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in ofertas.paginator.page_range %}
+                            {% if ofertas.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > ofertas.number|add:'-3' and num < ofertas.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if ofertas.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ ofertas.next_page_number }}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-search fa-3x text-muted"></i>
+                    </div>
+                    <h4 class="text-muted">No se encontraron ofertas</h4>
+                    <p class="text-muted">
+                        {% if request.GET.q or request.GET.instrumentos or request.GET.generos %}
+                            Intenta ajustar tus filtros de búsqueda
+                        {% else %}
+                            Aún no hay ofertas de trabajo disponibles
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'buscar_ofertas' %}" class="btn btn-outline-primary">
+                        Ver todas las ofertas
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para sincronizar formularios mobile y desktop
+    function sincronizarFormularios() {
+        // Obtener elementos de ambos formularios
+        const desktopForm = document.querySelector('form[action="{% url 'buscar_ofertas' %}"]');
+        const mobileForm = document.getElementById('filtrosMobileForm');
+        
+        if (!desktopForm || !mobileForm) return;
+        
+        // Campos a sincronizar
+        const campos = [
+            'q', 'instrumentos', 'generos', 'ubicacion', 'experiencia',
+            'presupuesto_min', 'presupuesto_max', 'fecha_evento_desde',
+            'fecha_evento_hasta', 'fecha_publicacion_desde', 'orden'
+        ];
+        
+        // Sincronizar de desktop a mobile
+        campos.forEach(campo => {
+            const desktopField = desktopForm.querySelector(`[name="${campo}"]`);
+            const mobileField = mobileForm.querySelector(`[name="${campo}"]`);
+            
+            if (desktopField && mobileField) {
+                if (desktopField.type === 'select-multiple') {
+                    // Para selects múltiples
+                    Array.from(desktopField.selectedOptions).forEach(option => {
+                        const mobileOption = mobileField.querySelector(`option[value="${option.value}"]`);
+                        if (mobileOption) mobileOption.selected = true;
+                    });
+                } else {
+                    // Para otros campos
+                    mobileField.value = desktopField.value;
+                }
+            }
+        });
+        
+        // Sincronizar de mobile a desktop cuando se cambie
+        mobileForm.addEventListener('change', function(e) {
+            const fieldName = e.target.name;
+            const desktopField = desktopForm.querySelector(`[name="${fieldName}"]`);
+            
+            if (desktopField) {
+                if (e.target.type === 'select-multiple') {
+                    // Limpiar selecciones previas en desktop
+                    Array.from(desktopField.options).forEach(option => option.selected = false);
+                    // Aplicar nuevas selecciones
+                    Array.from(e.target.selectedOptions).forEach(option => {
+                        const desktopOption = desktopField.querySelector(`option[value="${option.value}"]`);
+                        if (desktopOption) desktopOption.selected = true;
+                    });
+                } else {
+                    desktopField.value = e.target.value;
+                }
+            }
+        });
+    }
+    
+    // Función para contar filtros activos
+    function contarFiltrosActivos() {
+        let count = 0;
+        let descripcionesFiltros = [];
+
+        // Verificar búsqueda de texto
+        const qField = document.querySelector('input[name="q"]');
+        if (qField && qField.value.trim()) {
+            count++;
+            descripcionesFiltros.push('Búsqueda: "' + qField.value.trim() + '"');
+        }
+
+        // Verificar instrumentos seleccionados
+        const instrumentosSelect = document.querySelector('select[name="instrumentos"]');
+        if (instrumentosSelect) {
+            const selectedInstrumentos = Array.from(instrumentosSelect.selectedOptions);
+            if (selectedInstrumentos.length > 0) {
+                count++;
+                descripcionesFiltros.push(selectedInstrumentos.length + ' instrumento(s)');
+            }
+        }
+
+        // Verificar géneros seleccionados
+        const generosSelect = document.querySelector('select[name="generos"]');
+        if (generosSelect) {
+            const selectedGeneros = Array.from(generosSelect.selectedOptions);
+            if (selectedGeneros.length > 0) {
+                count++;
+                descripcionesFiltros.push(selectedGeneros.length + ' género(s)');
+            }
+        }
+
+        // Verificar otros filtros
+        const otrosFiltros = [
+            { name: 'ubicacion', label: 'Ubicación' },
+            { name: 'experiencia', label: 'Experiencia' },
+            { name: 'presupuesto_min', label: 'Presup. mín.' },
+            { name: 'presupuesto_max', label: 'Presup. máx.' },
+            { name: 'fecha_evento_desde', label: 'Fecha desde' },
+            { name: 'fecha_evento_hasta', label: 'Fecha hasta' },
+            { name: 'fecha_publicacion_desde', label: 'Publicado desde' }
+        ];
+
+        otrosFiltros.forEach(filtro => {
+            const field = document.querySelector(`[name="${filtro.name}"]`);
+            if (field && field.value.trim()) {
+                count++;
+                descripcionesFiltros.push(filtro.label);
+            }
+        });
+
+        // Actualizar indicadores
+        const countElement = document.getElementById('filtrosActivosCount');
+        const indicatorElement = document.getElementById('filtrosActivosIndicator');
+        const textoElement = document.getElementById('filtrosActivosTexto');
+
+        if (count > 0) {
+            if (countElement) {
+                countElement.textContent = count;
+                countElement.style.display = 'inline';
+            }
+            if (indicatorElement && textoElement) {
+                textoElement.textContent = descripcionesFiltros.slice(0, 2).join(', ');
+                indicatorElement.style.display = 'block';
+            }
+        } else {
+            if (countElement) countElement.style.display = 'none';
+            if (indicatorElement) indicatorElement.style.display = 'none';
+        }
+    }
+
+    // Inicializar
+    sincronizarFormularios();
+    contarFiltrosActivos();
+
+    // Actualizar contadores cuando cambien los filtros
+    document.addEventListener('change', contarFiltrosActivos);
+    document.addEventListener('input', contarFiltrosActivos);
+});
+</script>
+{% endblock %}

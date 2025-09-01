@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-envelope mr-2"></i>{{ titulo_pagina }}
+                    </h4>
+                    <p class="mb-0 mt-2">{{ descripcion_pagina }}</p>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Información del portafolio -->
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle mr-2"></i>Solicitar referencia para:
+                        </h6>
+                        <strong>{{ portafolio.usuario.get_full_name }}</strong>
+                        {% if portafolio.titulo_profesional %}
+                        - {{ portafolio.titulo_profesional }}
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información sobre referencias -->
+                    <div class="mb-4">
+                        <h6>¿Qué es una referencia laboral?</h6>
+                        <p class="text-muted small">
+                            Una referencia laboral es una recomendación escrita por alguien con quien has trabajado anteriormente. 
+                            Las referencias ayudan a construir confianza con nuevos empleadores y demuestran tu profesionalismo.
+                        </p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Información del contacto -->
+                            <div class="col-md-6">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-user mr-2"></i>Información del contacto
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    {{ form.autor_nombre.label_tag }}
+                                    {{ form.autor_nombre }}
+                                    {% if form.autor_nombre.errors %}
+                                        <div class="text-danger small">{{ form.autor_nombre.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.autor_email.label_tag }}
+                                    {{ form.autor_email }}
+                                    <div class="form-text">{{ form.autor_email.help_text }}</div>
+                                    {% if form.autor_email.errors %}
+                                        <div class="text-danger small">{{ form.autor_email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.autor_cargo.label_tag }}
+                                    {{ form.autor_cargo }}
+                                    {% if form.autor_cargo.errors %}
+                                        <div class="text-danger small">{{ form.autor_cargo.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.autor_organizacion.label_tag }}
+                                    {{ form.autor_organizacion }}
+                                    {% if form.autor_organizacion.errors %}
+                                        <div class="text-danger small">{{ form.autor_organizacion.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Información de la colaboración -->
+                            <div class="col-md-6">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-briefcase mr-2"></i>Información de la colaboración
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    {{ form.tipo.label_tag }}
+                                    {{ form.tipo }}
+                                    {% if form.tipo.errors %}
+                                        <div class="text-danger small">{{ form.tipo.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.proyecto_evento.label_tag }}
+                                    {{ form.proyecto_evento }}
+                                    {% if form.proyecto_evento.errors %}
+                                        <div class="text-danger small">{{ form.proyecto_evento.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.fecha_inicio_colaboracion.label_tag }}
+                                            {{ form.fecha_inicio_colaboracion }}
+                                            {% if form.fecha_inicio_colaboracion.errors %}
+                                                <div class="text-danger small">{{ form.fecha_inicio_colaboracion.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.fecha_fin_colaboracion.label_tag }}
+                                            {{ form.fecha_fin_colaboracion }}
+                                            {% if form.fecha_fin_colaboracion.errors %}
+                                                <div class="text-danger small">{{ form.fecha_fin_colaboracion.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.duracion_colaboracion.label_tag }}
+                                    {{ form.duracion_colaboracion }}
+                                    {% if form.duracion_colaboracion.errors %}
+                                        <div class="text-danger small">{{ form.duracion_colaboracion.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mensaje personalizado -->
+                        <div class="mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-comment mr-2"></i>Mensaje personalizado
+                            </h6>
+                            {{ form.mensaje_solicitud.label_tag }}
+                            {{ form.mensaje_solicitud }}
+                            <div class="form-text">{{ form.mensaje_solicitud.help_text }}</div>
+                            {% if form.mensaje_solicitud.errors %}
+                                <div class="text-danger small">{{ form.mensaje_solicitud.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Errores generales -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'portafolio_publico' slug=portafolio.slug %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left mr-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane mr-2"></i>Enviar Solicitud
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

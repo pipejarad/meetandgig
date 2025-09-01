@@ -343,20 +343,25 @@
                         <small>Controla qué información se muestra en tu portafolio público</small>
                     </div>
                     <div class="card-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Importante:</strong> Los empleadores registrados siempre podrán ver tu información de contacto completa para facilitar la contratación.
+                        </div>
+                        
                         <div class="row">
                             <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fas fa-address-book me-2"></i>Información de Contacto
+                                </h6>
+                                
                                 <div class="form-check mb-3">
                                     {{ form.show_email }}
                                     <label class="form-check-label" for="{{ form.show_email.id_for_label }}">
                                         <i class="fas fa-envelope me-2"></i>{{ form.show_email.label }}
                                     </label>
-                                </div>
-                                
-                                <div class="form-check mb-3">
-                                    {{ form.show_social_links }}
-                                    <label class="form-check-label" for="{{ form.show_social_links.id_for_label }}">
-                                        <i class="fas fa-share-alt me-2"></i>{{ form.show_social_links.label }}
-                                    </label>
+                                    <div class="form-text">
+                                        Permite que el público general vea tu email
+                                    </div>
                                 </div>
                                 
                                 <div class="form-check mb-3">
@@ -364,14 +369,35 @@
                                     <label class="form-check-label" for="{{ form.show_telefono.id_for_label }}">
                                         <i class="fas fa-phone me-2"></i>{{ form.show_telefono.label }}
                                     </label>
+                                    <div class="form-text">
+                                        Permite que el público general vea tu teléfono
+                                    </div>
                                 </div>
                             </div>
+                            
                             <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fas fa-eye me-2"></i>Información Profesional
+                                </h6>
+                                
+                                <div class="form-check mb-3">
+                                    {{ form.show_social_links }}
+                                    <label class="form-check-label" for="{{ form.show_social_links.id_for_label }}">
+                                        <i class="fas fa-share-alt me-2"></i>{{ form.show_social_links.label }}
+                                    </label>
+                                    <div class="form-text">
+                                        Muestra tus redes sociales y sitio web
+                                    </div>
+                                </div>
+                                
                                 <div class="form-check mb-3">
                                     {{ form.show_education }}
                                     <label class="form-check-label" for="{{ form.show_education.id_for_label }}">
                                         <i class="fas fa-graduation-cap me-2"></i>{{ form.show_education.label }}
                                     </label>
+                                    <div class="form-text">
+                                        Muestra tu formación y estudios musicales
+                                    </div>
                                 </div>
                                 
                                 <div class="form-check mb-3">
@@ -379,13 +405,16 @@
                                     <label class="form-check-label" for="{{ form.show_tarifa.id_for_label }}">
                                         <i class="fas fa-dollar-sign me-2"></i>{{ form.show_tarifa.label }}
                                     </label>
+                                    <div class="form-text">
+                                        Permite que se vea tu tarifa base
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="alert alert-info">
+                        <div class="alert alert-info mt-3">
                             <i class="fas fa-info-circle me-2"></i>
-                            <strong>Tip:</strong> Habilita "Mostrar enlaces sociales" para que aparezcan los enlaces a tus redes sociales y sitio web en tu portafolio público.
+                            <strong>Recomendación:</strong> Habilita la información de contacto solo si deseas recibir consultas directas del público general.
                         </div>
                     </div>
                 </div>
