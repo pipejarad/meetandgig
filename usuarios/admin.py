@@ -213,95 +213,6 @@ class OfertaGeneroInline(admin.TabularInline):
     fields = ('genero', 'prioridad')
 
 
-@admin.register(OfertaLaboral)
-class OfertaLaboralAdmin(admin.ModelAdmin):
-    list_display = (
-        'titulo', 'empleador', 'estado', 'ubicacion', 'nivel_experiencia_minimo',
-        'cupos_disponibles', 'fecha_publicacion', 'fecha_limite_postulacion'
-    )
-    list_filter = (
-        'estado', 'tipo_contrato', 'ubicacion__region', 
-        'nivel_experiencia_minimo', 'fecha_creacion'
-    )
-    search_fields = (
-        'titulo', 'descripcion', 'empleador__nombre_organizacion',
-        'empleador__usuario__username', 'empleador__usuario__email'
-    )
-    readonly_fields = ('slug', 'fecha_creacion', 'fecha_actualizacion', 'fecha_publicacion')
-    inlines = [OfertaInstrumentoInline, OfertaGeneroInline]
-    
-    fieldsets = (
-        ('Información Básica', {
-            'fields': ('empleador', 'titulo', 'slug', 'descripcion', 'requisitos')
-        }),
-        ('Detalles Laborales', {
-            'fields': (
-                'tipo_contrato', 'fecha_evento', 'duracion_estimada',
-                'cupos_disponibles', 'fecha_limite_postulacion'
-            )
-        }),
-        ('Ubicación y Experiencia', {
-            'fields': ('ubicacion', 'nivel_experiencia_minimo')
-        }),
-        ('Presupuesto', {
-            'fields': ('presupuesto_minimo', 'presupuesto_maximo', 'presupuesto_a_convenir')
-        }),
-        ('Estado', {
-            'fields': ('estado',)
-        }),
-        ('Metadatos', {
-            'fields': ('fecha_creacion', 'fecha_actualizacion', 'fecha_publicacion'),
-            'classes': ('collapse',)
-        })
-    )
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related(
-            'empleador__usuario', 'ubicacion', 'nivel_experiencia_minimo'
-        )
-
-
-@admin.register(Postulacion)
-class PostulacionAdmin(admin.ModelAdmin):
-    list_display = (
-        'musico', 'oferta_laboral', 'tipo_postulacion', 'estado',
-        'fecha_postulacion', 'fecha_respuesta'
-    )
-    list_filter = (
-        'tipo_postulacion', 'estado', 'fecha_postulacion',
-        'oferta_laboral__empleador__nombre_organizacion'
-    )
-    search_fields = (
-        'musico__username', 'musico__email', 'oferta_laboral__titulo',
-        'portafolio__usuario__username'
-    )
-    readonly_fields = ('fecha_postulacion', 'fecha_respuesta')
-    
-    fieldsets = (
-        ('Información Principal', {
-            'fields': ('oferta_laboral', 'musico', 'portafolio')
-        }),
-        ('Tipo y Estado', {
-            'fields': ('tipo_postulacion', 'estado')
-        }),
-        ('Información Adicional', {
-            'fields': ('mensaje_personalizado', 'tarifa_propuesta')
-        }),
-        ('Notas del Empleador', {
-            'fields': ('notas_empleador',)
-        }),
-        ('Fechas', {
-            'fields': ('fecha_postulacion', 'fecha_respuesta'),
-            'classes': ('collapse',)
-        })
-    )
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related(
-            'musico', 'oferta_laboral__empleador', 'portafolio'
-        )
-
-
 # Registrar modelos de ofertas
 admin.site.register(OfertaInstrumento)
 admin.site.register(OfertaGenero)
@@ -366,7 +277,7 @@ class NotificacionAdmin(admin.ModelAdmin):
         'tipo', 'leida', 'fecha_creacion'
     )
     search_fields = (
-        'empleador__nombre_empresa', 'titulo', 'mensaje'
+        'empleador__usuario__username', 'empleador__usuario__email', 'titulo', 'mensaje'
     )
     readonly_fields = ('fecha_creacion', 'fecha_lectura')
     
@@ -374,8 +285,8 @@ class NotificacionAdmin(admin.ModelAdmin):
         ('Información Principal', {
             'fields': ('empleador', 'tipo', 'titulo', 'mensaje')
         }),
-        ('Relaciones', {
-            'fields': ('postulacion', 'oferta_laboral', 'invitacion'),
+        ('Enlace', {
+            'fields': ('enlace',),
             'classes': ('collapse',)
         }),
         ('Estado', {
@@ -386,3 +297,327 @@ class NotificacionAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         })
     )
+
+    actions = ['marcar_como_leidas', 'marcar_como_no_leidas']
+
+    def marcar_como_leidas(self, request, queryset):
+        """Acción para marcar notificaciones como leídas"""
+        from django.utils import timezone
+        updated = queryset.update(leida=True, fecha_lectura=timezone.now())
+        self.message_user(request, f'{updated} notificaciones marcadas como leídas.')
+    marcar_como_leidas.short_description = 'Marcar como leídas'
+
+    def marcar_como_no_leidas(self, request, queryset):
+        """Acción para marcar notificaciones como no leídas"""
+        updated = queryset.update(leida=False, fecha_lectura=None)
+        self.message_user(request, f'{updated} notificaciones marcadas como no leídas.')
+    marcar_como_no_leidas.short_description = 'Marcar como no leídas'
+
+
+# ===================================================================
+# ADMIN MEJORADO PARA MODERACIÓN - SPRINT 4 TICKET 4.8
+# ===================================================================
+
+from django.utils.html import format_html
+from django.urls import reverse
+from django.contrib.admin import SimpleListFilter
+
+
+class EstadoPostulacionFilter(SimpleListFilter):
+    """Filtro personalizado para estados de postulación"""
+    title = 'Estado de Postulación'
+    parameter_name = 'estado'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('pendiente', 'Pendientes'),
+            ('en_revision', 'En Revisión'),
+            ('aceptada', 'Aceptadas'),
+            ('rechazada', 'Rechazadas'),
+            ('cancelada', 'Canceladas'),
+            ('sin_decision', 'Sin Decisión (Pendientes + En Revisión)'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'sin_decision':
+            return queryset.filter(estado__in=['pendiente', 'en_revision'])
+        elif self.value():
+            return queryset.filter(estado=self.value())
+        return queryset
+
+
+@admin.register(Postulacion)
+class PostulacionAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'musico_link', 'oferta_titulo', 'empleador_link', 
+        'estado_colored', 'fecha_postulacion', 'tiene_notas', 'acciones_rapidas'
+    )
+    list_filter = (
+        EstadoPostulacionFilter, 'fecha_postulacion', 
+        'oferta_laboral__ubicacion', 'oferta_laboral__tipo_contrato'
+    )
+    search_fields = (
+        'musico__username', 'musico__email', 'musico__first_name', 'musico__last_name',
+        'oferta_laboral__titulo', 'oferta_laboral__empleador__usuario__email'
+    )
+    readonly_fields = ('fecha_postulacion',)
+    raw_id_fields = ('musico', 'oferta_laboral')
+    
+    fieldsets = (
+        ('Información Principal', {
+            'fields': ('musico', 'oferta_laboral', 'estado', 'fecha_postulacion')
+        }),
+        ('Detalles de la Postulación', {
+            'fields': ('mensaje_presentacion', 'disponibilidad_fecha')
+        }),
+        ('Gestión del Empleador', {
+            'fields': ('comentarios_empleador',),
+            'classes': ('collapse',)
+        })
+    )
+
+    actions = [
+        'aceptar_postulaciones', 'rechazar_postulaciones', 
+        'marcar_en_revision', 'exportar_postulaciones'
+    ]
+
+    def musico_link(self, obj):
+        """Link al perfil del músico"""
+        url = reverse('admin:usuarios_usuario_change', args=[obj.musico.id])
+        return format_html('<a href="{}">{}</a>', url, obj.musico.get_full_name())
+    musico_link.short_description = 'Músico'
+
+    def empleador_link(self, obj):
+        """Link al perfil del empleador"""
+        url = reverse('admin:usuarios_usuario_change', args=[obj.oferta_laboral.empleador.usuario.id])
+        return format_html('<a href="{}">{}</a>', url, obj.oferta_laboral.empleador.usuario.get_full_name())
+    empleador_link.short_description = 'Empleador'
+
+    def oferta_titulo(self, obj):
+        """Título de la oferta con link"""
+        url = reverse('admin:usuarios_ofertalaboral_change', args=[obj.oferta_laboral.id])
+        return format_html('<a href="{}">{}</a>', url, obj.oferta_laboral.titulo[:50])
+    oferta_titulo.short_description = 'Oferta'
+
+    def estado_colored(self, obj):
+        """Estado con colores"""
+        colors = {
+            'pendiente': '#ffc107',
+            'en_revision': '#17a2b8',
+            'aceptada': '#28a745',
+            'rechazada': '#dc3545',
+            'cancelada': '#6c757d'
+        }
+        color = colors.get(obj.estado, '#6c757d')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color, obj.get_estado_display()
+        )
+    estado_colored.short_description = 'Estado'
+
+    def tiene_notas(self, obj):
+        """Indica si tiene comentarios del empleador"""
+        if obj.comentarios_empleador:
+            return format_html('✅ Sí')
+        return format_html('❌ No')
+    tiene_notas.short_description = 'Comentarios'
+
+    def acciones_rapidas(self, obj):
+        """Botones de acciones rápidas"""
+        if obj.estado in ['pendiente', 'en_revision']:
+            return format_html(
+                '<a class="button" href="{}">✅ Aceptar</a> '
+                '<a class="button" href="{}">❌ Rechazar</a>',
+                f'/admin/postulacion/{obj.id}/aceptar/',
+                f'/admin/postulacion/{obj.id}/rechazar/'
+            )
+        return format_html('✓ Procesada')
+    acciones_rapidas.short_description = 'Acciones'
+
+    def aceptar_postulaciones(self, request, queryset):
+        """Acción para aceptar postulaciones en lote"""
+        count = 0
+        for postulacion in queryset:
+            if postulacion.estado in ['pendiente', 'en_revision']:
+                postulacion.estado = 'aceptada'
+                postulacion.save()
+                # Enviar notificación
+                from .views import enviar_notificacion_resultado_postulacion
+                enviar_notificacion_resultado_postulacion(postulacion, aceptada=True)
+                count += 1
+        
+        self.message_user(request, f'{count} postulaciones aceptadas y notificadas.')
+    aceptar_postulaciones.short_description = 'Aceptar postulaciones seleccionadas'
+
+    def rechazar_postulaciones(self, request, queryset):
+        """Acción para rechazar postulaciones en lote"""
+        count = 0
+        for postulacion in queryset:
+            if postulacion.estado in ['pendiente', 'en_revision']:
+                postulacion.estado = 'rechazada'
+                postulacion.save()
+                # Enviar notificación
+                from .views import enviar_notificacion_resultado_postulacion
+                enviar_notificacion_resultado_postulacion(postulacion, aceptada=False)
+                count += 1
+        
+        self.message_user(request, f'{count} postulaciones rechazadas y notificadas.')
+    rechazar_postulaciones.short_description = 'Rechazar postulaciones seleccionadas'
+
+    def marcar_en_revision(self, request, queryset):
+        """Acción para marcar como en revisión"""
+        updated = queryset.update(estado='en_revision')
+        self.message_user(request, f'{updated} postulaciones marcadas como en revisión.')
+    marcar_en_revision.short_description = 'Marcar como en revisión'
+
+    def exportar_postulaciones(self, request, queryset):
+        """Exportar postulaciones a CSV"""
+        import csv
+        from django.http import HttpResponse
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="postulaciones.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'ID', 'Músico', 'Email Músico', 'Oferta', 'Empleador', 
+            'Estado', 'Fecha Postulación', 'Tiene Comentarios'
+        ])
+        
+        for postulacion in queryset:
+            writer.writerow([
+                postulacion.id,
+                postulacion.musico.get_full_name(),
+                postulacion.musico.email,
+                postulacion.oferta_laboral.titulo,
+                postulacion.oferta_laboral.empleador.usuario.get_full_name(),
+                postulacion.get_estado_display(),
+                postulacion.fecha_postulacion.strftime('%Y-%m-%d %H:%M'),
+                'Sí' if postulacion.comentarios_empleador else 'No'
+            ])
+        
+        return response
+    exportar_postulaciones.short_description = 'Exportar a CSV'
+
+
+# ADMIN MEJORADO PARA OFERTAS LABORALES
+@admin.register(OfertaLaboral)
+class OfertaLaboralAdmin(admin.ModelAdmin):
+    list_display = (
+        'titulo', 'empleador_link', 'fecha_evento', 'ubicacion', 
+        'estado_colored', 'postulaciones_count', 'presupuesto_range', 
+        'fecha_creacion'
+    )
+    list_filter = (
+        'estado', 'tipo_contrato', 'ubicacion', 'fecha_evento', 'fecha_creacion'
+    )
+    search_fields = (
+        'titulo', 'descripcion', 'empleador__usuario__email', 
+        'empleador__usuario__first_name', 'empleador__usuario__last_name'
+    )
+    readonly_fields = ('slug', 'fecha_creacion', 'fecha_actualizacion')
+    
+    fieldsets = (
+        ('Información Principal', {
+            'fields': ('empleador', 'titulo', 'slug', 'descripcion')
+        }),
+        ('Detalles del Evento', {
+            'fields': ('fecha_evento', 'duracion_estimada', 'ubicacion', 'direccion_evento')
+        }),
+        ('Términos Comerciales', {
+            'fields': (
+                'tipo_contrato', 'presupuesto_minimo', 'presupuesto_maximo',
+                'cupos_disponibles', 'incluye_transporte', 'incluye_hospedaje',
+                'incluye_alimentacion'
+            )
+        }),
+        ('Estado y Configuración', {
+            'fields': ('estado', 'fecha_limite_postulacion')
+        }),
+        ('Metadatos', {
+            'fields': ('fecha_creacion', 'fecha_actualizacion'),
+            'classes': ('collapse',)
+        })
+    )
+
+    actions = ['cerrar_ofertas', 'reabrir_ofertas', 'exportar_ofertas']
+
+    def empleador_link(self, obj):
+        """Link al perfil del empleador"""
+        url = reverse('admin:usuarios_usuario_change', args=[obj.empleador.usuario.id])
+        return format_html('<a href="{}">{}</a>', url, obj.empleador.usuario.get_full_name())
+    empleador_link.short_description = 'Empleador'
+
+    def estado_colored(self, obj):
+        """Estado con colores"""
+        colors = {
+            'abierta': '#28a745',
+            'cerrada': '#dc3545',
+            'pausada': '#ffc107'
+        }
+        color = colors.get(obj.estado, '#6c757d')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color, obj.get_estado_display()
+        )
+    estado_colored.short_description = 'Estado'
+
+    def postulaciones_count(self, obj):
+        """Cantidad de postulaciones"""
+        count = obj.postulacion_set.count()
+        if count > 0:
+            url = f'/admin/usuarios/postulacion/?oferta_laboral__id__exact={obj.id}'
+            return format_html('<a href="{}">{} postulaciones</a>', url, count)
+        return '0 postulaciones'
+    postulaciones_count.short_description = 'Postulaciones'
+
+    def presupuesto_range(self, obj):
+        """Rango de presupuesto"""
+        if obj.presupuesto_minimo and obj.presupuesto_maximo:
+            return f'${obj.presupuesto_minimo:,} - ${obj.presupuesto_maximo:,}'
+        elif obj.presupuesto_minimo:
+            return f'${obj.presupuesto_minimo:,}+'
+        return 'No especificado'
+    presupuesto_range.short_description = 'Presupuesto'
+
+    def cerrar_ofertas(self, request, queryset):
+        """Cerrar ofertas seleccionadas"""
+        updated = queryset.update(estado='cerrada')
+        self.message_user(request, f'{updated} ofertas cerradas.')
+    cerrar_ofertas.short_description = 'Cerrar ofertas seleccionadas'
+
+    def reabrir_ofertas(self, request, queryset):
+        """Reabrir ofertas seleccionadas"""
+        updated = queryset.update(estado='abierta')
+        self.message_user(request, f'{updated} ofertas reabiertas.')
+    reabrir_ofertas.short_description = 'Reabrir ofertas seleccionadas'
+
+    def exportar_ofertas(self, request, queryset):
+        """Exportar ofertas a CSV"""
+        import csv
+        from django.http import HttpResponse
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="ofertas_laborales.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'ID', 'Título', 'Empleador', 'Fecha Evento', 'Ubicación', 
+            'Estado', 'Postulaciones', 'Presupuesto Min', 'Presupuesto Max'
+        ])
+        
+        for oferta in queryset:
+            writer.writerow([
+                oferta.id,
+                oferta.titulo,
+                oferta.empleador.usuario.get_full_name(),
+                oferta.fecha_evento.strftime('%Y-%m-%d %H:%M'),
+                str(oferta.ubicacion),
+                oferta.get_estado_display(),
+                oferta.postulacion_set.count(),
+                oferta.presupuesto_minimo or '',
+                oferta.presupuesto_maximo or ''
+            ])
+        
+        return response
+    exportar_ofertas.short_description = 'Exportar a CSV'

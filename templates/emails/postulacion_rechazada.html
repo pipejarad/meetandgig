@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado de Postulación - Meet & Gig</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #6c757d; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { background: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }
+        .btn { display: inline-block; padding: 12px 25px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
+        .info-box { background: #fff3cd; color: #856404; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0; border-radius: 5px; }
+        .encourage-box { background: #d1ecf1; color: #0c5460; padding: 15px; border-left: 4px solid #17a2b8; margin: 15px 0; border-radius: 5px; }
+        .text-center { text-align: center; }
+        .details-box { background: white; padding: 15px; border: 1px solid #dee2e6; margin: 15px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Meet & Gig</h1>
+            <h2>Resultado de tu Postulación</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hola <strong>{{ musico.get_full_name }}</strong>,</p>
+            
+            <div class="info-box">
+                <h3>📄 Actualización de tu Postulación</h3>
+                <p>
+                    Queremos informarte sobre el resultado de tu postulación para la oferta 
+                    <strong>"{{ postulacion.oferta_laboral.titulo }}"</strong>.
+                </p>
+                <p>
+                    En esta ocasión, el empleador ha decidido continuar con otro candidato 
+                    para esta posición específica.
+                </p>
+            </div>
+            
+            <div class="details-box">
+                <h3>📋 Detalles de la Oferta</h3>
+                <ul>
+                    <li><strong>📝 Título:</strong> {{ postulacion.oferta_laboral.titulo }}</li>
+                    <li><strong>📅 Fecha del evento:</strong> {{ postulacion.oferta_laboral.fecha_evento|date:"d M Y" }}</li>
+                    <li><strong>📍 Ubicación:</strong> {{ postulacion.oferta_laboral.ubicacion.nombre }}</li>
+                    <li><strong>🏷️ Tipo:</strong> {{ postulacion.oferta_laboral.get_tipo_contrato_display }}</li>
+                </ul>
+            </div>
+            
+            {% if postulacion.comentarios_empleador %}
+                <div style="background: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <strong>💬 Comentarios del empleador:</strong>
+                    <p style="margin: 10px 0 0 0; font-style: italic;">"{{ postulacion.comentarios_empleador }}"</p>
+                </div>
+            {% endif %}
+            
+            <div class="encourage-box">
+                <h3>🚀 ¡No te desanimes!</h3>
+                <p>
+                    Cada experiencia es una oportunidad de crecimiento. La industria musical 
+                    tiene muchas oportunidades y tu talento encontrará el lugar perfecto.
+                </p>
+                <p>
+                    <strong>💡 Consejos para futuras postulaciones:</strong>
+                </p>
+                <ul>
+                    <li>🎵 Mantén tu portafolio actualizado con tus mejores trabajos</li>
+                    <li>📸 Actualiza tu material multimedia regularmente</li>
+                    <li>⭐ Solicita referencias laborales de trabajos anteriores</li>
+                    <li>📝 Personaliza tu mensaje de presentación para cada oferta</li>
+                </ul>
+            </div>
+            
+            <div class="text-center">
+                <h3>🎯 Sigue Explorando Oportunidades</h3>
+                <p>
+                    Hay muchas más ofertas esperándote. ¡No te rindas y sigue postulando!
+                </p>
+                
+                <a href="{{ url_ofertas }}" class="btn">
+                    🔍 Ver Nuevas Ofertas
+                </a>
+                <a href="{{ url_mis_postulaciones }}" class="btn" style="background: #6c757d;">
+                    📋 Mis Postulaciones
+                </a>
+                <a href="{{ url_portafolio }}" class="btn" style="background: #28a745;">
+                    ✏️ Actualizar Portafolio
+                </a>
+            </div>
+            
+            <div class="encourage-box">
+                <p><strong>🌟 Recuerda:</strong> El talento y la perseverancia siempre encuentran su camino. 
+                ¡Tu próxima gran oportunidad está esperándote!</p>
+            </div>
+            
+            <hr>
+            
+            <p class="text-center">
+                <small>
+                    ¡Sigue adelante! 🎤<br>
+                    Este email fue enviado por Meet & Gig<br>
+                    Si tienes preguntas, contáctanos en: soporte@meetandgig.com
+                </small>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1278,6 +1278,7 @@ class Notificacion(models.Model):
     """Sistema básico de notificaciones para empleadores"""
     
     TIPO_CHOICES = [
+        ('nueva_postulacion', 'Nueva postulación'),
         ('postulacion_cancelada', 'Postulación cancelada'),
         ('oferta_completada', 'Oferta completada'),
         ('invitacion_aceptada', 'Invitación aceptada'),

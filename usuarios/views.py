@@ -959,6 +959,10 @@ def postular_oferta_view(request, slug):
         
         if form.is_valid():
             postulacion = form.save()
+            
+            # Enviar notificación al empleador (Ticket 4.4)
+            enviar_notificacion_nueva_postulacion(postulacion)
+            
             messages.success(
                 request,
                 f'¡Te has postulado exitosamente a "{oferta.titulo}"! '
@@ -1203,6 +1207,13 @@ def procesar_postulacion_view(request, slug, postulacion_id):
         postulacion.notas_empleador = notas
     
     postulacion.save()
+    
+    # Enviar notificación al músico sobre el resultado (Ticket 4.5)
+    if accion in ['aceptar', 'rechazar'] and estado_anterior != postulacion.estado:
+        enviar_notificacion_resultado_postulacion(
+            postulacion=postulacion, 
+            aceptada=(accion == 'aceptar')
+        )
     
     # Verificar si la oferta debe cerrarse automáticamente
     if accion == 'aceptar':
@@ -1856,3 +1867,129 @@ def enviar_email_solicitud_referencia(testimonio):
         html_message=html_message,
         fail_silently=False
     )
+
+
+# ===================================================================
+# FUNCIONES DE NOTIFICACIÓN - SPRINT 4 TICKETS 4.4 y 4.5
+# ===================================================================
+
+def enviar_notificacion_nueva_postulacion(postulacion):
+    """
+    Envía notificación por email al empleador cuando recibe una nueva postulación
+    Ticket 4.4: Notificar postulación a empleador
+    """
+    try:
+        empleador = postulacion.oferta_laboral.empleador.usuario
+        musico = postulacion.musico
+        
+        # URLs para el email
+        url_gestionar = f"{settings.SITE_URL}{reverse('gestionar_postulaciones', kwargs={'slug': postulacion.oferta_laboral.slug})}"
+        url_portafolio = f"{settings.SITE_URL}{reverse('portafolio_publico', kwargs={'slug': musico.portafolio.slug})}"
+        
+        # Contexto para los templates
+        context = {
+            'empleador': empleador,
+            'postulacion': postulacion,
+            'musico': musico,
+            'url_gestionar': url_gestionar,
+            'url_portafolio': url_portafolio,
+        }
+        
+        # Renderizar templates
+        subject = f"📧 Nueva postulación para '{postulacion.oferta_laboral.titulo}' - Meet & Gig"
+        html_message = render_to_string('emails/nueva_postulacion.html', context)
+        plain_message = render_to_string('emails/nueva_postulacion.txt', context)
+        
+        # Enviar email
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[empleador.email],
+            html_message=html_message,
+            fail_silently=False
+        )
+        
+        # Crear notificación en base de datos para empleador
+        Notificacion.objects.create(
+            empleador=empleador.perfil_empleador,
+            tipo='nueva_postulacion',
+            titulo=f"Nueva postulación para '{postulacion.oferta_laboral.titulo}'",
+            mensaje=f"{musico.get_full_name()} se ha postulado para tu oferta laboral.",
+            postulacion=postulacion,
+            oferta_laboral=postulacion.oferta_laboral
+        )
+        
+        return True
+        
+    except Exception as e:
+        # Log del error (en producción usar logging proper)
+        print(f"Error enviando notificación nueva postulación: {str(e)}")
+        return False
+
+
+def enviar_notificacion_resultado_postulacion(postulacion, aceptada=True):
+    """
+    Envía notificación por email al músico sobre el resultado de su postulación
+    Ticket 4.5: Notificar resultado de postulación al músico
+    """
+    try:
+        musico = postulacion.musico
+        
+        # URLs para el email
+        url_mis_postulaciones = f"{settings.SITE_URL}{reverse('mis_postulaciones')}"
+        url_oferta = f"{settings.SITE_URL}{reverse('detalle_oferta', kwargs={'slug': postulacion.oferta_laboral.slug})}"
+        url_ofertas = f"{settings.SITE_URL}{reverse('buscar_ofertas')}"
+        url_portafolio = f"{settings.SITE_URL}{reverse('portafolio_publico', kwargs={'slug': musico.portafolio.slug})}"
+        
+        # Contexto para los templates
+        context = {
+            'musico': musico,
+            'postulacion': postulacion,
+            'url_mis_postulaciones': url_mis_postulaciones,
+            'url_oferta': url_oferta,
+            'url_ofertas': url_ofertas,
+            'url_portafolio': url_portafolio,
+        }
+        
+        if aceptada:
+            # Email de postulación aceptada
+            subject = f"🎉 ¡Postulación aceptada para '{postulacion.oferta_laboral.titulo}'! - Meet & Gig"
+            html_template = 'emails/postulacion_aceptada.html'
+            txt_template = 'emails/postulacion_aceptada.txt'
+            notif_tipo = 'postulacion_aceptada'
+            notif_titulo = f"¡Postulación aceptada para '{postulacion.oferta_laboral.titulo}'!"
+            notif_mensaje = f"Tu postulación ha sido aceptada. ¡Felicidades!"
+        else:
+            # Email de postulación rechazada
+            subject = f"📄 Resultado de postulación para '{postulacion.oferta_laboral.titulo}' - Meet & Gig"
+            html_template = 'emails/postulacion_rechazada.html'
+            txt_template = 'emails/postulacion_rechazada.txt'
+            notif_tipo = 'postulacion_rechazada'
+            notif_titulo = f"Resultado de postulación para '{postulacion.oferta_laboral.titulo}'"
+            notif_mensaje = f"El empleador ha tomado una decisión sobre tu postulación."
+        
+        # Renderizar templates
+        html_message = render_to_string(html_template, context)
+        plain_message = render_to_string(txt_template, context)
+        
+        # Enviar email
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[musico.email],
+            html_message=html_message,
+            fail_silently=False
+        )
+        
+        # Para músicos, no tenemos un modelo de notificación en BD por ahora
+        # Solo enviamos el email
+        # En futuras versiones se podría crear un modelo de notificación universal
+        
+        return True
+        
+    except Exception as e:
+        # Log del error (en producción usar logging proper)
+        print(f"Error enviando notificación resultado postulación: {str(e)}")
+        return False

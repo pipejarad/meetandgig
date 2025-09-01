@@ -1,0 +1,49 @@
+¡POSTULACIÓN ACEPTADA! - Meet & Gig
+====================================
+
+🎉 ¡FELICIDADES! 🎉
+
+Hola {{ musico.get_full_name }},
+
+✅ ¡Excelentes noticias!
+
+Tu postulación para la oferta "{{ postulacion.oferta_laboral.titulo }}" ha sido ACEPTADA por el empleador.
+
+INFORMACIÓN DEL EMPLEADOR:
+=========================
+👔 Nombre: {{ postulacion.oferta_laboral.empleador.get_full_name }}
+📧 Email: {{ postulacion.oferta_laboral.empleador.email }}
+{% if postulacion.oferta_laboral.empleador.perfilempleador.empresa %}🏢 Empresa: {{ postulacion.oferta_laboral.empleador.perfilempleador.empresa }}{% endif %}
+{% if postulacion.oferta_laboral.empleador.perfilempleador.telefono %}📞 Teléfono: {{ postulacion.oferta_laboral.empleador.perfilempleador.telefono }}{% endif %}
+
+DETALLES DEL TRABAJO CONFIRMADO:
+===============================
+📝 Título: {{ postulacion.oferta_laboral.titulo }}
+📅 Fecha del evento: {{ postulacion.oferta_laboral.fecha_evento|date:"d M Y H:i" }}
+📍 Ubicación: {{ postulacion.oferta_laboral.ubicacion.nombre }}
+🏷️ Tipo: {{ postulacion.oferta_laboral.get_tipo_contrato_display }}
+{% if postulacion.oferta_laboral.presupuesto_minimo %}💰 Presupuesto: ${{ postulacion.oferta_laboral.presupuesto_minimo|floatformat:0 }}{% if postulacion.oferta_laboral.presupuesto_maximo %} - ${{ postulacion.oferta_laboral.presupuesto_maximo|floatformat:0 }}{% endif %}{% endif %}
+
+{% if postulacion.comentarios_empleador %}
+COMENTARIOS DEL EMPLEADOR:
+=========================
+"{{ postulacion.comentarios_empleador }}"
+{% endif %}
+
+🚀 PRÓXIMOS PASOS:
+==================
+Te recomendamos contactar al empleador para coordinar los detalles finales 
+del evento y establecer una comunicación directa.
+
+ACCIONES DISPONIBLES:
+====================
+📋 Ver mis postulaciones: {{ url_mis_postulaciones }}
+👀 Ver oferta completa: {{ url_oferta }}
+
+🎯 IMPORTANTE: Mantén una comunicación profesional con el empleador 
+y confirma todos los detalles del evento antes de la fecha programada.
+
+====================================
+¡Éxito en tu presentación! 🎤
+Este email fue enviado por Meet & Gig
+Si tienes preguntas, contáctanos en: soporte@meetandgig.com

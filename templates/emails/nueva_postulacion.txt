@@ -1,0 +1,41 @@
+NUEVA POSTULACIÓN RECIBIDA - Meet & Gig
+==========================================
+
+Hola {{ empleador.get_full_name }},
+
+Has recibido una nueva postulación para tu oferta de trabajo "{{ postulacion.oferta_laboral.titulo }}".
+
+INFORMACIÓN DEL MÚSICO:
+=======================
+👨‍🎤 Nombre: {{ postulacion.musico.get_full_name }}
+📧 Email: {{ postulacion.musico.email }}
+{% if postulacion.musico.perfilmusico.telefono %}📞 Teléfono: {{ postulacion.musico.perfilmusico.telefono }}{% endif %}
+{% if postulacion.musico.portafolio.ubicacion %}📍 Ubicación: {{ postulacion.musico.portafolio.ubicacion.nombre }}{% endif %}
+{% if postulacion.musico.portafolio.años_experiencia %}🎯 Experiencia: {{ postulacion.musico.portafolio.años_experiencia }} años{% endif %}
+{% if postulacion.musico.portafolio.instrumento_principal %}🎹 Instrumento Principal: {{ postulacion.musico.portafolio.instrumento_principal.nombre }}{% endif %}
+
+{% if postulacion.mensaje_personalizado %}
+MENSAJE DEL MÚSICO:
+==================
+"{{ postulacion.mensaje_personalizado }}"
+{% endif %}
+
+DETALLES DE TU OFERTA:
+=====================
+📋 Título: {{ postulacion.oferta_laboral.titulo }}
+📅 Fecha del evento: {{ postulacion.oferta_laboral.fecha_evento|date:"d M Y" }}
+📍 Ubicación: {{ postulacion.oferta_laboral.ubicacion.nombre }}
+🏷️ Tipo: {{ postulacion.oferta_laboral.get_tipo_contrato_display }}
+{% if postulacion.oferta_laboral.presupuesto_minimo %}💰 Presupuesto: ${{ postulacion.oferta_laboral.presupuesto_minimo|floatformat:0 }}{% if postulacion.oferta_laboral.presupuesto_maximo %} - ${{ postulacion.oferta_laboral.presupuesto_maximo|floatformat:0 }}{% endif %}{% endif %}
+
+ACCIONES DISPONIBLES:
+====================
+👀 Ver postulación completa: {{ url_gestionar }}
+🎵 Ver portafolio del músico: {{ url_portafolio }}
+
+💡 CONSEJO: Revisa el portafolio completo del músico para conocer mejor su experiencia, 
+referencias laborales y material multimedia antes de tomar una decisión.
+
+==========================================
+Este email fue enviado por Meet & Gig
+Si tienes preguntas, contáctanos en: soporte@meetandgig.com

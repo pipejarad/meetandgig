@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Postulación Aceptada! - Meet & Gig</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #28a745; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { background: #f8f9fa; padding: 20px; border-radius: 0 0 5px 5px; }
+        .btn { display: inline-block; padding: 12px 25px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
+        .success-box { background: #d4edda; color: #155724; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0; border-radius: 5px; }
+        .info-box { background: white; padding: 15px; border-left: 4px solid #007bff; margin: 15px 0; }
+        .text-center { text-align: center; }
+        .empleador-card { background: white; padding: 20px; border-radius: 8px; margin: 15px 0; border: 1px solid #dee2e6; }
+        .celebration { font-size: 2em; text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Meet & Gig</h1>
+            <div class="celebration">🎉 ¡FELICIDADES! 🎉</div>
+            <h2>Tu Postulación fue Aceptada</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hola <strong>{{ musico.get_full_name }}</strong>,</p>
+            
+            <div class="success-box">
+                <h3>✅ ¡Excelentes noticias!</h3>
+                <p>
+                    Tu postulación para la oferta <strong>"{{ postulacion.oferta_laboral.titulo }}"</strong> 
+                    ha sido <strong>ACEPTADA</strong> por el empleador.
+                </p>
+            </div>
+            
+            <div class="empleador-card">
+                <h3>👔 Información del Empleador</h3>
+                <div style="margin-bottom: 15px;">
+                    <strong>📧 Email:</strong> {{ postulacion.oferta_laboral.empleador.email }}<br>
+                    <strong>👤 Nombre:</strong> {{ postulacion.oferta_laboral.empleador.get_full_name }}<br>
+                    {% if postulacion.oferta_laboral.empleador.perfilempleador.empresa %}
+                        <strong>🏢 Empresa:</strong> {{ postulacion.oferta_laboral.empleador.perfilempleador.empresa }}<br>
+                    {% endif %}
+                    {% if postulacion.oferta_laboral.empleador.perfilempleador.telefono %}
+                        <strong>📞 Teléfono:</strong> {{ postulacion.oferta_laboral.empleador.perfilempleador.telefono }}<br>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h3>📋 Detalles del Trabajo Confirmado</h3>
+                <ul>
+                    <li><strong>📝 Título:</strong> {{ postulacion.oferta_laboral.titulo }}</li>
+                    <li><strong>📅 Fecha del evento:</strong> {{ postulacion.oferta_laboral.fecha_evento|date:"d M Y H:i" }}</li>
+                    <li><strong>📍 Ubicación:</strong> {{ postulacion.oferta_laboral.ubicacion.nombre }}</li>
+                    <li><strong>🏷️ Tipo:</strong> {{ postulacion.oferta_laboral.get_tipo_contrato_display }}</li>
+                    {% if postulacion.oferta_laboral.presupuesto_minimo %}
+                        <li><strong>💰 Presupuesto:</strong> ${{ postulacion.oferta_laboral.presupuesto_minimo|floatformat:0 }}{% if postulacion.oferta_laboral.presupuesto_maximo %} - ${{ postulacion.oferta_laboral.presupuesto_maximo|floatformat:0 }}{% endif %}</li>
+                    {% endif %}
+                    {% if postulacion.oferta_laboral.descripcion %}
+                        <li><strong>📄 Descripción:</strong> {{ postulacion.oferta_laboral.descripcion|truncatewords:20 }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            {% if postulacion.comentarios_empleador %}
+                <div style="background: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <strong>💬 Comentarios del empleador:</strong>
+                    <p style="margin: 10px 0 0 0; font-style: italic;">"{{ postulacion.comentarios_empleador }}"</p>
+                </div>
+            {% endif %}
+            
+            <div class="text-center">
+                <h3>🚀 Próximos Pasos</h3>
+                <p>
+                    Te recomendamos contactar al empleador para coordinar los detalles finales 
+                    del evento y establecer una comunicación directa.
+                </p>
+                
+                <a href="{{ url_mis_postulaciones }}" class="btn">
+                    📋 Ver Mis Postulaciones
+                </a>
+                <a href="{{ url_oferta }}" class="btn" style="background: #6c757d;">
+                    👀 Ver Oferta Completa
+                </a>
+            </div>
+            
+            <div class="success-box">
+                <p><strong>🎯 Importante:</strong> Mantén una comunicación profesional con el empleador 
+                y confirma todos los detalles del evento antes de la fecha programada.</p>
+            </div>
+            
+            <hr>
+            
+            <p class="text-center">
+                <small>
+                    ¡Éxito en tu presentación! 🎤<br>
+                    Este email fue enviado por Meet & Gig<br>
+                    Si tienes preguntas, contáctanos en: soporte@meetandgig.com
+                </small>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

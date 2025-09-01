@@ -1,0 +1,56 @@
+RESULTADO DE TU POSTULACIÓN - Meet & Gig
+=======================================
+
+Hola {{ musico.get_full_name }},
+
+📄 ACTUALIZACIÓN DE TU POSTULACIÓN
+==================================
+
+Queremos informarte sobre el resultado de tu postulación para la oferta "{{ postulacion.oferta_laboral.titulo }}".
+
+En esta ocasión, el empleador ha decidido continuar con otro candidato para esta posición específica.
+
+DETALLES DE LA OFERTA:
+=====================
+📝 Título: {{ postulacion.oferta_laboral.titulo }}
+📅 Fecha del evento: {{ postulacion.oferta_laboral.fecha_evento|date:"d M Y" }}
+📍 Ubicación: {{ postulacion.oferta_laboral.ubicacion.nombre }}
+🏷️ Tipo: {{ postulacion.oferta_laboral.get_tipo_contrato_display }}
+
+{% if postulacion.comentarios_empleador %}
+COMENTARIOS DEL EMPLEADOR:
+=========================
+"{{ postulacion.comentarios_empleador }}"
+{% endif %}
+
+🚀 ¡NO TE DESANIMES!
+===================
+
+Cada experiencia es una oportunidad de crecimiento. La industria musical 
+tiene muchas oportunidades y tu talento encontrará el lugar perfecto.
+
+💡 CONSEJOS PARA FUTURAS POSTULACIONES:
+======================================
+🎵 Mantén tu portafolio actualizado con tus mejores trabajos
+📸 Actualiza tu material multimedia regularmente
+⭐ Solicita referencias laborales de trabajos anteriores
+📝 Personaliza tu mensaje de presentación para cada oferta
+
+🎯 SIGUE EXPLORANDO OPORTUNIDADES
+================================
+
+Hay muchas más ofertas esperándote. ¡No te rindas y sigue postulando!
+
+ACCIONES DISPONIBLES:
+====================
+🔍 Ver nuevas ofertas: {{ url_ofertas }}
+📋 Mis postulaciones: {{ url_mis_postulaciones }}
+✏️ Actualizar portafolio: {{ url_portafolio }}
+
+🌟 RECUERDA: El talento y la perseverancia siempre encuentran su camino. 
+¡Tu próxima gran oportunidad está esperándote!
+
+=======================================
+¡Sigue adelante! 🎤
+Este email fue enviado por Meet & Gig
+Si tienes preguntas, contáctanos en: soporte@meetandgig.com
