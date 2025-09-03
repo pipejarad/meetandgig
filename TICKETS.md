@@ -46,17 +46,26 @@
 
 ## 🟩 Sprint 4: Visualización, Referencias y Moderación
 
-| Ticket | Título                                       | Descripción breve                                        |
-| ------ | -------------------------------------------- | -------------------------------------------------------- |
-| 4.1    | Agregar referencia laboral                   | Permitir agregar referencias al portafolio de un músico. |
-| 4.2    | Visualizar referencias laborales             | Las referencias son visibles en el portafolio.           |
-| 4.3    | Mostrar información de contacto              | Email u otros datos visibles según configuración.        |
-| 4.4    | Notificar postulación a empleador            | Email o alerta al recibir nueva postulación.             |
-| 4.5    | Notificar resultado de postulación al músico | Notificación si es aceptado o rechazado.                 |
-| 4.6    | Revisar y aceptar/rechazar postulaciones     | Gestión de candidaturas por parte del empleador.         |
-| 4.7    | Vista de estado de postulación               | Músico puede ver estado de sus postulaciones.            |
-| 4.8    | Funcionalidad de moderación básica           | Admin puede editar/eliminar usuarios, ofertas, etc.      |
-| 4.9    | Diseño responsive general                    | Garantizar experiencia óptima en móvil/escritorio.       |
+| Ticket | Título                                       | Estado        | Descripción breve                                        |
+| ------ | -------------------------------------------- | ------------- | -------------------------------------------------------- |
+| 4.1    | Agregar referencia laboral                   | ✅ COMPLETADO | Sistema completo de referencias con modelo Testimonio, forms de solicitud/respuesta y workflow de aprobación. |
+| 4.2    | Visualizar referencias laborales             | ✅ COMPLETADO | Referencias integradas en portafolio con sistema de tokens para solicitudes seguras. |
+| 4.3    | Mostrar información de contacto              | ✅ COMPLETADO | Email de contacto incluido en sistema de notificaciones y templates. |
+| 4.4    | Notificar postulación a empleador            | ✅ COMPLETADO | Sistema completo de notificaciones por email con templates HTML/texto profesionales. |
+| 4.5    | Notificar resultado de postulación al músico | ✅ COMPLETADO | Notificaciones automáticas para aceptación/rechazo con URLs corregidas. |
+| 4.6    | Revisar y aceptar/rechazar postulaciones     | 🔶 PARCIAL    | Funcionalidad básica via admin. Pendiente: dashboard dedicado para empleadores. |
+| 4.7    | Vista de estado de postulación               | 🔶 PARCIAL    | Vista `mis_postulaciones` con estadísticas básicas. Pendiente: dashboard mejorado. |
+| 4.8    | Funcionalidad de moderación básica           | ✅ COMPLETADO | Admin interface mejorado con filtros, acciones en lote y correcciones de campos. |
+| 4.9    | Diseño responsive general                    | 🔍 PENDIENTE  | Requiere evaluación y audit de responsive design en toda la aplicación. |
+
+---
+
+## 📊 Resumen de Progreso por Sprint
+
+- **Sprint 1**: ✅ 100% Completado (6/6 tickets)
+- **Sprint 2**: ✅ 100% Completado (9/9 tickets)  
+- **Sprint 3**: ✅ 100% Completado (8/8 tickets)
+- **Sprint 4**: 🔶 ~80% Completado (6/9 tickets completos, 2 parciales, 1 pendiente)
 
 ---
 

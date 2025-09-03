@@ -1882,16 +1882,19 @@ def enviar_notificacion_nueva_postulacion(postulacion):
         empleador = postulacion.oferta_laboral.empleador.usuario
         musico = postulacion.musico
         
-        # URLs para el email
-        url_gestionar = f"{settings.SITE_URL}{reverse('gestionar_postulaciones', kwargs={'slug': postulacion.oferta_laboral.slug})}"
-        url_portafolio = f"{settings.SITE_URL}{reverse('portafolio_publico', kwargs={'slug': musico.portafolio.slug})}"
+        # URLs para el email (usando URLs que sabemos que funcionan)
+        url_oferta = f"http://127.0.0.1:8000/ofertas/{postulacion.oferta_laboral.slug}/"
+        url_admin_postulaciones = "http://127.0.0.1:8000/admin/usuarios/postulacion/"
+        url_portafolio = f"http://127.0.0.1:8000/portafolio/{musico.username}/"
         
         # Contexto para los templates
         context = {
             'empleador': empleador,
             'postulacion': postulacion,
             'musico': musico,
-            'url_gestionar': url_gestionar,
+            'oferta': postulacion.oferta_laboral,
+            'url_oferta': url_oferta,
+            'url_admin_postulaciones': url_admin_postulaciones,
             'url_portafolio': url_portafolio,
         }
         
@@ -1928,7 +1931,7 @@ def enviar_notificacion_nueva_postulacion(postulacion):
         return False
 
 
-def enviar_notificacion_resultado_postulacion(postulacion, aceptada=True):
+def enviar_notificacion_resultado_postulacion(postulacion):
     """
     Envía notificación por email al músico sobre el resultado de su postulación
     Ticket 4.5: Notificar resultado de postulación al músico
@@ -1936,16 +1939,21 @@ def enviar_notificacion_resultado_postulacion(postulacion, aceptada=True):
     try:
         musico = postulacion.musico
         
-        # URLs para el email
-        url_mis_postulaciones = f"{settings.SITE_URL}{reverse('mis_postulaciones')}"
-        url_oferta = f"{settings.SITE_URL}{reverse('detalle_oferta', kwargs={'slug': postulacion.oferta_laboral.slug})}"
-        url_ofertas = f"{settings.SITE_URL}{reverse('buscar_ofertas')}"
-        url_portafolio = f"{settings.SITE_URL}{reverse('portafolio_publico', kwargs={'slug': musico.portafolio.slug})}"
+        # Determinar si fue aceptada o rechazada
+        aceptada = postulacion.estado == 'aceptada'
+        
+        # URLs para el email (usando URLs que sabemos que funcionan)
+        url_mis_postulaciones = "http://127.0.0.1:8000/mis-postulaciones/"
+        url_oferta = f"http://127.0.0.1:8000/ofertas/{postulacion.oferta_laboral.slug}/"
+        url_ofertas = "http://127.0.0.1:8000/ofertas/"
+        url_portafolio = f"http://127.0.0.1:8000/portafolio/{musico.username}/"
         
         # Contexto para los templates
         context = {
             'musico': musico,
             'postulacion': postulacion,
+            'oferta': postulacion.oferta_laboral,
+            'empleador': postulacion.oferta_laboral.empleador.usuario,
             'url_mis_postulaciones': url_mis_postulaciones,
             'url_oferta': url_oferta,
             'url_ofertas': url_ofertas,

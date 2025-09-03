@@ -30,7 +30,7 @@ DETALLES DE TU OFERTA:
 
 ACCIONES DISPONIBLES:
 ====================
-👀 Ver postulación completa: {{ url_gestionar }}
+👀 Ver postulación completa: {{ url_admin_postulaciones }}
 🎵 Ver portafolio del músico: {{ url_portafolio }}
 
 💡 CONSEJO: Revisa el portafolio completo del músico para conocer mejor su experiencia, 

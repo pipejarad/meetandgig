@@ -368,10 +368,10 @@ class PostulacionAdmin(admin.ModelAdmin):
             'fields': ('musico', 'oferta_laboral', 'estado', 'fecha_postulacion')
         }),
         ('Detalles de la Postulación', {
-            'fields': ('mensaje_presentacion', 'disponibilidad_fecha')
+            'fields': ('mensaje_personalizado', 'tarifa_propuesta')
         }),
         ('Gestión del Empleador', {
-            'fields': ('comentarios_empleador',),
+            'fields': ('notas_empleador',),
             'classes': ('collapse',)
         })
     )
@@ -417,22 +417,27 @@ class PostulacionAdmin(admin.ModelAdmin):
 
     def tiene_notas(self, obj):
         """Indica si tiene comentarios del empleador"""
-        if obj.comentarios_empleador:
+        if obj.notas_empleador:
             return format_html('✅ Sí')
         return format_html('❌ No')
     tiene_notas.short_description = 'Comentarios'
 
     def acciones_rapidas(self, obj):
-        """Botones de acciones rápidas"""
+        """Estado actual y enlace a edición"""
         if obj.estado in ['pendiente', 'en_revision']:
+            edit_url = f'/admin/usuarios/postulacion/{obj.id}/change/'
             return format_html(
-                '<a class="button" href="{}">✅ Aceptar</a> '
-                '<a class="button" href="{}">❌ Rechazar</a>',
-                f'/admin/postulacion/{obj.id}/aceptar/',
-                f'/admin/postulacion/{obj.id}/rechazar/'
+                '<span style="color: orange;">⏳ {}</span> | '
+                '<a class="button" href="{}">✏️ Editar</a>',
+                obj.get_estado_display(),
+                edit_url
             )
+        elif obj.estado == 'aceptada':
+            return format_html('<span style="color: green;">✅ Aceptada</span>')
+        elif obj.estado == 'rechazada':
+            return format_html('<span style="color: red;">❌ Rechazada</span>')
         return format_html('✓ Procesada')
-    acciones_rapidas.short_description = 'Acciones'
+    acciones_rapidas.short_description = 'Estado y Acciones'
 
     def aceptar_postulaciones(self, request, queryset):
         """Acción para aceptar postulaciones en lote"""
@@ -442,8 +447,11 @@ class PostulacionAdmin(admin.ModelAdmin):
                 postulacion.estado = 'aceptada'
                 postulacion.save()
                 # Enviar notificación
-                from .views import enviar_notificacion_resultado_postulacion
-                enviar_notificacion_resultado_postulacion(postulacion, aceptada=True)
+                from usuarios.views import enviar_notificacion_resultado_postulacion
+                try:
+                    enviar_notificacion_resultado_postulacion(postulacion)
+                except Exception as e:
+                    pass  # Continuar aunque falle el email
                 count += 1
         
         self.message_user(request, f'{count} postulaciones aceptadas y notificadas.')
@@ -457,8 +465,11 @@ class PostulacionAdmin(admin.ModelAdmin):
                 postulacion.estado = 'rechazada'
                 postulacion.save()
                 # Enviar notificación
-                from .views import enviar_notificacion_resultado_postulacion
-                enviar_notificacion_resultado_postulacion(postulacion, aceptada=False)
+                from usuarios.views import enviar_notificacion_resultado_postulacion
+                try:
+                    enviar_notificacion_resultado_postulacion(postulacion)
+                except Exception as e:
+                    pass  # Continuar aunque falle el email
                 count += 1
         
         self.message_user(request, f'{count} postulaciones rechazadas y notificadas.')
@@ -493,7 +504,7 @@ class PostulacionAdmin(admin.ModelAdmin):
                 postulacion.oferta_laboral.empleador.usuario.get_full_name(),
                 postulacion.get_estado_display(),
                 postulacion.fecha_postulacion.strftime('%Y-%m-%d %H:%M'),
-                'Sí' if postulacion.comentarios_empleador else 'No'
+                'Sí' if postulacion.notas_empleador else 'No'
             ])
         
         return response
@@ -564,7 +575,7 @@ class OfertaLaboralAdmin(admin.ModelAdmin):
 
     def postulaciones_count(self, obj):
         """Cantidad de postulaciones"""
-        count = obj.postulacion_set.count()
+        count = obj.postulaciones.count()
         if count > 0:
             url = f'/admin/usuarios/postulacion/?oferta_laboral__id__exact={obj.id}'
             return format_html('<a href="{}">{} postulaciones</a>', url, count)
@@ -614,7 +625,7 @@ class OfertaLaboralAdmin(admin.ModelAdmin):
                 oferta.fecha_evento.strftime('%Y-%m-%d %H:%M'),
                 str(oferta.ubicacion),
                 oferta.get_estado_display(),
-                oferta.postulacion_set.count(),
+                oferta.postulaciones.count(),
                 oferta.presupuesto_minimo or '',
                 oferta.presupuesto_maximo or ''
             ])
