@@ -5,8 +5,16 @@
 [![Django](https://img.shields.io/badge/Django-4.2.20-green.svg)](https://djangoproject.com)
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-4.3.1-purple.svg)](https://getbootstrap.com)
-[![Tests](https://img.shields.io/badge/Tests-34/34_passing-brightgreen.svg)]()
-[![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-Reorganized-brightgreen.svg)]()
+[![Code_Quality](https://img.shields.io/### 📊 Métricas Actuales
+
+- **Líneas de código**: ~2000+ líneas (models.py: 1200+, views.py: 1600+)
+- **Tests**: Suite reorganizada con 16 archivos de test en estructura profesional
+- **Modelos**: 16 modelos interconectados
+- **Templates**: 30+ templates responsive
+- **URLs**: 25+ endpoints funcionales
+- **Migraciones**: 24+ migraciones optimizadas
+- **Scripts**: Organizados en categorías (desarrollo, debug, data)de_Quality-Optimized-brightgreen.svg)]()
 
 ## 📋 Descripción
 
@@ -46,17 +54,26 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 - ✅ **Ticket 3.7**: Validaciones completas, gestión de postulaciones y notificaciones automáticas
 - ✅ **Ticket 3.8**: Sistema de invitaciones directas con dashboard y notificaciones
 
-### 🎭 Sprint 4: Referencias y Moderación (🔄 PLANIFICADO)
+### 🎭 Sprint 4: Referencias y Moderación (� EN PROGRESO)
 
-- 🔄 **Ticket 4.1**: Agregar referencia laboral al portafolio
-- 🔄 **Ticket 4.2**: Visualizar referencias laborales en portafolio
-- 🔄 **Ticket 4.3**: Mostrar información de contacto según configuración
-- 🔄 **Ticket 4.4**: Notificar postulación a empleador (email/alerta)
-- 🔄 **Ticket 4.5**: Notificar resultado de postulación al músico
-- 🔄 **Ticket 4.6**: Revisar y aceptar/rechazar postulaciones
-- 🔄 **Ticket 4.7**: Vista de estado de postulación para músicos
-- 🔄 **Ticket 4.8**: Funcionalidad de moderación básica (admin)
-- 🔄 **Ticket 4.9**: Diseño responsive general (móvil/escritorio)
+- ✅ **Ticket 4.1**: Sistema de referencias laborales implementado
+- ✅ **Ticket 4.3**: Configuración de privacidad de información de contacto
+- 🔄 **Ticket 4.2**: Visualización pública de referencias en portafolios
+- 🔄 **Ticket 4.4**: Sistema de notificaciones por email (empleadores)
+- 🔄 **Ticket 4.5**: Notificaciones de resultado de postulación (músicos)
+- 🔄 **Ticket 4.6**: Panel de gestión de postulaciones para empleadores
+- 🔄 **Ticket 4.7**: Vista de estado detallado para músicos
+- 🔄 **Ticket 4.8**: Sistema de moderación administrativa
+- 🔄 **Ticket 4.9**: Optimización responsive final
+
+### 🛠️ Sprint 5: Infraestructura y Calidad (✅ COMPLETADO)
+
+- ✅ **Reorganización completa de tests**: Estructura profesional y mantenible
+- ✅ **Organización de scripts de desarrollo**: Separación por funcionalidad
+- ✅ **Limpieza de código**: Eliminación de archivos duplicados y obsoletos
+- ✅ **Documentación actualizada**: Guías y estructura del proyecto
+- ✅ **Configuración de testing**: Setup con pytest y fixtures
+- ✅ **Scripts de utilidad**: Debug, desarrollo y manejo de datos
 
 ### 👥 Tipos de Usuario
 
@@ -152,9 +169,10 @@ MeetAndGig es una aplicación web desarrollada en Django que facilita la conexi�
 - **Templates**: Sistema jerárquico con base.html, bloques reutilizables
 - **Formularios**: Django Forms con validación personalizada y contadores
 - **Localización**: Configurado para Chile (es-CL, CLP)
-- **Testing**: Django TestCase con 34 tests y 100% de cobertura
-- **Control de versiones**: Git con conventional commits
-- **Documentación**: Markdown organizado en carpeta docs/
+- **Testing**: Suite de tests reorganizada profesionalmente con pytest
+- **Control de versiones**: Git con conventional commits y documentación completa
+- **Documentación**: Markdown organizado con guías de desarrollo
+- **Scripts de utilidad**: Herramientas de debug, desarrollo y manejo de datos
 
 ## 🚀 Instalación y Configuración
 
@@ -215,39 +233,68 @@ El comando `poblar_catalogos` añade:
 - **16 ubicaciones** principales de Chile
 - **4 niveles de experiencia** estructurados
 
-## 🧪 Testing
+## 🧪 Testing y Calidad de Código
 
-### ✅ Suite Completa de Tests (34/34 pasando)
+### ✅ Suite de Tests Reorganizada
+
+El proyecto cuenta con una suite de tests completamente reorganizada siguiendo mejores prácticas:
 
 ```bash
-# Ejecutar todos los tests
-python manage.py test
+# Ejecutar tests básicos de verificación
+python manage.py test usuarios.tests.test_basic
 
 # Tests específicos por funcionalidad
-python manage.py test usuarios.tests_ofertas_laborales    # 15 tests
-python manage.py test usuarios.tests_postulaciones       # 8 tests
-python manage.py test usuarios.tests_invitaciones        # 8 tests
-python manage.py test usuarios.tests_notificaciones      # 3 tests
+python manage.py test usuarios.tests.test_authentication
+python manage.py test usuarios.tests.test_models
+python manage.py test usuarios.tests.test_views
+python manage.py test usuarios.tests.test_integration
 
 # Ver detalles de ejecución
-python manage.py test -v 2
+python manage.py test usuarios.tests -v 2
 ```
 
-### 📊 Cobertura de Tests
+### � Estructura de Tests Organizada
 
-| **Funcionalidad**        | **Tests** | **Cobertura** | **Estado**   |
-| ------------------------ | --------- | ------------- | ------------ |
-| **Ofertas Laborales**    | 15/15     | 100%          | ✅ Completo  |
-| **Postulaciones**        | 8/8       | 100%          | ✅ Completo  |
-| **Invitaciones**         | 8/8       | 100%          | ✅ Completo  |
-| **Notificaciones**       | 3/3       | 100%          | ✅ Completo  |
-| **Perfiles/Portafolios** | -         | Legacy        | ✅ Funcional |
+```
+usuarios/tests/
+├── __init__.py                    # Configuración del módulo
+├── test_basic.py                  # ✅ Tests básicos (verificados)
+├── test_authentication.py        # Tests de autenticación y registro
+├── test_models.py                 # Tests de modelos y relaciones
+├── test_views.py                  # Tests de vistas y funcionalidad web
+├── test_integration.py            # Tests de integración end-to-end
+├── test_notificaciones.py         # Tests del sistema de notificaciones
+├── test_notificaciones_manual.py  # Tests manuales Sprint 4
+├── test_notificaciones_simple.py  # Tests simplificados
+├── test_sprint_4_manual.py        # Testing manual completo Sprint 4
+├── test_referencias.py            # Tests del sistema de referencias
+├── test_postulaciones.py          # Tests de postulaciones
+├── test_invitaciones.py           # Tests de invitaciones
+├── test_ofertas_laborales.py      # Tests de ofertas laborales
+├── test_ticket_4_1.py             # Tests específicos del ticket 4.1
+└── test_ticket_4_3.py             # Tests específicos del ticket 4.3
+```
 
-### 🎯 Tests Incluyen
+### 🛠️ Scripts de Desarrollo Organizados
 
-- **Modelos**: Validación de campos, métodos, relaciones
-- **Vistas**: Autenticación, permisos, respuestas HTTP
-- **Formularios**: Validación de datos y reglas de negocio
+```
+scripts/
+├── README.md                  # Documentación de scripts
+├── desarrollo/
+│   └── mostrar_resumen_perfiles.py  # Ver perfiles creados
+├── debug/
+│   ├── debug_sociales.py          # Debug redes sociales
+│   └── debug_password.py          # Debug recuperación password
+└── data/
+    └── crear_perfiles_musicos.py  # Crear datos de prueba
+```
+
+### 🎯 Configuración de Testing
+
+- **pytest**: Configurado con `conftest.py` y fixtures reutilizables
+- **Django TestCase**: Tests de modelos, vistas y formularios
+- **Tests manuales**: Scripts específicos para Sprint 4
+- **Cobertura**: Tests básicos verificados y funcionando
 - **Búsquedas**: Filtros, parámetros, resultados esperados
 - **Flujos Completos**: Desde creación hasta finalización
 
@@ -255,11 +302,18 @@ python manage.py test -v 2
 
 ```
 meetandgig/
-├── docs/                    # 📚 Documentación organizada
+├── docs/                    # 📚 Documentación completa del proyecto
 │   ├── tickets/            # Tickets completados con detalles técnicos
 │   ├── sprints/            # Documentación de sprints completados
 │   ├── guides/             # Guías de desarrollo y contexto
+│   ├── ANALISIS_SCRIPTS_DESARROLLO.md  # Análisis de scripts
+│   ├── REORGANIZACION_TESTS_COMPLETADA.md  # Limpieza de tests
 │   └── PROJECT_STATUS.md   # Estado actual del proyecto
+├── scripts/                # 🛠️ Scripts de desarrollo organizados
+│   ├── README.md          # Documentación de scripts
+│   ├── desarrollo/        # Scripts para facilitar desarrollo
+│   ├── debug/             # Scripts de debugging específico
+│   └── data/              # Scripts de manejo de datos
 ├── meetandgig/             # ⚙️ Configuración principal
 │   ├── settings.py        # Configuraciones de Django
 │   ├── urls.py           # URLs principales del proyecto
@@ -272,8 +326,19 @@ meetandgig/
 │   ├── admin.py          # Admin personalizado con filtros y búsqueda
 │   ├── urls.py           # 25+ URLs específicas de la aplicación
 │   ├── backends.py       # Backend de autenticación personalizado
-│   ├── tests_*.py        # 4 archivos de tests (34 tests total)
-│   ├── migrations/       # 21 migraciones de BD optimizadas
+│   ├── tests/            # 📋 Suite de tests completamente reorganizada
+│   │   ├── test_basic.py           # Tests básicos verificados
+│   │   ├── test_authentication.py  # Tests de autenticación
+│   │   ├── test_models.py          # Tests de modelos
+│   │   ├── test_views.py           # Tests de vistas
+│   │   ├── test_integration.py     # Tests de integración
+│   │   ├── test_notificaciones*.py # Tests de notificaciones
+│   │   ├── test_referencias.py     # Tests de referencias
+│   │   ├── test_postulaciones.py   # Tests de postulaciones
+│   │   ├── test_invitaciones.py    # Tests de invitaciones
+│   │   ├── test_ofertas_laborales.py # Tests de ofertas
+│   │   └── test_ticket_*.py        # Tests específicos por ticket
+│   ├── migrations/       # 24+ migraciones de BD optimizadas
 │   ├── management/       # Commands personalizados (poblar_catalogos)
 │   └── templates/usuarios/  # 30+ templates HTML específicos
 │       ├── auth/              # Templates de autenticación
@@ -286,6 +351,8 @@ meetandgig/
 │   ├── fotos_perfil/     # Fotos de perfil de usuarios
 │   └── portafolios/      # Multimedia de portafolios
 ├── staticfiles/          # 📦 Archivos estáticos recolectados
+├── conftest.py           # ⚙️ Configuración global de pytest
+├── pytest.ini           # 📋 Configuración de pytest
 ├── TICKETS.md            # 📋 Backlog con estado de tickets
 ├── guidelines.md         # 📖 Convenciones de desarrollo
 ├── requirements.txt      # 📦 Dependencias de producción
@@ -492,15 +559,8 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 **Felipe Jara** ([@pipejarad](https://github.com/pipejarad))
 
-- 🌐 LinkedIn: [Felipe Jara](https://linkedin.com/in/pipejarad)
-- 📧 Email: contacto@felipejara.dev
-
-## 🙏 Agradecimientos
-
-- **Django Community** por el excelente framework
-- **Bootstrap Team** por el sistema de diseño
-- **VS Code** por las herramientas de desarrollo
-- **GitHub Copilot** por la asistencia en desarrollo
+- 🌐 LinkedIn: [Felipe Jara](https://www.linkedin.com/in/felipe-jara-6582a3100/)
+- 📧 Email: jarad.felipe@gmail.com
 
 ---
 
@@ -508,12 +568,13 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 **🎯 MVP Progress: 75% completado**
 
-| Sprint   | Estado         | Progreso | Tests     |
-| -------- | -------------- | -------- | --------- |
-| Sprint 1 | ✅ Completado  | 100%     | ✅ Legacy |
-| Sprint 2 | ✅ Completado  | 100%     | ✅ Legacy |
-| Sprint 3 | ✅ Completado  | 100%     | ✅ 34/34  |
-| Sprint 4 | 🔄 Planificado | 0%       | 📋 TBD    |
+| Sprint   | Estado        | Progreso | Tests              |
+| -------- | ------------- | -------- | ------------------ |
+| Sprint 1 | ✅ Completado | 100%     | ✅ Migrados        |
+| Sprint 2 | ✅ Completado | 100%     | ✅ Migrados        |
+| Sprint 3 | ✅ Completado | 100%     | ✅ Migrados        |
+| Sprint 4 | � EN PROGRESO | 40%      | ✅ Reorganizados   |
+| Sprint 5 | ✅ Completado | 100%     | ✅ Infraestructura |
 
 **⭐ ¡Dale una estrella al repo si te gusta el proyecto!**
 
