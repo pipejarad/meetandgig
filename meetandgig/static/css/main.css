@@ -4586,23 +4586,28 @@ ul.user-messages li {
   line-height: 100%;
   vertical-align: middle; }
   .badge.badge-primary {
-    background: #ee0000; }
+    background: #ee0000;
+    color: #ffffff; }
     .badge.badge-primary:hover {
       background: #ee0000; }
   .badge.badge-secondary {
-    background: #484848; }
+    background: #484848;
+    color: #ffffff; }
     .badge.badge-secondary:hover {
       background: #484848; }
   .badge.badge-success {
-    background: #2f8a00; }
+    background: #2f8a00;
+    color: #ffffff; }
     .badge.badge-success:hover {
       background: #2f8a00; }
   .badge.badge-info {
-    background: #074694; }
+    background: #074694;
+    color: #ffffff; }
     .badge.badge-info:hover {
       background: #074694; }
   .badge.badge-danger {
-    background: #ee0000; }
+    background: #ee0000;
+    color: #ffffff; }
     .badge.badge-danger:hover {
       background: #ee0000; }
   .badge.badge-warning {
@@ -4616,11 +4621,13 @@ ul.user-messages li {
     .badge.badge-orange:hover {
       background: #f18024; }
   .badge.badge-light {
-    background: #d0d0d0; }
+    background: #d0d0d0;
+    color: #333333; }
     .badge.badge-light:hover {
       background: #d0d0d0; }
   .badge.badge-dark {
-    background: #1b1b1b; }
+    background: #1b1b1b;
+    color: #ffffff; }
     .badge.badge-dark:hover {
       background: #1b1b1b; }
   .badge.badge-white {

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Referencia Aceptada - Meet & Gig</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #28a745; color: white; padding: 20px; text-align: center; border-radius: 5px; }
+        .content { padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-top: 10px; }
+        .success-badge { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .details { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .btn { display: inline-block; padding: 12px 25px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .footer { text-align: center; color: #666; font-size: 14px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✅ ¡Referencia Aceptada!</h1>
+    </div>
+    
+    <div class="content">
+        <div class="success-badge">
+            <strong>¡Excelentes noticias!</strong> {{ musico.get_full_name }} ha aceptado tu referencia laboral.
+        </div>
+        
+        <p>Hola,</p>
+        
+        <p>Te informamos que <strong>{{ musico.get_full_name }}</strong> ha aceptado la referencia laboral que enviaste.</p>
+        
+        <p>Tu referencia ahora será visible públicamente en su portafolio de Meet & Gig y ayudará a otros empleadores a conocer la calidad profesional del músico.</p>
+        
+        <div class="details">
+            <h4>📋 Detalles de la referencia:</h4>
+            <ul>
+                <li><strong>Músico:</strong> {{ musico.get_full_name }}</li>
+                {% if testimonio.proyecto_evento %}
+                <li><strong>Proyecto/Evento:</strong> {{ testimonio.proyecto_evento }}</li>
+                {% endif %}
+                {% if testimonio.get_duracion_display %}
+                <li><strong>Duración:</strong> {{ testimonio.get_duracion_display }}</li>
+                {% endif %}
+                <li><strong>Estado:</strong> <span style="color: #28a745;">✅ Aceptada y visible</span></li>
+            </ul>
+        </div>
+        
+        {% if url_portafolio %}
+        <p style="text-align: center;">
+            <a href="{{ url_portafolio }}" class="btn">Ver Portafolio Público</a>
+        </p>
+        {% endif %}
+        
+        <p>¡Gracias por contribuir a la comunidad musical de Meet & Gig!</p>
+    </div>
+    
+    <div class="footer">
+        <p><strong>Meet & Gig</strong><br>
+        Conectando músicos con oportunidades</p>
+    </div>
+</body>
+</html>

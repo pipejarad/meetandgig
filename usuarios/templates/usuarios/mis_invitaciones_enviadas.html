@@ -147,19 +147,19 @@
                         <!-- Estado y fecha -->
                         <div class="col-md-3">
                             {% if invitacion.estado == 'pendiente' %}
-                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                <span class="badge badge-warning text-dark">Pendiente</span>
                                 <br><small class="text-muted">{{ invitacion.dias_restantes }} días restantes</small>
                             {% elif invitacion.estado == 'aceptada' %}
-                                <span class="badge bg-success">Aceptada</span>
+                                <span class="badge badge-success">Aceptada</span>
                                 <br><small class="text-muted">{{ invitacion.fecha_respuesta|date:"d/m/Y" }}</small>
                             {% elif invitacion.estado == 'rechazada' %}
-                                <span class="badge bg-danger">Rechazada</span>
+                                <span class="badge badge-danger">Rechazada</span>
                                 <br><small class="text-muted">{{ invitacion.fecha_respuesta|date:"d/m/Y" }}</small>
                             {% elif invitacion.estado == 'expirada' %}
-                                <span class="badge bg-secondary">Expirada</span>
+                                <span class="badge badge-secondary">Expirada</span>
                                 <br><small class="text-muted">{{ invitacion.fecha_expiracion|date:"d/m/Y" }}</small>
                             {% elif invitacion.estado == 'cancelada' %}
-                                <span class="badge bg-dark">Cancelada</span>
+                                <span class="badge badge-dark">Cancelada</span>
                             {% endif %}
                             <br><small class="text-muted">Enviada: {{ invitacion.fecha_invitacion|date:"d/m/Y" }}</small>
                         </div>

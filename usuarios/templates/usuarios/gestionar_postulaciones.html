@@ -25,7 +25,7 @@
                             <p class="mb-0 small">{{ oferta.titulo }}</p>
                         </div>
                         <div class="col-md-4 text-md-end">
-                            <span class="badge bg-light text-dark fs-6">
+                            <span class="badge badge-light text-dark fs-6">
                                 {% if oferta.estado == 'publicada' %}
                                     <i class="fas fa-eye me-1"></i>Publicada
                                 {% elif oferta.estado == 'cerrada' %}
@@ -147,7 +147,7 @@
                                                         <small class="text-muted d-block">Instrumentos:</small>
                                                         <div class="d-flex flex-wrap gap-1">
                                                             {% for pi in instrumentos %}
-                                                                <span class="badge bg-primary small">{{ pi.instrumento.nombre }}</span>
+                                                                <span class="badge badge-primary small">{{ pi.instrumento.nombre }}</span>
                                                             {% endfor %}
                                                         </div>
                                                     </div>
@@ -161,7 +161,7 @@
                                                         <small class="text-muted d-block">Géneros:</small>
                                                         <div class="d-flex flex-wrap gap-1">
                                                             {% for pg in generos %}
-                                                                <span class="badge bg-secondary small">{{ pg.genero.nombre }}</span>
+                                                                <span class="badge badge-secondary small">{{ pg.genero.nombre }}</span>
                                                             {% endfor %}
                                                         </div>
                                                     </div>

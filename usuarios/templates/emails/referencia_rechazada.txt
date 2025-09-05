@@ -1,0 +1,18 @@
+Respuesta a tu referencia de {{ musico.get_full_name }} - Meet & Gig
+
+Hola,
+
+Te informamos que {{ musico.get_full_name }} ha revisado la referencia laboral que enviaste y ha decidido no incluirla en su portafolio público en este momento.
+
+Detalles de la referencia:
+- Músico: {{ musico.get_full_name }}{% if testimonio.proyecto_evento %}
+- Proyecto/Evento: {{ testimonio.proyecto_evento }}{% endif %}{% if testimonio.get_duracion_display %}
+- Duración: {{ testimonio.get_duracion_display }}{% endif %}
+- Estado: No incluida en el portafolio
+
+Esto puede deberse a diferentes razones personales o profesionales del músico.
+
+Agradecemos tu participación en la comunidad de Meet & Gig.
+
+---
+Meet & Gig - Conectando músicos con oportunidades

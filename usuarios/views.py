@@ -36,6 +36,7 @@ def inicio(request):
         'total_musicos': Usuario.objects.filter(tipo_usuario='musico').count(),
         'total_empleadores': Usuario.objects.filter(tipo_usuario='empleador').count(),
         'total_portafolios': Portafolio.objects.filter(activo=True).count(),
+        'total_ofertas': OfertaLaboral.objects.filter(estado='publicada').count(),
         'total_usuarios': Usuario.objects.count(),
     }
     
@@ -1613,6 +1614,11 @@ def responder_invitacion_view(request, invitacion_id):
         
         try:
             if accion == 'aceptar':
+                # Verificar nuevamente antes de aceptar
+                if not invitacion.puede_ser_aceptada():
+                    messages.error(request, 'La invitación no puede ser aceptada en este momento.')
+                    return redirect('mis_invitaciones_recibidas')
+                
                 # Aceptar la invitación (crea automáticamente una postulación)
                 postulacion = invitacion.aceptar(mensaje_respuesta)
                 
@@ -2000,4 +2006,210 @@ def enviar_notificacion_resultado_postulacion(postulacion):
     except Exception as e:
         # Log del error (en producción usar logging proper)
         print(f"Error enviando notificación resultado postulación: {str(e)}")
+        return False
+
+
+@login_required
+def aceptar_referencia(request, testimonio_id):
+    """Vista para que el músico acepte una referencia pendiente"""
+    if request.user.tipo_usuario != 'musico':
+        raise PermissionDenied("Solo los músicos pueden gestionar referencias.")
+    
+    testimonio = get_object_or_404(
+        Testimonio, 
+        id=testimonio_id, 
+        portafolio__usuario=request.user,
+        estado='pendiente'
+    )
+    
+    if request.method == 'POST':
+        # Cambiar estado a aprobado
+        testimonio.estado = 'aprobado'
+        testimonio.fecha_respuesta = timezone.now()
+        testimonio.save()
+        
+        messages.success(
+            request, 
+            f'Has aceptado la referencia de {testimonio.autor_nombre}. Ahora será visible en tu portafolio público.'
+        )
+        
+        # Enviar email de confirmación al autor de la referencia
+        try:
+            enviar_notificacion_respuesta_referencia(testimonio, aceptada=True)
+        except Exception as e:
+            messages.warning(request, 'Referencia aceptada, pero hubo un problema enviando la notificación por email.')
+        
+        return redirect('gestionar_referencias')
+    
+    context = {
+        'testimonio': testimonio,
+        'accion': 'aceptar',
+        'titulo_pagina': 'Aceptar Referencia',
+    }
+    
+    return render(request, 'usuarios/confirmar_accion_referencia.html', context)
+
+
+@login_required  
+def rechazar_referencia(request, testimonio_id):
+    """Vista para que el músico rechace una referencia pendiente"""
+    if request.user.tipo_usuario != 'musico':
+        raise PermissionDenied("Solo los músicos pueden gestionar referencias.")
+    
+    testimonio = get_object_or_404(
+        Testimonio, 
+        id=testimonio_id, 
+        portafolio__usuario=request.user,
+        estado='pendiente'
+    )
+    
+    if request.method == 'POST':
+        # Cambiar estado a rechazado
+        testimonio.estado = 'rechazado'
+        testimonio.fecha_respuesta = timezone.now()
+        testimonio.save()
+        
+        messages.info(
+            request, 
+            f'Has rechazado la referencia de {testimonio.autor_nombre}. No será visible en tu portafolio.'
+        )
+        
+        # Enviar email de notificación al autor de la referencia
+        try:
+            enviar_notificacion_respuesta_referencia(testimonio, aceptada=False)
+        except Exception as e:
+            messages.warning(request, 'Referencia rechazada, pero hubo un problema enviando la notificación por email.')
+        
+        return redirect('gestionar_referencias')
+    
+    context = {
+        'testimonio': testimonio,
+        'accion': 'rechazar',
+        'titulo_pagina': 'Rechazar Referencia',
+    }
+    
+    return render(request, 'usuarios/confirmar_accion_referencia.html', context)
+
+
+@login_required
+def ocultar_referencia(request, testimonio_id):
+    """Vista para ocultar/mostrar una referencia aprobada del portafolio público"""
+    if request.user.tipo_usuario != 'musico':
+        raise PermissionDenied("Solo los músicos pueden gestionar referencias.")
+    
+    testimonio = get_object_or_404(
+        Testimonio, 
+        id=testimonio_id, 
+        portafolio__usuario=request.user,
+        estado__in=['aprobado', 'directo']
+    )
+    
+    if request.method == 'POST':
+        # Alternar visibilidad
+        testimonio.activo = not testimonio.activo
+        testimonio.save()
+        
+        if testimonio.activo:
+            messages.success(
+                request, 
+                f'La referencia de {testimonio.autor_nombre} ahora es visible en tu portafolio público.'
+            )
+        else:
+            messages.info(
+                request, 
+                f'Has ocultado la referencia de {testimonio.autor_nombre} de tu portafolio público. Puedes mostrarla nuevamente cuando quieras.'
+            )
+        
+        return redirect('gestionar_referencias')
+    
+    context = {
+        'testimonio': testimonio,
+        'accion': 'ocultar' if testimonio.activo else 'mostrar',
+        'titulo_pagina': 'Ocultar Referencia' if testimonio.activo else 'Mostrar Referencia',
+    }
+    
+    return render(request, 'usuarios/confirmar_accion_referencia.html', context)
+
+
+@login_required
+def eliminar_referencia(request, testimonio_id):
+    """Vista para eliminar permanentemente una referencia"""
+    if request.user.tipo_usuario != 'musico':
+        raise PermissionDenied("Solo los músicos pueden gestionar referencias.")
+    
+    testimonio = get_object_or_404(
+        Testimonio, 
+        id=testimonio_id, 
+        portafolio__usuario=request.user
+    )
+    
+    if request.method == 'POST':
+        autor_nombre = testimonio.autor_nombre
+        testimonio.delete()
+        
+        messages.warning(
+            request, 
+            f'Has eliminado permanentemente la referencia de {autor_nombre}.'
+        )
+        
+        return redirect('gestionar_referencias')
+    
+    context = {
+        'testimonio': testimonio,
+        'accion': 'eliminar',
+        'titulo_pagina': 'Eliminar Referencia',
+    }
+    
+    return render(request, 'usuarios/confirmar_accion_referencia.html', context)
+
+
+def enviar_notificacion_respuesta_referencia(testimonio, aceptada=True):
+    """
+    Envía email de notificación al autor de la referencia cuando el músico responde
+    """
+    try:
+        musico = testimonio.portafolio.usuario
+        
+        # URLs para el contexto (usar settings.SITE_URL si está disponible)
+        url_portafolio = None
+        if aceptada and hasattr(settings, 'SITE_URL'):
+            url_portafolio = f"{settings.SITE_URL}/portafolio/{testimonio.portafolio.slug}/"
+        
+        # Contexto para los templates
+        context = {
+            'testimonio': testimonio,
+            'musico': musico,
+            'aceptada': aceptada,
+            'url_portafolio': url_portafolio,
+        }
+        
+        if aceptada:
+            # Email de referencia aceptada
+            subject = f"✅ {musico.get_full_name()} aceptó tu referencia - Meet & Gig"
+            html_template = 'emails/referencia_aceptada.html'
+            txt_template = 'emails/referencia_aceptada.txt'
+        else:
+            # Email de referencia rechazada
+            subject = f"📝 Respuesta a tu referencia de {musico.get_full_name()} - Meet & Gig"
+            html_template = 'emails/referencia_rechazada.html'
+            txt_template = 'emails/referencia_rechazada.txt'
+        
+        # Renderizar templates
+        html_message = render_to_string(html_template, context)
+        plain_message = render_to_string(txt_template, context)
+        
+        # Enviar email
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[testimonio.autor_email],
+            html_message=html_message,
+            fail_silently=False
+        )
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error enviando notificación respuesta referencia: {str(e)}")
         return False

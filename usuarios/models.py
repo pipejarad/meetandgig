@@ -1126,7 +1126,7 @@ class Invitacion(models.Model):
         ]
     
     def __str__(self):
-        return f"Invitación: {self.empleador.nombre_empresa} → {self.musico.get_full_name()} para {self.oferta_laboral.titulo}"
+        return f"Invitación: {self.empleador.nombre_organizacion} → {self.musico.get_full_name()} para {self.oferta_laboral.titulo}"
     
     def save(self, *args, **kwargs):
         # Auto-configurar fecha de expiración (7 días por defecto)

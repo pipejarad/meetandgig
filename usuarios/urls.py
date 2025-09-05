@@ -68,4 +68,8 @@ urlpatterns = [
     path('referencias/responder/<str:token>/', views.responder_referencia, name='responder_referencia'),
     path('referencias/gestionar/', views.gestionar_referencias, name='gestionar_referencias'),
     path('referencias/agregar-testimonio/', views.agregar_testimonio_directo, name='agregar_testimonio_directo'),
+    path('referencias/<int:testimonio_id>/aceptar/', views.aceptar_referencia, name='aceptar_referencia'),
+    path('referencias/<int:testimonio_id>/rechazar/', views.rechazar_referencia, name='rechazar_referencia'),
+    path('referencias/<int:testimonio_id>/ocultar/', views.ocultar_referencia, name='ocultar_referencia'),
+    path('referencias/<int:testimonio_id>/eliminar/', views.eliminar_referencia, name='eliminar_referencia'),
 ]

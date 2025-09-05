@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Respuesta a Referencia - Meet & Gig</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #6c757d; color: white; padding: 20px; text-align: center; border-radius: 5px; }
+        .content { padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-top: 10px; }
+        .info-badge { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .details { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .footer { text-align: center; color: #666; font-size: 14px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📝 Respuesta a tu Referencia</h1>
+    </div>
+    
+    <div class="content">
+        <div class="info-badge">
+            {{ musico.get_full_name }} ha revisado tu referencia laboral.
+        </div>
+        
+        <p>Hola,</p>
+        
+        <p>Te informamos que <strong>{{ musico.get_full_name }}</strong> ha revisado la referencia laboral que enviaste y ha decidido no incluirla en su portafolio público en este momento.</p>
+        
+        <div class="details">
+            <h4>📋 Detalles de la referencia:</h4>
+            <ul>
+                <li><strong>Músico:</strong> {{ musico.get_full_name }}</li>
+                {% if testimonio.proyecto_evento %}
+                <li><strong>Proyecto/Evento:</strong> {{ testimonio.proyecto_evento }}</li>
+                {% endif %}
+                {% if testimonio.get_duracion_display %}
+                <li><strong>Duración:</strong> {{ testimonio.get_duracion_display }}</li>
+                {% endif %}
+                <li><strong>Estado:</strong> <span style="color: #6c757d;">📝 No incluida en el portafolio</span></li>
+            </ul>
+        </div>
+        
+        <p>Esto puede deberse a diferentes razones personales o profesionales del músico.</p>
+        
+        <p>Agradecemos tu participación en la comunidad de Meet & Gig.</p>
+    </div>
+    
+    <div class="footer">
+        <p><strong>Meet & Gig</strong><br>
+        Conectando músicos con oportunidades</p>
+    </div>
+</body>
+</html>

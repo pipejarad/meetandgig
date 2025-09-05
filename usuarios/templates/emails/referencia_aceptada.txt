@@ -1,0 +1,19 @@
+{{ musico.get_full_name }} aceptó tu referencia laboral - Meet & Gig
+
+¡Excelentes noticias!
+
+{{ musico.get_full_name }} ha aceptado la referencia laboral que enviaste.
+
+Tu referencia ahora será visible públicamente en su portafolio de Meet & Gig{% if url_portafolio %} y puedes verla en:
+
+{{ url_portafolio }}{% endif %}
+
+Detalles de la referencia:
+- Músico: {{ musico.get_full_name }}{% if testimonio.proyecto_evento %}
+- Proyecto/Evento: {{ testimonio.proyecto_evento }}{% endif %}{% if testimonio.get_duracion_display %}
+- Duración: {{ testimonio.get_duracion_display }}{% endif %}
+
+¡Gracias por contribuir a la comunidad musical de Meet & Gig!
+
+---
+Meet & Gig - Conectando músicos con oportunidades

@@ -3,12 +3,68 @@
 
 {% block title %}{{ titulo_pagina }} - Meet&Gig{% endblock %}
 
+{% block extra_css %}
+<style>
+.postulation-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.postulation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.postulation-card .card-header {
+    background: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    padding: 1rem 1.5rem;
+}
+
+.postulation-card .card-body {
+    padding: 1.5rem;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 1rem;
+    font-weight: 500;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    color: #495057;
+}
+
+.info-item i {
+    width: 20px;
+    margin-right: 0.75rem;
+    text-align: center;
+}
+
+.message-box {
+    background: #f8f9fc;
+    border-left: 4px solid #007bff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-12">
             <h2 class="text-primary mb-4">
-                <i class="fas fa-list-alt me-2"></i>Mis Postulaciones
+                <i class="fas fa-list-alt mr-2"></i>Mis Postulaciones
             </h2>
             
             <!-- Estadísticas -->
@@ -67,66 +123,79 @@
                 <div class="row">
                     {% for postulacion in postulaciones %}
                     <div class="col-md-6 mb-4">
-                        <div class="card h-100">
+                        <div class="card postulation-card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
-                                <h6 class="card-title mb-0">
-                                    <a href="{% url 'detalle_oferta' postulacion.oferta_laboral.slug %}" 
-                                       class="text-decoration-none">
-                                        {{ postulacion.oferta_laboral.titulo }}
-                                    </a>
+                                <h6 class="mb-0 font-weight-600 text-dark">
+                                    {{ postulacion.oferta_laboral.titulo }}
                                 </h6>
                                 {% if postulacion.estado == 'pendiente' %}
-                                    <span class="badge badge-warning">Pendiente</span>
+                                    <span class="badge badge-warning status-badge">
+                                        <i class="fas fa-clock mr-1"></i>Pendiente
+                                    </span>
                                 {% elif postulacion.estado == 'en_revision' %}
-                                    <span class="badge badge-info">En Revisión</span>
+                                    <span class="badge badge-info status-badge">
+                                        <i class="fas fa-search mr-1"></i>En Revisión
+                                    </span>
                                 {% elif postulacion.estado == 'aceptada' %}
-                                    <span class="badge badge-success">Aceptada</span>
+                                    <span class="badge badge-success status-badge">
+                                        <i class="fas fa-check mr-1"></i>Aceptada
+                                    </span>
                                 {% elif postulacion.estado == 'rechazada' %}
-                                    <span class="badge bg-danger">Rechazada</span>
+                                    <span class="badge badge-danger status-badge">
+                                        <i class="fas fa-times mr-1"></i>Rechazada
+                                    </span>
                                 {% elif postulacion.estado == 'cancelada' %}
-                                    <span class="badge bg-secondary">Cancelada</span>
+                                    <span class="badge badge-secondary status-badge">
+                                        <i class="fas fa-ban mr-1"></i>Cancelada
+                                    </span>
                                 {% endif %}
                             </div>
+                            
                             <div class="card-body">
-                                <p class="text-muted small mb-2">
-                                    <i class="fas fa-building me-1"></i>
-                                    {{ postulacion.oferta_laboral.empleador.nombre_empresa }}
-                                </p>
-                                <p class="text-muted small mb-2">
-                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                <div class="info-item">
+                                    <i class="fas fa-building text-primary"></i>
+                                    <strong>{{ postulacion.oferta_laboral.empleador.nombre_organizacion }}</strong>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <i class="fas fa-map-marker-alt text-success"></i>
                                     {{ postulacion.oferta_laboral.ubicacion.ciudad }}, {{ postulacion.oferta_laboral.ubicacion.region }}
-                                </p>
-                                <p class="text-muted small mb-2">
-                                    <i class="fas fa-calendar me-1"></i>
-                                    Postulado: {{ postulacion.fecha_postulacion|date:"d/m/Y H:i" }}
-                                </p>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <i class="fas fa-calendar text-info"></i>
+                                    {{ postulacion.fecha_postulacion|date:"d/m/Y H:i" }}
+                                </div>
+                                
                                 {% if postulacion.fecha_actualizacion != postulacion.fecha_postulacion %}
-                                    <p class="text-muted small mb-2">
-                                        <i class="fas fa-clock me-1"></i>
-                                        Actualizado: {{ postulacion.fecha_actualizacion|date:"d/m/Y H:i" }}
-                                    </p>
+                                <div class="info-item">
+                                    <i class="fas fa-clock text-warning"></i>
+                                    <small>Actualizado: {{ postulacion.fecha_actualizacion|date:"d/m/Y H:i" }}</small>
+                                </div>
                                 {% endif %}
                                 
-                                {% if postulacion.mensaje %}
-                                    <div class="mt-2">
-                                        <small class="text-muted">Mi mensaje:</small>
-                                        <p class="small border-start border-primary ps-2 ms-2">
-                                            {{ postulacion.mensaje|truncatewords:20 }}
-                                        </p>
-                                    </div>
+                                {% if postulacion.mensaje_personalizado %}
+                                <div class="message-box">
+                                    <small class="text-primary font-weight-bold d-block mb-2">
+                                        <i class="fas fa-comment mr-1"></i>Mi mensaje:
+                                    </small>
+                                    <p class="mb-0 text-dark">
+                                        <em>"{{ postulacion.mensaje_personalizado|truncatewords:20 }}"</em>
+                                    </p>
+                                </div>
                                 {% endif %}
-                            </div>
-                            <div class="card-footer bg-transparent">
-                                <div class="d-flex justify-content-between align-items-center">
+                                
+                                <div class="mt-3 pt-3 border-top d-flex justify-content-between">
                                     <a href="{% url 'detalle_oferta' postulacion.oferta_laboral.slug %}" 
                                        class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye me-1"></i>Ver Oferta
+                                        <i class="fas fa-eye mr-1"></i>Ver Oferta
                                     </a>
                                     
                                     {% if postulacion.estado == 'pendiente' or postulacion.estado == 'en_revision' %}
                                         <a href="{% url 'cancelar_postulacion' postulacion.id %}" 
-                                           class="btn btn-outline-danger btn-sm">
-                                            <i class="fas fa-times me-1"></i>Cancelar
+                                           class="btn btn-outline-danger btn-sm" 
+                                           onclick="return confirm('¿Estás seguro de cancelar esta postulación?')">
+                                            <i class="fas fa-times mr-1"></i>Cancelar
                                         </a>
                                     {% endif %}
                                 </div>
@@ -143,7 +212,7 @@
                         Explora las ofertas disponibles y postúlate a las que más te interesen.
                     </p>
                     <a href="{% url 'buscar_ofertas' %}" class="btn btn-primary mt-3">
-                        <i class="fas fa-search me-2"></i>Buscar Ofertas
+                        <i class="fas fa-search mr-2"></i>Buscar Ofertas
                     </a>
                 </div>
             {% endif %}

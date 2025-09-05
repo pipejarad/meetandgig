@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} - Meet & Gig{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        {% if accion == 'aceptar' %}
+                            <i class="fas fa-check-circle text-success mr-2"></i>Aceptar Referencia
+                        {% elif accion == 'rechazar' %}
+                            <i class="fas fa-times-circle text-danger mr-2"></i>Rechazar Referencia
+                        {% elif accion == 'ocultar' %}
+                            <i class="fas fa-eye-slash text-warning mr-2"></i>Ocultar Referencia
+                        {% elif accion == 'mostrar' %}
+                            <i class="fas fa-eye text-info mr-2"></i>Mostrar Referencia
+                        {% elif accion == 'eliminar' %}
+                            <i class="fas fa-trash text-danger mr-2"></i>Eliminar Referencia
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Información de la referencia -->
+                    <div class="border rounded p-3 mb-4 bg-light">
+                        <h6 class="mb-2">
+                            <strong>{{ testimonio.autor_nombre }}</strong>
+                            {% if testimonio.autor_cargo %}
+                                - {{ testimonio.autor_cargo }}
+                            {% endif %}
+                        </h6>
+                        
+                        {% if testimonio.autor_organizacion %}
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-building mr-1"></i>{{ testimonio.autor_organizacion }}
+                            </p>
+                        {% endif %}
+                        
+                        {% if testimonio.proyecto_evento %}
+                            <p class="text-primary small mb-2">
+                                <i class="fas fa-briefcase mr-1"></i>{{ testimonio.proyecto_evento }}
+                            </p>
+                        {% endif %}
+                        
+                        {% if testimonio.mensaje_solicitud %}
+                            <div class="mt-3">
+                                <small class="text-muted">Mensaje de solicitud:</small>
+                                <p class="small">{{ testimonio.mensaje_solicitud }}</p>
+                            </div>
+                        {% endif %}
+                        
+                        {% if testimonio.texto %}
+                            <div class="mt-3">
+                                <small class="text-muted">Referencia/Testimonio:</small>
+                                <p class="small">{{ testimonio.texto }}</p>
+                            </div>
+                        {% endif %}
+                        
+                        <small class="text-muted">
+                            <i class="fas fa-calendar mr-1"></i>
+                            Solicitada el {{ testimonio.fecha_solicitud|date:"d M Y" }}
+                        </small>
+                    </div>
+                    
+                    <!-- Mensaje de confirmación -->
+                    {% if accion == 'aceptar' %}
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-info-circle mr-2"></i>¿Confirmas que quieres aceptar esta referencia?</h6>
+                            <p class="mb-0">Al aceptarla, la referencia será visible públicamente en tu portafolio y el autor será notificado por email.</p>
+                        </div>
+                    {% elif accion == 'rechazar' %}
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle mr-2"></i>¿Confirmas que quieres rechazar esta referencia?</h6>
+                            <p class="mb-0">Al rechazarla, la referencia NO será visible en tu portafolio y el autor será notificado por email.</p>
+                        </div>
+                    {% elif accion == 'ocultar' %}
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-eye-slash mr-2"></i>¿Confirmas que quieres ocultar esta referencia?</h6>
+                            <p class="mb-0">La referencia ya no será visible en tu portafolio público, pero permanecerá como "aprobada". Podrás mostrarla nuevamente cuando quieras.</p>
+                        </div>
+                    {% elif accion == 'mostrar' %}
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-eye mr-2"></i>¿Confirmas que quieres mostrar esta referencia?</h6>
+                            <p class="mb-0">La referencia volverá a ser visible públicamente en tu portafolio.</p>
+                        </div>
+                    {% elif accion == 'eliminar' %}
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle mr-2"></i>¿Confirmas que quieres eliminar permanentemente esta referencia?</h6>
+                            <p class="mb-0"><strong>¡Esta acción no se puede deshacer!</strong> La referencia será eliminada completamente de la base de datos.</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Botones de acción -->
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="{% url 'gestionar_referencias' %}" class="btn btn-secondary btn-block">
+                                    <i class="fas fa-arrow-left mr-2"></i>Cancelar
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                {% if accion == 'aceptar' %}
+                                    <button type="submit" class="btn btn-success btn-block">
+                                        <i class="fas fa-check mr-2"></i>Aceptar Referencia
+                                    </button>
+                                {% elif accion == 'rechazar' %}
+                                    <button type="submit" class="btn btn-danger btn-block">
+                                        <i class="fas fa-times mr-2"></i>Rechazar Referencia
+                                    </button>
+                                {% elif accion == 'ocultar' %}
+                                    <button type="submit" class="btn btn-warning btn-block">
+                                        <i class="fas fa-eye-slash mr-2"></i>Ocultar Referencia
+                                    </button>
+                                {% elif accion == 'mostrar' %}
+                                    <button type="submit" class="btn btn-info btn-block">
+                                        <i class="fas fa-eye mr-2"></i>Mostrar Referencia
+                                    </button>
+                                {% elif accion == 'eliminar' %}
+                                    <button type="submit" class="btn btn-danger btn-block">
+                                        <i class="fas fa-trash mr-2"></i>Eliminar Permanentemente
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,11 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load st                            <i class="fas fa-info-circle me-1"></i>
+                            Estado actual: 
+                            {% if postulacion.estado == 'pendiente' %}
+                                <span class="badge badge-warning">Pendiente de revisión</span>
+                            {% elif postulacion.estado == 'en_revision' %}
+                                <span class="badge badge-info">En revisión</span>
+                            {% endif %}
 
 {% block title %}{{ titulo_pagina }} - Meet&Gig{% endblock %}
 

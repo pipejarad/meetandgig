@@ -100,7 +100,19 @@
                                             Solicitada: {{ referencia.fecha_solicitud|date:"d M Y" }}
                                         </small>
                                         <br>
-                                        <span class="badge badge-warning">Pendiente</span>
+                                        <span class="badge badge-warning mb-2">Pendiente</span>
+                                        
+                                        <!-- Botones de acción -->
+                                        <div class="mt-2">
+                                            <a href="{% url 'aceptar_referencia' referencia.id %}" 
+                                               class="btn btn-success btn-sm mr-1">
+                                                <i class="fas fa-check"></i> Aceptar
+                                            </a>
+                                            <a href="{% url 'rechazar_referencia' referencia.id %}" 
+                                               class="btn btn-danger btn-sm">
+                                                <i class="fas fa-times"></i> Rechazar
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -141,8 +153,8 @@
                                                 <i class="fas fa-briefcase mr-1"></i>{{ referencia.proyecto_evento }}
                                             </p>
                                         {% endif %}
-                                        {% if referencia.texto_referencia %}
-                                            <p class="small">{{ referencia.texto_referencia|truncatewords:30 }}</p>
+                                        {% if referencia.texto %}
+                                            <p class="small">{{ referencia.texto|truncatewords:30 }}</p>
                                         {% endif %}
                                     </div>
                                     <div class="col-md-4 text-right">
@@ -150,10 +162,36 @@
                                             Aprobada: {{ referencia.fecha_respuesta|date:"d M Y" }}
                                         </small>
                                         <br>
-                                        <span class="badge badge-success">Visible en portafolio</span>
-                                        {% if referencia.verificada %}
+                                        {% if referencia.activo %}
+                                            <span class="badge badge-success mb-2">Visible en portafolio</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary mb-2">Oculta del portafolio</span>
+                                        {% endif %}
+                                        {% if referencia.verificado %}
                                             <br><span class="badge badge-info mt-1">Verificada</span>
                                         {% endif %}
+                                        
+                                        <!-- Botones de gestión -->
+                                        <div class="mt-2">
+                                            {% if referencia.activo %}
+                                                <a href="{% url 'ocultar_referencia' referencia.id %}" 
+                                                   class="btn btn-warning btn-sm mr-1" 
+                                                   title="Ocultar del portafolio">
+                                                    <i class="fas fa-eye-slash"></i> Ocultar
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'ocultar_referencia' referencia.id %}" 
+                                                   class="btn btn-info btn-sm mr-1"
+                                                   title="Mostrar en portafolio">
+                                                    <i class="fas fa-eye"></i> Mostrar
+                                                </a>
+                                            {% endif %}
+                                            <a href="{% url 'eliminar_referencia' referencia.id %}" 
+                                               class="btn btn-danger btn-sm"
+                                               title="Eliminar permanentemente">
+                                                <i class="fas fa-trash"></i> Eliminar
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -186,16 +224,42 @@
                                         {% if testimonio.autor_organizacion %}
                                             <p class="text-muted small mb-1">{{ testimonio.autor_organizacion }}</p>
                                         {% endif %}
-                                        {% if testimonio.texto_referencia %}
-                                            <p class="small">{{ testimonio.texto_referencia|truncatewords:30 }}</p>
+                                        {% if testimonio.texto %}
+                                            <p class="small">{{ testimonio.texto|truncatewords:30 }}</p>
                                         {% endif %}
                                     </div>
                                     <div class="col-md-4 text-right">
                                         <small class="text-muted">
-                                            Agregado: {{ testimonio.fecha_creacion|date:"d M Y" }}
+                                            Agregado: {{ testimonio.fecha_publicacion|date:"d M Y" }}
                                         </small>
                                         <br>
-                                        <span class="badge badge-info">Testimonio directo</span>
+                                        {% if testimonio.activo %}
+                                            <span class="badge badge-info mb-2">Visible en portafolio</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary mb-2">Oculto del portafolio</span>
+                                        {% endif %}
+                                        
+                                        <!-- Botones de gestión -->
+                                        <div class="mt-2">
+                                            {% if testimonio.activo %}
+                                                <a href="{% url 'ocultar_referencia' testimonio.id %}" 
+                                                   class="btn btn-warning btn-sm mr-1"
+                                                   title="Ocultar del portafolio">
+                                                    <i class="fas fa-eye-slash"></i> Ocultar
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'ocultar_referencia' testimonio.id %}" 
+                                                   class="btn btn-info btn-sm mr-1"
+                                                   title="Mostrar en portafolio">
+                                                    <i class="fas fa-eye"></i> Mostrar
+                                                </a>
+                                            {% endif %}
+                                            <a href="{% url 'eliminar_referencia' testimonio.id %}" 
+                                               class="btn btn-danger btn-sm"
+                                               title="Eliminar permanentemente">
+                                                <i class="fas fa-trash"></i> Eliminar
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

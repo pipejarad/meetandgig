@@ -22,7 +22,7 @@
                         <div class="col-md-6 col-lg-4 mb-4">
                             <div class="card h-100 shadow-sm">
                                 <div class="card-header d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-{{ oferta.estado|yesno:'success,warning,danger' }}">
+                                    <span class="badge badge-{% if oferta.estado == 'publicada' %}success{% elif oferta.estado == 'borrador' %}warning{% else %}danger{% endif %}">
                                         {% if oferta.estado == 'borrador' %}
                                             <i class="fas fa-edit me-1"></i>Borrador
                                         {% elif oferta.estado == 'publicada' %}
@@ -110,13 +110,13 @@
                                                 <i class="fas fa-share"></i>
                                             </a>
                                         {% elif oferta.estado == 'publicada' and oferta.esta_vigente %}
-                                            <span class="badge bg-success">Vigente</span>
+                                            <span class="badge badge-success">Vigente</span>
                                         {% elif oferta.estado == 'cerrada' %}
                                             <a href="{% url 'reabrir_oferta' oferta.slug %}" class="btn btn-sm btn-success" title="Reabrir oferta">
                                                 <i class="fas fa-unlock"></i>
                                             </a>
                                         {% elif oferta.fecha_limite_postulacion and oferta.fecha_limite_postulacion|date:"Y-m-d" < today|date:"Y-m-d" %}
-                                            <span class="badge bg-warning">Vencida</span>
+                                            <span class="badge badge-warning">Vencida</span>
                                         {% endif %}
                                         
                                         <div class="btn-group" role="group">

@@ -252,6 +252,93 @@
         width: 100%;
         height: 100%;
     }
+    
+    /* Estilos para referencias clickeables */
+    .testimonio-item {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        border: 1px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .testimonio-item:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border: 1px solid #e9ecef;
+    }
+    
+    .testimonio-clickable {
+        position: relative;
+    }
+    
+    .testimonio-overlay {
+        position: absolute;
+        bottom: 0.75rem;
+        right: 0.75rem;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.7rem;
+        font-weight: 500;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        z-index: 2;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+    }
+    
+    .testimonio-item:hover .testimonio-overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .testimonio-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Modal de referencia */
+    .referencia-modal .modal-dialog {
+        max-width: 600px;
+    }
+    
+    .referencia-modal .modal-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-bottom: none;
+    }
+    
+    .referencia-modal .modal-header .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    
+    .referencia-modal .badge-tipo {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .referencia-modal .info-item {
+        display: flex;
+        margin-bottom: 0.75rem;
+        align-items: flex-start;
+    }
+    
+    .referencia-modal .info-label {
+        font-weight: 600;
+        color: #495057;
+        min-width: 120px;
+        margin-right: 1rem;
+    }
+    
+    .referencia-modal .info-value {
+        flex: 1;
+        color: #6c757d;
+    }
 </style>
 {% endblock %}
 
@@ -408,6 +495,65 @@
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Referencias y Testimonios -->
+            {% with referencias_visibles=portafolio.testimonios.all|dictsort:"fecha_publicacion" %}
+                {% if referencias_visibles %}
+                <div class="card info-card">
+                    <div class="card-header">
+                        <i class="fas fa-star"></i> Referencias y Testimonios
+                        <span class="badge badge-primary ml-2">{{ referencias_visibles|length }}</span>
+                    </div>
+                    <div class="card-body">
+                        {% for testimonio in referencias_visibles %}
+                            {% if testimonio.esta_visible %}
+                            <div class="testimonio-item testimonio-clickable mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}" 
+                                 data-bs-toggle="modal" 
+                                 data-toggle="modal"
+                                 data-bs-target="#referenciaModal{{ testimonio.id }}"
+                                 data-target="#referenciaModal{{ testimonio.id }}">
+                                
+                                <div class="testimonio-content">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-1">{{ testimonio.get_autor_completo }}</h6>
+                                            {% if testimonio.proyecto_evento %}
+                                                <small class="text-primary">
+                                                    <i class="fas fa-briefcase me-1"></i>{{ testimonio.proyecto_evento }}
+                                                </small>
+                                            {% endif %}
+                                            {% if testimonio.get_duracion_display %}
+                                                <small class="text-muted d-block">
+                                                    <i class="fas fa-calendar me-1"></i>{{ testimonio.get_duracion_display }}
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge badge-{% if testimonio.tipo == 'referencia_laboral' %}success{% elif testimonio.tipo == 'testimonio_cliente' %}info{% else %}secondary{% endif %} text-uppercase small">
+                                                {{ testimonio.get_tipo_display }}
+                                            </span>
+                                            {% if testimonio.verificado %}
+                                                <span class="badge badge-warning text-dark d-block mt-1">
+                                                    <i class="fas fa-check-circle me-1"></i>Verificado
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <blockquote class="mb-0">
+                                        <p class="mb-0">"{{ testimonio.texto|truncatewords:20 }}"</p>
+                                    </blockquote>
+                                </div>
+                                
+                                <div class="testimonio-overlay">
+                                    <i class="fas fa-eye me-1"></i>Ver detalles
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endwith %}
 
             <!-- Video Demo -->
             {% if portafolio.video_demo %}
@@ -578,54 +724,6 @@
                 {% endif %}
             {% endif %}
 
-            <!-- Referencias y Testimonios -->
-            {% with referencias_visibles=portafolio.testimonios.all|dictsort:"fecha_publicacion" %}
-                {% if referencias_visibles %}
-                <div class="card info-card">
-                    <div class="card-header">
-                        <i class="fas fa-star"></i> Referencias y Testimonios
-                        <span class="badge badge-primary ml-2">{{ referencias_visibles|length }}</span>
-                    </div>
-                    <div class="card-body">
-                        {% for testimonio in referencias_visibles %}
-                            {% if testimonio.esta_visible %}
-                            <div class="testimonio-item mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h6 class="mb-1">{{ testimonio.get_autor_completo }}</h6>
-                                        {% if testimonio.proyecto_evento %}
-                                            <small class="text-primary">
-                                                <i class="fas fa-briefcase me-1"></i>{{ testimonio.proyecto_evento }}
-                                            </small>
-                                        {% endif %}
-                                        {% if testimonio.get_duracion_display %}
-                                            <small class="text-muted d-block">
-                                                <i class="fas fa-calendar me-1"></i>{{ testimonio.get_duracion_display }}
-                                            </small>
-                                        {% endif %}
-                                    </div>
-                                    <div class="text-end">
-                                        <span class="badge bg-{% if testimonio.tipo == 'referencia_laboral' %}success{% elif testimonio.tipo == 'testimonio_cliente' %}info{% else %}secondary{% endif %} text-uppercase small">
-                                            {{ testimonio.get_tipo_display }}
-                                        </span>
-                                        {% if testimonio.verificado %}
-                                            <span class="badge badge-warning text-dark d-block mt-1">
-                                                <i class="fas fa-check-circle me-1"></i>Verificado
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <blockquote class="mb-0">
-                                    <p class="mb-0">"{{ testimonio.texto }}"</p>
-                                </blockquote>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-            {% endwith %}
-
             <!-- Acciones para el propietario -->
             {% if es_propietario %}
             <div class="card info-card border-primary">
@@ -695,4 +793,178 @@
         </div>
     </div>
 </div>
+
+<!-- Modales de referencias -->
+{% with referencias_visibles=portafolio.testimonios.all|dictsort:"fecha_publicacion" %}
+    {% for testimonio in referencias_visibles %}
+        {% if testimonio.esta_visible %}
+        <div class="modal fade referencia-modal" id="referenciaModal{{ testimonio.id }}" tabindex="-1" aria-labelledby="referenciaModalLabel{{ testimonio.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="referenciaModalLabel{{ testimonio.id }}">
+                            <i class="fas fa-star me-2"></i>Referencia Laboral
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Información del autor -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="mb-1">{{ testimonio.autor_nombre }}</h6>
+                                {% if testimonio.autor_cargo %}
+                                    <p class="text-muted mb-0">{{ testimonio.autor_cargo }}</p>
+                                {% endif %}
+                                {% if testimonio.autor_organizacion %}
+                                    <p class="text-primary mb-0">
+                                        <i class="fas fa-building me-1"></i>{{ testimonio.autor_organizacion }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                <span class="badge badge-{% if testimonio.tipo == 'referencia_laboral' %}success{% elif testimonio.tipo == 'testimonio_cliente' %}info{% else %}secondary{% endif %} badge-tipo">
+                                    {{ testimonio.get_tipo_display }}
+                                </span>
+                                {% if testimonio.verificado %}
+                                    <span class="badge badge-warning text-dark d-block mt-1">
+                                        <i class="fas fa-check-circle me-1"></i>Verificado
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Información del proyecto -->
+                        {% if testimonio.proyecto_evento or testimonio.get_duracion_display %}
+                        <hr>
+                        <div class="mb-3">
+                            {% if testimonio.proyecto_evento %}
+                                <div class="info-item">
+                                    <span class="info-label">Proyecto:</span>
+                                    <span class="info-value">{{ testimonio.proyecto_evento }}</span>
+                                </div>
+                            {% endif %}
+                            {% if testimonio.get_duracion_display %}
+                                <div class="info-item">
+                                    <span class="info-label">Duración:</span>
+                                    <span class="info-value">{{ testimonio.get_duracion_display }}</span>
+                                </div>
+                            {% endif %}
+                            {% if testimonio.fecha_publicacion %}
+                                <div class="info-item">
+                                    <span class="info-label">Fecha:</span>
+                                    <span class="info-value">{{ testimonio.fecha_publicacion|date:"F Y" }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Texto completo de la referencia -->
+                        <hr>
+                        <blockquote class="border-start border-success border-3 ps-3 mb-0">
+                            <p class="mb-0 fst-italic">"{{ testimonio.texto }}"</p>
+                        </blockquote>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- Botón para ver portafolio del autor si es músico registrado -->
+                        {% if testimonio.autor_usuario and testimonio.autor_usuario.tipo_usuario == 'musico' %}
+                            {% if testimonio.autor_usuario.portafolio and testimonio.autor_usuario.portafolio.activo %}
+                                <a href="{% url 'ver_portafolio' slug=testimonio.autor_usuario.portafolio.slug %}" 
+                                   class="btn btn-outline-primary">
+                                    <i class="fas fa-user me-1"></i>Ver Portafolio de {{ testimonio.autor_nombre }}
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endwith %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar clicks en referencias para abrir modales
+    const testimonioItems = document.querySelectorAll('.testimonio-clickable');
+    
+    testimonioItems.forEach(item => {
+        // Agregar atributos de accesibilidad
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('aria-label', 'Ver detalles de la referencia');
+        
+        // Manejar click para abrir modal
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetModal = this.getAttribute('data-bs-target');
+            if (targetModal) {
+                const modalElement = document.querySelector(targetModal);
+                if (modalElement) {
+                    // Intentar usar Bootstrap 5 primero
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        const modal = new bootstrap.Modal(modalElement);
+                        modal.show();
+                    }
+                    // Fallback para Bootstrap 4
+                    else if (typeof $ !== 'undefined' && $.fn.modal) {
+                        $(modalElement).modal('show');
+                    }
+                    // Fallback manual si Bootstrap no está disponible
+                    else {
+                        modalElement.style.display = 'block';
+                        modalElement.classList.add('show');
+                        document.body.classList.add('modal-open');
+                        
+                        // Crear backdrop
+                        const backdrop = document.createElement('div');
+                        backdrop.className = 'modal-backdrop fade show';
+                        backdrop.id = 'modal-backdrop-' + modalElement.id;
+                        document.body.appendChild(backdrop);
+                        
+                        // Manejar cerrar modal
+                        const closeButtons = modalElement.querySelectorAll('[data-bs-dismiss="modal"], [data-dismiss="modal"]');
+                        closeButtons.forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                closeModal(modalElement, backdrop);
+                            });
+                        });
+                        
+                        // Cerrar con ESC
+                        document.addEventListener('keydown', function escHandler(e) {
+                            if (e.key === 'Escape') {
+                                closeModal(modalElement, backdrop);
+                                document.removeEventListener('keydown', escHandler);
+                            }
+                        });
+                        
+                        // Cerrar clickeando fuera
+                        backdrop.addEventListener('click', function() {
+                            closeModal(modalElement, backdrop);
+                        });
+                    }
+                }
+            }
+        });
+        
+        // Manejar navegación con teclado
+        item.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    });
+    
+    // Función para cerrar modal manualmente
+    function closeModal(modalElement, backdrop) {
+        modalElement.style.display = 'none';
+        modalElement.classList.remove('show');
+        document.body.classList.remove('modal-open');
+        if (backdrop && backdrop.parentNode) {
+            backdrop.parentNode.removeChild(backdrop);
+        }
+    }
+});
+</script>
 {% endblock %}
