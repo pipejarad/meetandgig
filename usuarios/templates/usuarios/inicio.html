@@ -38,6 +38,50 @@
   </div>
 </section>
 
+<!-- Call to Actions por Tipo de Usuario -->
+{% if not user.is_authenticated %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 mb-4">
+        <div class="card bg-brand text-white h-100 border-0">
+          <div class="card-body text-center p-5 d-flex flex-column">
+            <i class="fas fa-music fa-4x mb-4"></i>
+            <h3 class="h2 mb-3">¿Eres Músico?</h3>
+            <p class="fs-5 flex-grow-1 mb-4">
+              Crea tu portafolio profesional, muestra tu talento y encuentra 
+              oportunidades laborales en eventos en vivo.
+            </p>
+            <div class="mt-auto">
+              <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-4">
+                <i class="fas fa-guitar mr-2"></i>Crear Perfil de Músico
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 mb-4">
+        <div class="card bg-accent-teal text-white h-100 border-0">
+          <div class="card-body text-center p-5 d-flex flex-column">
+            <i class="fas fa-briefcase fa-4x mb-4"></i>
+            <h3 class="h2 mb-3">¿Organizas Eventos?</h3>
+            <p class="fs-5 flex-grow-1 mb-4">
+              Encuentra músicos profesionales para tu evento. Publica ofertas 
+              y conecta con el talento perfecto para tu ocasión especial.
+            </p>
+            <div class="mt-auto">
+              <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-4">
+                <i class="fas fa-calendar-alt mr-2"></i>Crear Perfil de Empleador
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <!-- Músicos Destacados -->
 {% if portafolios_destacados %}
 <section id="musicos-destacados" class="py-5">
@@ -120,50 +164,6 @@
       <a href="{% url 'buscar_portafolios' %}" class="btn btn-primary btn-lg">
         <i class="fas fa-search mr-2"></i>Ver Todos los Músicos
       </a>
-    </div>
-  </div>
-</section>
-{% endif %}
-
-<!-- Call to Actions por Tipo de Usuario -->
-{% if not user.is_authenticated %}
-<section class="py-5 bg-light">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-6 mb-4">
-        <div class="card bg-brand text-white h-100 border-0">
-          <div class="card-body text-center p-5 d-flex flex-column">
-            <i class="fas fa-music fa-4x mb-4"></i>
-            <h3 class="h2 mb-3">¿Eres Músico?</h3>
-            <p class="fs-5 flex-grow-1 mb-4">
-              Crea tu portafolio profesional, muestra tu talento y encuentra 
-              oportunidades laborales en eventos en vivo.
-            </p>
-            <div class="mt-auto">
-              <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-4">
-                <i class="fas fa-guitar mr-2"></i>Crear Perfil de Músico
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-6 mb-4">
-        <div class="card bg-accent-teal text-white h-100 border-0">
-          <div class="card-body text-center p-5 d-flex flex-column">
-            <i class="fas fa-briefcase fa-4x mb-4"></i>
-            <h3 class="h2 mb-3">¿Organizas Eventos?</h3>
-            <p class="fs-5 flex-grow-1 mb-4">
-              Encuentra músicos profesionales para tu evento. Publica ofertas 
-              y conecta con el talento perfecto para tu ocasión especial.
-            </p>
-            <div class="mt-auto">
-              <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-4">
-                <i class="fas fa-calendar-alt mr-2"></i>Crear Perfil de Empleador
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </section>
